@@ -33,6 +33,9 @@ type LatticeResponseError = {
   errorMessage: string
 }
 
+type SigningPayload = Parameters<InstanceType<typeof Client>['sign']>[0]['data']
+type SignProtocol = 'eip712' | 'signPersonal'
+
 export const Status = {
   OK: 'ok',
   CONNECTING: 'connecting',
@@ -324,17 +327,19 @@ export default class Lattice extends Signer {
     }
   }
 
-  private async sign(index: number, protocol: string, payload: string | TypedData) {
+  private async sign(index: number, protocol: SignProtocol, payload: string | TypedData) {
     const connection = this.connection as Client
 
     const data = {
       protocol,
       payload,
+      curveType: Constants.SIGNING.CURVES.SECP256K1,
+      hashType: Constants.SIGNING.HASHES.KECCAK256,
       signerPath: this.getPath(index)
-    }
+    } as SigningPayload
 
     const signOpts = {
-      currency: 'ETH_MSG',
+      currency: 'ETH_MSG' as const,
       data: data
     }
 
@@ -401,7 +406,7 @@ export default class Lattice extends Signer {
       return { data, currency: unsignedTx.currency }
     }
 
-    return { currency: 'ETH', data: unsignedTx }
+    return { currency: 'ETH' as const, data: unsignedTx }
   }
 
   private getPath(index: number) {
