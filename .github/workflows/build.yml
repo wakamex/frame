@@ -36,7 +36,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
+          - ubuntu-20.04
+          - ubuntu-22.04-arm
         include:
           - os: macos-13
             cert_key: APPLE_DEVELOPER_SIGNING_CERTIFICATE
@@ -64,12 +65,12 @@ jobs:
           node-version: 18.12.1
           cache: 'npm'
       - name: install Linux dev tools
-        if: matrix.os == 'ubuntu-latest'
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt update -y
           sudo apt install -y libudev-dev
       - name: install Macos dev tools
-        if: matrix.os == 'macos-13'
+        if: startsWith(matrix.os, 'macos')
         run: |
           sudo -H pip install setuptools
       - name: create NPM config file
@@ -82,4 +83,9 @@ jobs:
       - name: Sleep for 4 seconds
         shell: bash
         run: sleep 4
-      - run: npm run publish
+      - name: Publish
+        if: ${{ startsWith(matrix.os, 'ubuntu') && endsWith(matrix.os, 'arm') }}
+        run: npm run publish:linux:arm64
+      - name: Publish
+        if: ${{ !startsWith(matrix.os, 'ubuntu') || !endsWith(matrix.os, 'arm') }}
+        run: npm run publish

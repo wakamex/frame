@@ -1,6 +1,6 @@
 {
   "name": "frame",
-  "version": "0.6.10",
+  "version": "0.6.11",
   "description": "System-wide web3",
   "main": "compiled/main",
   "scripts": {
@@ -37,10 +37,11 @@
     "prod": "npm run compile && npm run bundle && npm run launch",
     "compile": "npm run copy-assets && tsc --project tsconfig.build.json",
     "compile:watch": "npm run copy-assets && tsc --project tsconfig.build.json -w",
-    "build": "npm run compile && sleep 4 && npm run bundle && sleep 4 && electron-builder",
+    "build": "npm run compile && sleep 4 && npm run bundle && sleep 4 && electron-builder --config=build/electron-builder-standard.js",
     "copy-assets": "shx mkdir -p ./compiled/main/windows && shx cp ./main/windows/*.png ./compiled/main/windows",
     "parcel:build": "parcel build --no-autoinstall --public-url .",
-    "publish": "electron-builder -c.snap.publish=github",
+    "publish": "electron-builder -c.snap.publish=github --config=build/electron-builder-standard.js",
+    "publish:linux:arm64": "electron-builder -c.snap.publish=github --config=build/electron-builder-linux-arm64.js",
     "release": "npm run compile && sleep 4 && npm run bundle && sleep 4 && npm run publish",
     "postinstall": "electron-builder install-app-deps",
     "test": "npm run test:unit && npm run test:e2e",
