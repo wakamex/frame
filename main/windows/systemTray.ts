@@ -1,8 +1,31 @@
-import { app, screen, BrowserWindow, Menu, KeyboardEvent, Rectangle, Tray as ElectronTray } from 'electron'
+// @ts-ignore
+import getos from 'getos'
 import path from 'path'
+import { app, screen, BrowserWindow, Menu, KeyboardEvent, Rectangle, Tray as ElectronTray } from 'electron'
+
 import { capitalize } from '../../resources/utils'
 
 const isMacOS = process.platform === 'darwin'
+let isUbuntu23OrGreater = false
+
+if (process.platform === 'linux') {
+  try {
+    getos((error: Error, osInfo: any) => {
+      if (error) {
+        console.error('Could not determine Linux version', error)
+      } else {
+        if (osInfo.dist === 'Ubuntu' && osInfo.release) {
+          const majorVersion = parseInt(osInfo.release.split('.')[0], 10)
+          isUbuntu23OrGreater = majorVersion >= 23
+        }
+      }
+    })
+  } catch (error) {
+    console.error('Could not determine Linux version', error)
+  }
+}
+
+const delaySettingContextMenu = () => !isMacOS && !isUbuntu23OrGreater
 
 export type SystemTrayEventHandlers = {
   click: () => void
@@ -67,7 +90,7 @@ export class SystemTray {
     if (switchScreen) {
       this.electronTray?.setContextMenu(menu)
     } else {
-      setTimeout(() => this.electronTray?.setContextMenu(menu), isMacOS ? 0 : 200)
+      setTimeout(() => this.electronTray?.setContextMenu(menu), delaySettingContextMenu() ? 200 : 0)
     }
   }
 
