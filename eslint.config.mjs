@@ -1,6 +1,5 @@
 import eslint from '@eslint/js'
-import ts from '@typescript-eslint/eslint-plugin'
-import tsParser from '@typescript-eslint/parser'
+import tseslint from 'typescript-eslint'
 import prettier from 'eslint-config-prettier'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
@@ -64,7 +63,6 @@ export default [
   {
     files: [
       'app/**/*.js',
-      'main/dapps/server/inject/*.js',
       'resources/keyboard/**/*.js',
       'resources/Components/**/*.js',
       'resources/Hooks/**/*.js',
@@ -92,23 +90,19 @@ export default [
       }
     }
   },
-  // TS files
+  // TypeScript support via typescript-eslint recommended configs
+  ...tseslint.configs.recommended,
+  // TypeScript overrides
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
-      parser: tsParser,
       parserOptions: {
         ecmaFeatures: { modules: true },
         ecmaVersion: 'latest',
         project: './tsconfig.json'
       }
     },
-    plugins: {
-      '@typescript-eslint': ts
-    },
     rules: {
-      ...ts.configs['eslint-recommended'].rules,
-      ...ts.configs.recommended.rules,
       'no-undef': 'off', // redundant - TS will fail to compile with undefined vars
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -119,13 +113,12 @@ export default [
           destructuredArrayIgnorePattern: '^_'
         }
       ],
-      '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions'] }], // allow noop arrow functions, e.g. in a method signature for ensuring a parameter defaults to a function
+      '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions'] }], // allow noop arrow functions
       '@typescript-eslint/prefer-namespace-keyword': 'off', // use ES module syntax instead of namespace
       '@typescript-eslint/no-namespace': ['error', { allowDeclarations: true }]
     }
   },
   // React / JSX files
-  // TODO: simplify as '**/*.{jsx,tsx}'
   {
     files: [
       'app/**/*.js',
@@ -173,10 +166,6 @@ export default [
         ...globals.jest
       }
     }
-    // TODO: enable jest rules
-    // rules: {
-    //   ...jest.configs.recommended.rules
-    // }
   },
   // Components test files
   {
@@ -185,7 +174,7 @@ export default [
       'testing-library': testingLibrary
     },
     rules: {
-      ...testingLibrary.configs.react.rules
+      ...testingLibrary.configs['flat/react'].rules
     }
   },
   // ensure all rules work with prettier
