@@ -1,23 +1,25 @@
-const fs = require('fs')
-const { ipcMain } = require('electron')
-const log = require('electron-log')
-const { randomBytes } = require('crypto')
+import fs from 'fs'
+import { ipcMain } from 'electron'
+import log from 'electron-log'
+import { randomBytes } from 'crypto'
 import { isAddress } from '@ethersproject/address'
 import { openFileDialog } from '../windows/dialog'
 import { openBlockExplorer } from '../windows/window'
 
-const accounts = require('../accounts').default
-const signers = require('../signers').default
-const launch = require('../launch')
-const provider = require('../provider').default
-const store = require('../store').default
-const nebulaApi = require('../nebula').default
+import accounts from '../accounts'
+import signers from '../signers'
+import * as launch from '../launch'
+import provider from '../provider'
+import store from '../store'
+import nebulaApi from '../nebula'
 
-const { arraysEqual, randomLetters } = require('../../resources/utils')
-const { isSignatureRequest } = require('../signatures')
-const { default: TrezorBridge } = require('../../main/signers/trezor/bridge')
+import { arraysEqual, randomLetters } from '../../resources/utils'
+import { isSignatureRequest } from '../signatures'
+import TrezorBridge from '../../main/signers/trezor/bridge'
 
-const callbackWhenDone = (fn, cb) => {
+type RpcCallback = (...args: any[]) => void
+
+const callbackWhenDone = (fn: () => void, cb: RpcCallback) => {
   try {
     fn()
     cb(null)
@@ -26,17 +28,15 @@ const callbackWhenDone = (fn, cb) => {
   }
 }
 
-const rpc = {
-  getState: (cb) => {
+const rpc: Record<string, (...args: any[]) => void> = {
+  getState: (cb: RpcCallback) => {
     cb(null, store())
   },
   signTransaction: accounts.signTransaction,
   signMessage: accounts.signMessage,
   getAccounts: accounts.getAccounts,
   getCoinbase: accounts.getCoinbase,
-  // Review
-  // getSigners: signers.getSigners,
-  setSigner: (id, cb) => {
+  setSigner: (id: string, cb: RpcCallback) => {
     const previousAddresses = accounts.getSelectedAddresses()
 
     accounts.setSigner(id, cb)
@@ -47,14 +47,7 @@ const rpc = {
       provider.accountsChanged(currentAddresses)
     }
   },
-  // setSignerIndex: (index, cb) => {
-  //   accounts.setSignerIndex(index, cb)
-  //   provider.accountsChanged(accounts.getSelectedAddresses())
-  //   setTimeout(() => {
-  //     accounts.balanceScan()
-  //   }, 320)
-  // },
-  unsetSigner: (id, cb) => {
+  unsetSigner: (_id: string, cb: RpcCallback) => {
     const previousAddresses = accounts.getSelectedAddresses()
 
     accounts.unsetSigner(cb)
@@ -65,21 +58,19 @@ const rpc = {
       provider.accountsChanged(currentAddresses)
     }
   },
-  // setSignerIndex: signers.setSignerIndex,
-  // unsetSigner: signers.unsetSigner,
-  trezorPin: (id, pin, cb) => {
+  trezorPin: (id: string, pin: string, cb: RpcCallback) => {
     cb()
     TrezorBridge.pinEntered(id, pin)
   },
-  trezorPhrase: (id, phrase, cb) => {
+  trezorPhrase: (id: string, phrase: string, cb: RpcCallback) => {
     cb()
     TrezorBridge.passphraseEntered(id, phrase)
   },
-  trezorEnterPhrase: (id, cb) => {
+  trezorEnterPhrase: (id: string, cb: RpcCallback) => {
     cb()
     TrezorBridge.enterPassphraseOnDevice(id)
   },
-  createLattice: (deviceId, deviceName, cb) => {
+  createLattice: (deviceId: string, deviceName: string, cb: RpcCallback) => {
     if (!deviceId) {
       return cb(new Error('No Device ID'))
     }
@@ -96,21 +87,21 @@ const rpc = {
 
     cb(null, { id: 'lattice-' + deviceId })
   },
-  async latticePair(id, pin, cb) {
+  async latticePair(id: string, pin: string, cb: RpcCallback) {
     const signer = signers.get(id)
 
     if (signer && signer.pair) {
       try {
         const hasActiveWallet = await signer.pair(pin)
         cb(null, hasActiveWallet)
-      } catch (e) {
+      } catch (e: any) {
         cb(e.message)
       }
     }
   },
   launchStatus: launch.status,
-  providerSend: (payload, cb) => provider.send(payload, cb),
-  connectionStatus: (cb) => {
+  providerSend: (payload: any, cb: RpcCallback) => provider.send(payload, cb),
+  connectionStatus: (cb: RpcCallback) => {
     cb(null, {
       primary: {
         status: provider.connection.primary.status,
@@ -126,58 +117,58 @@ const rpc = {
       }
     })
   },
-  confirmRequestApproval(req, approvalType, approvalData) {
+  confirmRequestApproval(req: any, approvalType: string, approvalData: any) {
     accounts.confirmRequestApproval(req.handlerId, approvalType, approvalData)
   },
-  respondToExtensionRequest(id, approved, cb) {
+  respondToExtensionRequest(id: string, approved: boolean, cb: RpcCallback) {
     callbackWhenDone(() => store.trustExtension(id, approved), cb)
   },
-  updateRequest(reqId, data, actionId) {
+  updateRequest(reqId: string, data: any, actionId: string) {
     accounts.updateRequest(reqId, data, actionId)
   },
-  approveRequest(req) {
+  approveRequest(req: any) {
     accounts.setRequestPending(req)
     if (req.type === 'transaction') {
-      provider.approveTransactionRequest(req, (err, res) => {
+      provider.approveTransactionRequest(req, (err: any, res: any) => {
         if (err) return accounts.setRequestError(req.handlerId, err)
         setTimeout(() => accounts.setTxSent(req.handlerId, res), 1800)
       })
     } else if (req.type === 'sign') {
-      provider.approveSign(req, (err, res) => {
+      provider.approveSign(req, (err: any, res: any) => {
         if (err) return accounts.setRequestError(req.handlerId, err)
         accounts.setRequestSuccess(req.handlerId, res)
       })
     } else if (req.type === 'signTypedData' || req.type === 'signErc20Permit') {
-      provider.approveSignTypedData(req, (err, res) => {
+      provider.approveSignTypedData(req, (err: any, res: any) => {
         if (err) return accounts.setRequestError(req.handlerId, err)
         accounts.setRequestSuccess(req.handlerId, res)
       })
     }
   },
-  declineRequest(req) {
+  declineRequest(req: any) {
     if (req.type === 'transaction' || isSignatureRequest(req)) {
       accounts.declineRequest(req.handlerId)
       provider.declineRequest(req)
     }
   },
-  createFromAddress(address, name, cb) {
+  createFromAddress(address: string, name: string, cb: RpcCallback) {
     if (!isAddress(address)) return cb(new Error('Invalid Address'))
     accounts.add(address, name, { type: 'Address' })
     cb()
   },
-  createAccount(address, name, options, cb) {
+  createAccount(address: string, name: string, options: any, cb: RpcCallback) {
     if (!isAddress(address)) return cb(new Error('Invalid Address'))
     accounts.add(address, name, options)
     cb()
   },
-  removeAccount(address, _options, cb) {
+  removeAccount(address: string, _options: any, cb: RpcCallback) {
     accounts.remove(address)
     cb()
   },
-  createFromPhrase(phrase, password, cb) {
+  createFromPhrase(phrase: string, password: string, cb: RpcCallback) {
     signers.createFromPhrase(phrase, password, cb)
   },
-  async locateKeystore(cb) {
+  async locateKeystore(cb: RpcCallback) {
     try {
       const file = await openFileDialog()
       const keystore = file || { filePaths: [] }
@@ -200,31 +191,31 @@ const rpc = {
       cb(e)
     }
   },
-  createFromKeystore(keystore, password, keystorePassword, cb) {
+  createFromKeystore(keystore: any, password: string, keystorePassword: string, cb: RpcCallback) {
     signers.createFromKeystore(keystore, keystorePassword, password, cb)
   },
-  createFromPrivateKey(privateKey, password, cb) {
+  createFromPrivateKey(privateKey: string, password: string, cb: RpcCallback) {
     signers.createFromPrivateKey(privateKey, password, cb)
   },
-  addPrivateKey(id, privateKey, password, cb) {
+  addPrivateKey(id: string, privateKey: string, password: string, cb: RpcCallback) {
     signers.addPrivateKey(id, privateKey, password, cb)
   },
-  removePrivateKey(id, index, password, cb) {
+  removePrivateKey(id: string, index: number, password: string, cb: RpcCallback) {
     signers.removePrivateKey(id, index, password, cb)
   },
-  addKeystore(id, keystore, keystorePassword, password, cb) {
+  addKeystore(id: string, keystore: any, keystorePassword: string, password: string, cb: RpcCallback) {
     signers.addKeystore(id, keystore, keystorePassword, password, cb)
   },
-  unlockSigner(id, password, cb) {
+  unlockSigner(id: string, password: string, cb: RpcCallback) {
     signers.unlock(id, password, cb)
   },
-  lockSigner(id, cb) {
+  lockSigner(id: string, cb: RpcCallback) {
     signers.lock(id, cb)
   },
-  remove(id) {
+  remove(id: string) {
     signers.remove(id)
   },
-  async resolveEnsName(name, cb) {
+  async resolveEnsName(name: string, cb: RpcCallback) {
     log.debug('Resolving ENS name', { name })
 
     const nebula = nebulaApi()
@@ -239,29 +230,29 @@ const rpc = {
       return cb(err)
     }
   },
-  verifyAddress(cb) {
-    const res = (err, data) => cb(err, data || false)
+  verifyAddress(cb: RpcCallback) {
+    const res = (err: any, data: any) => cb(err, data || false)
     accounts.verifyAddress(true, res)
   },
-  setBaseFee(fee, handlerId, cb) {
+  setBaseFee(fee: string, handlerId: string, cb: RpcCallback) {
     callbackWhenDone(() => accounts.setBaseFee(fee, handlerId, true), cb)
   },
-  setPriorityFee(fee, handlerId, cb) {
+  setPriorityFee(fee: string, handlerId: string, cb: RpcCallback) {
     callbackWhenDone(() => accounts.setPriorityFee(fee, handlerId, true), cb)
   },
-  setGasPrice(price, handlerId, cb) {
+  setGasPrice(price: string, handlerId: string, cb: RpcCallback) {
     callbackWhenDone(() => accounts.setGasPrice(price, handlerId, true), cb)
   },
-  setGasLimit(limit, handlerId, cb) {
+  setGasLimit(limit: string, handlerId: string, cb: RpcCallback) {
     callbackWhenDone(() => accounts.setGasLimit(limit, handlerId, true), cb)
   },
-  removeFeeUpdateNotice(handlerId, cb) {
+  removeFeeUpdateNotice(handlerId: string, cb: RpcCallback) {
     accounts.removeFeeUpdateNotice(handlerId, cb)
   },
-  signerCompatibility(handlerId, cb) {
+  signerCompatibility(handlerId: string, cb: RpcCallback) {
     accounts.signerCompatibility(handlerId, cb)
   },
-  openExplorer(chain) {
+  openExplorer(chain: any) {
     if (store('main.mute.explorerWarning')) {
       openBlockExplorer(chain)
     } else {
@@ -270,27 +261,27 @@ const rpc = {
   }
 }
 
-const unwrap = (v) => (v !== undefined || v !== null ? JSON.parse(v) : v)
-const wrap = (v) => (v !== undefined || v !== null ? JSON.stringify(v) : v)
+const unwrap = (v: any) => (v !== undefined || v !== null ? JSON.parse(v) : v)
+const wrap = (v: any) => (v !== undefined || v !== null ? JSON.stringify(v) : v)
 
-ipcMain.on('main:rpc', (event, id, method, ...args) => {
-  id = unwrap(id)
-  method = unwrap(method)
-  args = args.map((arg) => unwrap(arg))
-  if (rpc[method]) {
-    rpc[method](...args, (...args) => {
+ipcMain.on('main:rpc', (event, id, method, ...rawArgs) => {
+  const parsedId = unwrap(id)
+  const parsedMethod = unwrap(method)
+  const args = rawArgs.map((arg: any) => unwrap(arg))
+  if (rpc[parsedMethod]) {
+    rpc[parsedMethod](...args, (...responseArgs: any[]) => {
       event.sender.send(
         'main:rpc',
-        id,
-        ...args.map((arg) => (arg instanceof Error ? wrap(arg.message) : wrap(arg)))
+        parsedId,
+        ...responseArgs.map((arg: any) => (arg instanceof Error ? wrap(arg.message) : wrap(arg)))
       )
     })
   } else {
-    const args = [new Error('Unknown RPC method: ' + method)]
+    const errorArgs = [new Error('Unknown RPC method: ' + parsedMethod)]
     event.sender.send(
       'main:rpc',
-      id,
-      ...args.map((arg) => (arg instanceof Error ? wrap(arg.message) : wrap(arg)))
+      parsedId,
+      ...errorArgs.map((arg) => (arg instanceof Error ? wrap(arg.message) : wrap(arg)))
     )
   }
 })

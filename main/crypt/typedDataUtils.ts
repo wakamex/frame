@@ -1,6 +1,13 @@
-// Translated to JavaScript from https://github.com/dicether/eip712/blob/master/src/eip712.ts
-const abi = require('ethereumjs-abi')
-const ethUtil = require('@ethereumjs/util')
+// Translated to TypeScript from https://github.com/dicether/eip712/blob/master/src/eip712.ts
+import abi from 'ethereumjs-abi'
+import * as ethUtil from '@ethereumjs/util'
+
+interface TypeField {
+  name: string
+  type: string
+}
+
+type TypeDefinitions = Record<string, TypeField[]>
 
 const PRIMITIVE_TYPES = [
   /^bytes[0-9]|[0-2][0-9]|3[0-2]$/,
@@ -12,12 +19,12 @@ const PRIMITIVE_TYPES = [
   /^string$/
 ]
 
-function isPrimitiveType(type) {
+function isPrimitiveType(type: string) {
   return PRIMITIVE_TYPES.some((regex) => regex.test(type))
 }
 
 // Recursively finds all the dependencies of a type
-function dependencies(primaryType, types, found = []) {
+function dependencies(primaryType: string, types: TypeDefinitions, found: string[] = []): string[] {
   if (found.includes(primaryType)) {
     return found
   }
@@ -38,7 +45,7 @@ function dependencies(primaryType, types, found = []) {
   return found
 }
 
-function encodeType(primaryType, types) {
+function encodeType(primaryType: string, types: TypeDefinitions) {
   // Get dependencies primary first, then alphabetical
   let deps = dependencies(primaryType, types)
   deps = deps.filter((t) => t !== primaryType)
@@ -53,13 +60,13 @@ function encodeType(primaryType, types) {
   return Buffer.from(result)
 }
 
-function typeHash(primaryType, types) {
+function typeHash(primaryType: string, types: TypeDefinitions) {
   return ethUtil.keccak256(encodeType(primaryType, types))
 }
 
-function encodeData(primaryType, types, data) {
-  const encTypes = []
-  const encValues = []
+function encodeData(primaryType: string, types: TypeDefinitions, data: Record<string, any>): Buffer {
+  const encTypes: string[] = []
+  const encValues: any[] = []
 
   // Add typehash
   encTypes.push('bytes32')
@@ -95,11 +102,18 @@ function encodeData(primaryType, types, data) {
   return abi.rawEncode(encTypes, encValues)
 }
 
-function structHash(primaryType, types, data) {
+function structHash(primaryType: string, types: TypeDefinitions, data: Record<string, any>) {
   return ethUtil.keccak256(encodeData(primaryType, types, data))
 }
 
-function hashTypedData(typedData) {
+interface TypedData {
+  types: TypeDefinitions
+  primaryType: string
+  domain: Record<string, any>
+  message: Record<string, any>
+}
+
+export function hashTypedData(typedData: TypedData) {
   return ethUtil.keccak256(
     Buffer.concat([
       Buffer.from('1901', 'hex'),
@@ -108,5 +122,3 @@ function hashTypedData(typedData) {
     ])
   )
 }
-
-module.exports = { hashTypedData }
