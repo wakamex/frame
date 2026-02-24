@@ -28,7 +28,7 @@ link.invoke = (...args) => {
 }
 
 const safeOrigins = ['file://'].concat(
-  process.env.NODE_ENV === 'development' ? ['http://localhost:1234'] : []
+  process.env.NODE_ENV === 'development' ? ['http://localhost:5173'] : []
 )
 
 window.addEventListener(

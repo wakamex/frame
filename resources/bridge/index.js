@@ -5,7 +5,7 @@ const unwrap = (v) => (v !== undefined || v !== null ? JSON.parse(v) : v)
 const wrap = (v) => (v !== undefined || v !== null ? JSON.stringify(v) : v)
 const source = 'bridge:link'
 const safeOrigins = ['file://'].concat(
-  process.env.NODE_ENV === 'development' ? ['http://localhost:1234'] : []
+  process.env.NODE_ENV === 'development' ? ['http://localhost:5173'] : []
 )
 
 window.addEventListener(
@@ -41,7 +41,3 @@ ipcRenderer.on('main:flex', (...args) => {
   window.postMessage(wrap({ method: 'event', channel: 'flex', args, source }), '*')
 })
 
-ipcRenderer.on('main:dapp', (...args) => {
-  args.shift()
-  window.postMessage(wrap({ method: 'event', channel: 'dapp', args, source }), '*')
-})

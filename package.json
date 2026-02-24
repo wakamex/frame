@@ -4,7 +4,7 @@
   "description": "System-wide web3",
   "main": "compiled/main",
   "scripts": {
-    "clean": "npx rimraf dist bundle compiled .parcel-cache node_modules",
+    "clean": "npx rimraf dist bundle compiled node_modules",
     "setup:full": "npm run clean && npm cache clean --force && npm install --cache /tmp/empty-cache --ignore-scripts && npm run setup:scripts && npm audit fix",
     "setup:clean": "npm run clean && npm run setup:deps",
     "setup:ci": "npm ci --ignore-scripts && npm run setup:scripts",
@@ -12,13 +12,8 @@
     "setup:scripts": "allow-scripts",
     "setup": "npm run setup:deps && husky install",
     "start": "npm run launch",
-    "bundle": "npm run bundle:bridge && npm run bundle:tray && npm run bundle:dash",
-    "bundle:bridge": "npm run parcel:build -- --target bridge resources/bridge/index.js",
-    "bundle:tray": "npm run parcel:build -- --target tray app/tray/index.html",
-    "bundle:dash": "npm run parcel:build -- --target dash app/dash/index.html",
-    "serve": "npm run bundle:bridge && npm run dev:server & wait-on http://localhost:1234/tray/index.dev.html && npm run compile:watch",
-    "dev": "node ./scripts/run-dev.mjs",
-    "dev:server": "node ./scripts/bundler.mjs",
+    "bundle": "electron-vite build",
+    "dev": "electron-vite dev",
     "inspect": "npm run bundle && npm run launch:inspect",
     "launch": "cross-env NODE_ENV=production electron ./compiled/main",
     "launch:dev": "cross-env NODE_ENV=development ELECTRON_DISABLE_SECURITY_WARNINGS=true electron ./compiled/main --inspect",
@@ -35,7 +30,6 @@
     "compile:watch": "npm run copy-assets && tsc --project tsconfig.build.json -w",
     "build": "npm run compile && sleep 4 && npm run bundle && sleep 4 && electron-builder --config=build/electron-builder-standard.js",
     "copy-assets": "shx mkdir -p ./compiled/main/windows && shx cp ./main/windows/*.png ./compiled/main/windows",
-    "parcel:build": "parcel build --no-autoinstall --public-url .",
     "publish": "electron-builder -c.snap.publish=github --config=build/electron-builder-standard.js",
     "publish:linux:arm64": "electron-builder -c.snap.publish=github --config=build/electron-builder-linux-arm64.js",
     "release": "npm run compile && sleep 4 && npm run bundle && sleep 4 && npm run publish",
@@ -120,11 +114,6 @@
     "@lavamoat/allow-scripts": "3.3.1",
     "@lavamoat/preinstall-always-fail": "2.1.0",
     "@ledgerhq/hw-transport-mocker": "6.29.4",
-    "@parcel/config-default": "2.13.3",
-    "@parcel/core": "2.13.3",
-    "@parcel/transformer-css": "2.13.3",
-    "@parcel/transformer-stylus": "2.13.3",
-    "@parcel/transformer-typescript-tsc": "2.13.3",
     "@testing-library/dom": "9.0.1",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
@@ -155,8 +144,8 @@
     "nock": "13.3.0",
     "node-abi": "3.33.0",
     "node-gyp": "9.3.1",
+    "electron-vite": "5.0.0",
     "node-watch": "0.7.3",
-    "parcel": "2.13.3",
     "prebuild-install": "7.1.1",
     "prettier": "2.8.4",
     "rimraf": "4.4.0",
@@ -164,48 +153,11 @@
     "stylus": "0.59.0",
     "tree-kill": "1.2.2",
     "ts-jest": "29.2.5",
-    "typescript": "5.7.3",
-    "wait-on": "8.0.2"
-  },
-  "alias": {
-    "buffer": "buffer",
-    "crypto": false,
-    "path": false,
-    "process": false,
-    "punycode": false,
-    "querystring": false,
-    "stream": false,
-    "string_decoder": false,
-    "url": false
+    "typescript": "5.7.3"
   },
   "engines": {
     "electron": "40",
     "node": ">= 24.0.0"
-  },
-  "browserslist": [
-    "last 1 Electron major version"
-  ],
-  "bridge": "./bundle/bridge.js",
-  "tray": "./bundle/tray.html",
-  "dash": "./bundle/dash.html",
-  "targets": {
-    "main": false,
-    "bridge": {
-      "context": "electron-renderer",
-      "isLibrary": true,
-      "sourceMap": {
-        "inline": true
-      }
-    },
-    "dash": {
-      "context": "browser"
-    },
-    "tray": {
-      "context": "browser"
-    },
-    "default": {
-      "distDir": "./bundle"
-    }
   },
   "repository": "github:floating/frame",
   "overrides": {
@@ -221,8 +173,6 @@
       "@lavamoat/preinstall-always-fail": false,
       "@ledgerhq/hw-transport-node-hid-noevents>node-hid": false,
       "@ledgerhq/hw-transport-node-hid-singleton>usb": false,
-      "@parcel/core>@parcel/cache>lmdb": true,
-      "@parcel/core>msgpackr>msgpackr-extract": false,
       "@trezor/connect>@trezor/protobuf>protobufjs": false,
       "@trezor/connect>@trezor/transport>protobufjs": false,
       "@trezor/connect>@trezor/transport>usb": false,
@@ -240,8 +190,6 @@
       "hardhat>keccak": true,
       "hdkey>secp256k1": true,
       "node-hid": false,
-      "parcel>@parcel/fs>@parcel/watcher": false,
-      "parcel>@parcel/package-manager>@swc/core": false,
       "react-restore>babel-core>babel-register>core-js": true,
       "react-restore>babel-core>babel-runtime>core-js": true,
       "styled-components": false,

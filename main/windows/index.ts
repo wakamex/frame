@@ -107,9 +107,9 @@ const detectMouse = () => {
 }
 
 function initWindow(id: string, opts: Electron.BrowserWindowConstructorOptions) {
-  // in development, serve files from local filesystem instead of the created bundle
-  const url = isDev
-    ? `http://localhost:1234/${id}/index.dev.html`
+  const rendererUrl = process.env['ELECTRON_RENDERER_URL']
+  const url = isDev && rendererUrl
+    ? `${rendererUrl}/${id}/index.html`
     : new URL(path.join(process.env.BUNDLE_LOCATION, `${id}.html`), 'file:')
 
   windows[id] = createWindow(id, opts)
