@@ -18,7 +18,7 @@ export default defineConfig({
     build: {
       outDir: 'bundle',
       lib: {
-        entry: resolve(__dirname, 'resources/bridge/index.js')
+        entry: resolve(__dirname, 'resources/bridge/index.ts')
       },
       rollupOptions: {
         output: {
