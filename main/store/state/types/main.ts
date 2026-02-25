@@ -14,7 +14,8 @@ const ShortcutsSchema = z.object({
 })
 
 const UpdaterPreferencesSchema = z.object({
-  dontRemind: z.array(z.string())
+  dontRemind: z.array(z.string()),
+  badge: z.object({ type: z.string(), version: z.string() }).nullable().optional()
 })
 
 // these are individual keys on the main state object

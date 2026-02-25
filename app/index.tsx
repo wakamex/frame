@@ -2,7 +2,7 @@ import 'tailwindcss'
 import { createRoot } from 'react-dom/client'
 import { useEffect } from 'react'
 
-import { initializeApp, sendEvent, sendAction } from './ipc'
+import { initializeApp, sendEvent, sendAction, actions } from './ipc'
 import { useStore, useCurrentView, useAccounts, usePendingRequests } from './store'
 import AccountsView from './views/Accounts'
 import SignersView from './views/Signers'
@@ -47,9 +47,14 @@ function App() {
   }
 
   const pendingRequests = usePendingRequests()
+  const updateBadge = useStore((s) => s.main?.updater?.badge)
 
   return (
-    <div className="flex h-screen">
+    <div className="flex flex-col h-screen">
+      {/* Update banner */}
+      {updateBadge && <UpdateBanner badge={updateBadge} />}
+
+      <div className="flex flex-1 min-h-0">
       {/* Sidebar navigation */}
       <nav className="w-48 bg-gray-900 border-r border-gray-800 flex flex-col p-3 gap-1">
         <div className="text-lg font-semibold text-gray-100 px-3 py-2 mb-2">Frame</div>
@@ -69,6 +74,7 @@ function App() {
 
       {/* Request overlay - shows when pending requests exist */}
       {pendingRequests.length > 0 && <RequestOverlay requests={pendingRequests} />}
+    </div>
     </div>
   )
 }
@@ -116,6 +122,43 @@ function ViewContent({ view }: { view: string }) {
     default:
       return <AccountsView />
   }
+}
+
+function UpdateBanner({ badge }: { badge: { type: string; version: string } }) {
+  const isReady = badge.type === 'updateReady'
+
+  return (
+    <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700 text-sm">
+      <span className="text-gray-300">
+        {isReady
+          ? `Update ${badge.version} is ready to install.`
+          : `Update ${badge.version} is available.`}
+      </span>
+      <div className="flex gap-2">
+        {isReady ? (
+          <button
+            onClick={() => actions.installUpdate()}
+            className="px-3 py-1 rounded text-xs font-medium bg-gray-100 text-gray-900 hover:bg-white transition-colors"
+          >
+            Install & Restart
+          </button>
+        ) : (
+          <button
+            onClick={() => actions.installUpdate()}
+            className="px-3 py-1 rounded text-xs font-medium bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors"
+          >
+            Download
+          </button>
+        )}
+        <button
+          onClick={() => actions.dismissUpdate(badge.version, false)}
+          className="px-3 py-1 rounded text-xs text-gray-500 hover:text-gray-300 transition-colors"
+        >
+          Dismiss
+        </button>
+      </div>
+    </div>
+  )
 }
 
 // Prevent drag-and-drop navigation

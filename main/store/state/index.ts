@@ -167,7 +167,8 @@ const mainState: M = {
   signers: {},
   savedSigners: {},
   updater: {
-    dontRemind: main('updater.dontRemind', [])
+    dontRemind: main('updater.dontRemind', []),
+    badge: null as null | { type: string; version: string }
   },
   networks: main('networks', {
     ethereum: {

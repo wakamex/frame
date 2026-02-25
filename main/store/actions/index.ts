@@ -831,3 +831,7 @@ export const updateTypedDataRequest = (u: UpdateFn, account: string, reqId: stri
     return requests
   })
 }
+
+export const updateBadge = (u: UpdateFn, type: string, version?: string) => {
+  u('main.updater.badge', () => type ? { type, version: version || '' } : null)
+}
