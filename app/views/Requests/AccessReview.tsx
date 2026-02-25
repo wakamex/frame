@@ -1,7 +1,8 @@
+import type { AccountRequest } from '../../types'
 import { actions } from '../../ipc'
 
 interface AccessReviewProps {
-  request: any
+  request: AccountRequest
 }
 
 export default function AccessReview({ request }: AccessReviewProps) {

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
+import type { AccountRequest } from '../../types'
 import TransactionReview from './TransactionReview'
 import SignatureReview from './SignatureReview'
 import AccessReview from './AccessReview'
 import ChainTokenReview from './ChainTokenReview'
 
 interface RequestOverlayProps {
-  requests: any[]
+  requests: AccountRequest[]
 }
 
 export default function RequestOverlay({ requests }: RequestOverlayProps) {
@@ -71,7 +72,7 @@ function requestTypeLabel(type: string): string {
   }
 }
 
-function RequestRouter({ request }: { request: any }) {
+function RequestRouter({ request }: { request: AccountRequest }) {
   switch (request.type) {
     case 'transaction':
       return <TransactionReview request={request} />

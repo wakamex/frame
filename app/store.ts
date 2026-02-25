@@ -1,84 +1,18 @@
 import { create } from 'zustand'
-
-// State shape mirrors the main process state
-// Only the subset needed by the renderer is typed here
-interface NetworkConnection {
-  on: boolean
-  current: string
-  status: string
-  connected: boolean
-  custom: string
-  type: string
-  network: string
-}
-
-interface Network {
-  id: number
-  type: string
-  name: string
-  layer: string
-  isTestnet: boolean
-  on: boolean
-  explorer: string
-  connection: {
-    primary: NetworkConnection
-    secondary: NetworkConnection
-  }
-}
-
-interface GasLevels {
-  slow: string
-  standard: string
-  fast: string
-  asap: string
-  custom: string
-}
-
-interface NetworkMeta {
-  blockHeight: number
-  icon: string
-  primaryColor: string
-  nativeCurrency: {
-    symbol: string
-    name: string
-    icon: string
-    decimals: number
-    usd: {
-      price: number
-      change24hr: number
-    }
-  }
-  gas: {
-    price: {
-      selected: string
-      levels: GasLevels
-    }
-  }
-}
-
-interface Shortcut {
-  modifierKeys: string[]
-  shortcutKey: string
-  enabled: boolean
-  configuring: boolean
-}
-
-interface Origin {
-  chain: { id: number; type: string }
-  name: string
-  session: {
-    requests: number
-    startedAt: number
-    endedAt?: number
-    lastUpdatedAt: number
-  }
-}
-
-interface Permission {
-  origin: string
-  provider: boolean
-  handlerId: string
-}
+import type {
+  Account,
+  AccountMetadata,
+  AccountRequest,
+  Balance,
+  Chain,
+  ChainMetadata,
+  GasLevels,
+  Origin,
+  Permission,
+  Shortcut,
+  Signer,
+  Token
+} from './types'
 
 export interface MainState {
   _version: number
@@ -94,20 +28,20 @@ export interface MainState {
     summon: Shortcut
   }
   networks: {
-    ethereum: Record<string, Network>
+    ethereum: Record<string, Chain>
   }
   networksMeta: {
-    ethereum: Record<string, NetworkMeta>
+    ethereum: Record<string, ChainMetadata>
   }
-  accounts: Record<string, any>
-  accountsMeta: Record<string, any>
+  accounts: Record<string, Account>
+  accountsMeta: Record<string, AccountMetadata>
   origins: Record<string, Origin>
   permissions: Record<string, Record<string, Permission>>
-  balances: Record<string, any[]>
-  tokens: { custom: any[]; known: Record<string, any> }
-  signers: Record<string, any>
-  savedSigners: Record<string, any>
-  lattice: Record<string, any>
+  balances: Record<string, Balance[]>
+  tokens: { custom: Token[]; known: Record<string, Token> }
+  signers: Record<string, Signer>
+  savedSigners: Record<string, Signer>
+  lattice: Record<string, unknown>
   latticeSettings: {
     accountLimit: number
     derivation: string
@@ -126,6 +60,7 @@ export interface MainState {
   }
   updater: {
     dontRemind: string[]
+    badge?: { type: string; version: string }
   }
 }
 
@@ -140,20 +75,20 @@ export interface AppState {
   selectedAccount: string | null
 
   // Actions
-  initialize: (state: any) => void
-  applyUpdates: (updates: Array<{ path: string; value: any }>) => void
+  initialize: (state: { main: MainState; platform: string }) => void
+  applyUpdates: (updates: Array<{ path: string; value: unknown }>) => void
   setView: (view: AppState['currentView']) => void
   setSelectedAccount: (id: string | null) => void
 }
 
-function setNestedValue(obj: any, path: string, value: any): any {
+function setNestedValue(obj: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
   const keys = path.split('.')
-  const result = { ...obj }
-  let current = result
+  const result = { ...obj } as Record<string, unknown>
+  let current = result as Record<string, unknown>
 
   for (let i = 0; i < keys.length - 1; i++) {
-    current[keys[i]] = { ...current[keys[i]] }
-    current = current[keys[i]]
+    current[keys[i]] = { ...(current[keys[i]] as Record<string, unknown>) }
+    current = current[keys[i]] as Record<string, unknown>
   }
 
   current[keys[keys.length - 1]] = value
@@ -171,7 +106,7 @@ export const useStore = create<AppState>((set) => ({
   selectedAccount: null,
 
   // Initialize with full state from main process
-  initialize: (state: any) =>
+  initialize: (state) =>
     set({
       main: state.main,
       platform: state.platform,
@@ -181,11 +116,11 @@ export const useStore = create<AppState>((set) => ({
   // Apply incremental state updates from main process
   applyUpdates: (updates) =>
     set((prev) => {
-      let next = { ...prev }
+      let next = { ...prev } as Record<string, unknown>
       for (const update of updates) {
         next = setNestedValue(next, update.path, update.value)
       }
-      return next
+      return next as AppState
     }),
 
   // Local UI actions
@@ -221,14 +156,14 @@ export const useAccountsMeta = () => useStore((s) => s.main?.accountsMeta ?? {})
 export const usePendingRequests = () =>
   useStore((s) => {
     const accounts = s.main?.accounts ?? {}
-    const requests: any[] = []
+    const requests: AccountRequest[] = []
     for (const account of Object.values(accounts)) {
-      const accountRequests = (account as any)?.requests ?? {}
+      const accountRequests = account?.requests ?? {}
       for (const req of Object.values(accountRequests)) {
         requests.push(req)
       }
     }
     return requests.filter(
-      (r: any) => r && !['confirmed', 'declined', 'error', 'success'].includes(r.status)
+      (r) => r && !['confirmed', 'declined', 'error', 'success'].includes(r.status ?? '')
     )
   })

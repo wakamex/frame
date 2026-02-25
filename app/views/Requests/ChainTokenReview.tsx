@@ -1,7 +1,8 @@
+import type { AccountRequest } from '../../types'
 import { actions } from '../../ipc'
 
 interface ChainTokenReviewProps {
-  request: any
+  request: AccountRequest
 }
 
 export default function ChainTokenReview({ request }: ChainTokenReviewProps) {
@@ -15,7 +16,7 @@ export default function ChainTokenReview({ request }: ChainTokenReviewProps) {
   return null
 }
 
-function AddChainReview({ request, isPending, origin }: { request: any; isPending: boolean; origin: string }) {
+function AddChainReview({ request, isPending, origin }: { request: AccountRequest; isPending: boolean; origin: string }) {
   const chain = request.chain || {}
   const handleApprove = () => actions.addChain(chain)
   const handleDecline = () => actions.rejectRequest(request)
@@ -42,7 +43,7 @@ function AddChainReview({ request, isPending, origin }: { request: any; isPendin
   )
 }
 
-function AddTokenReview({ request, isPending, origin }: { request: any; isPending: boolean; origin: string }) {
+function AddTokenReview({ request, isPending, origin }: { request: AccountRequest; isPending: boolean; origin: string }) {
   const token = request.token || {}
   const handleApprove = () => actions.addToken(token, request)
   const handleDecline = () => actions.rejectRequest(request)
@@ -69,7 +70,7 @@ function AddTokenReview({ request, isPending, origin }: { request: any; isPendin
   )
 }
 
-function SwitchChainReview({ request, isPending, origin }: { request: any; isPending: boolean; origin: string }) {
+function SwitchChainReview({ request, isPending, origin }: { request: AccountRequest; isPending: boolean; origin: string }) {
   const chainId = request.payload?.params?.[0]?.chainId
   const handleApprove = () => actions.switchChain('ethereum', parseInt(chainId, 16), request)
   const handleDecline = () => actions.rejectRequest(request)

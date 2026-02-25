@@ -1,9 +1,10 @@
+import type { AccountRequest } from '../../types'
 import { actions } from '../../ipc'
 import { accountViewTitles } from '../../../resources/domain/request'
 import useCountdown from '../../../resources/Hooks/useCountdown'
 
 interface SignatureReviewProps {
-  request: any
+  request: AccountRequest
 }
 
 export default function SignatureReview({ request }: SignatureReviewProps) {
@@ -52,7 +53,7 @@ export default function SignatureReview({ request }: SignatureReviewProps) {
   )
 }
 
-function PlainMessageView({ request }: { request: any }) {
+function PlainMessageView({ request }: { request: AccountRequest }) {
   const message = request.data?.decodedMessage || request.payload?.params?.[1] || ''
   return (
     <div className="bg-gray-800/50 rounded-lg p-3">
@@ -64,7 +65,7 @@ function PlainMessageView({ request }: { request: any }) {
   )
 }
 
-function TypedDataView({ request }: { request: any }) {
+function TypedDataView({ request }: { request: AccountRequest }) {
   const typedMessage = request.typedMessage
   const data = typedMessage?.data
 
@@ -91,7 +92,7 @@ function TypedDataView({ request }: { request: any }) {
   )
 }
 
-function PermitView({ request }: { request: any }) {
+function PermitView({ request }: { request: AccountRequest }) {
   const permit = request.permit
   const tokenData = request.tokenData
   const deadline = permit?.deadline

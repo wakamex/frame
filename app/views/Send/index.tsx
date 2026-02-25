@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import type { Chain } from '../../types'
 import { useStore, useAccounts, useBalances, useNetworks } from '../../store'
 import { rpc } from '../../ipc'
 
@@ -28,8 +29,8 @@ function SendForm({
   networks
 }: {
   accountId: string
-  account: Record<string, any>
-  networks: Record<string, any>
+  account: Record<string, unknown>
+  networks: Record<string, Chain>
 }) {
   const balances = useBalances(accountId)
 
@@ -70,7 +71,7 @@ function SendForm({
   // Active chains for the chain selector
   const activeChains = useMemo(() => {
     return Object.entries(networks)
-      .filter(([, chain]: [string, any]) => chain.on)
+      .filter(([, chain]) => chain.on)
       .sort(([a], [b]) => {
         if (a === '1') return -1
         if (b === '1') return 1
@@ -91,8 +92,8 @@ function SendForm({
       } else {
         setError('Could not resolve ENS name')
       }
-    } catch (e: any) {
-      setError(e?.message || 'ENS resolution failed')
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'ENS resolution failed')
     } finally {
       setResolving(false)
     }
@@ -161,8 +162,8 @@ function SendForm({
       setRecipient('')
       setAmount('')
       setResolvedAddress('')
-    } catch (e: any) {
-      setError(e?.message || 'Failed to send transaction')
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to send transaction')
     } finally {
       setSending(false)
     }
@@ -181,7 +182,7 @@ function SendForm({
             onChange={(e) => { setChainId(e.target.value); setTokenAddress('native') }}
             className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 outline-none focus:border-gray-600"
           >
-            {activeChains.map(([id, chain]: [string, any]) => (
+            {activeChains.map(([id, chain]) => (
               <option key={id} value={id}>{chain.name} ({id})</option>
             ))}
           </select>
