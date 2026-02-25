@@ -66,26 +66,93 @@ export function rpc(method: string, ...args: any[]): Promise<any> {
 
 // Typed action helpers for common operations
 export const actions = {
+  // Clipboard
   clipboardData: (data: string) => sendEvent('tray:clipboardData', data),
+
+  // Request management
   resolveRequest: (req: any, result?: any) => sendEvent('tray:resolveRequest', req, result),
   rejectRequest: (req: any) => sendEvent('tray:rejectRequest', req),
+  approveRequest: (req: any) => rpc('approveRequest', req),
+  declineRequest: (req: any) => rpc('declineRequest', req),
+  confirmRequestApproval: (req: any, type: string, data: any) =>
+    rpc('confirmRequestApproval', req, type, data),
+  updateRequest: (reqId: string, data: any, actionId: string) =>
+    rpc('updateRequest', reqId, data, actionId),
+
+  // Gas fee controls
+  setBaseFee: (fee: string, handlerId: string) => rpc('setBaseFee', fee, handlerId),
+  setPriorityFee: (fee: string, handlerId: string) => rpc('setPriorityFee', fee, handlerId),
+  setGasPrice: (price: string, handlerId: string) => rpc('setGasPrice', price, handlerId),
+  setGasLimit: (limit: string, handlerId: string) => rpc('setGasLimit', limit, handlerId),
+  removeFeeUpdateNotice: (handlerId: string) => rpc('removeFeeUpdateNotice', handlerId),
+
+  // Account management
   removeAccount: (id: string) => sendEvent('tray:removeAccount', id),
   renameAccount: (id: string, name: string) => sendEvent('tray:renameAccount', id, name),
+  giveAccess: (req: any, access: boolean) => sendEvent('tray:giveAccess', req, access),
+  clearRequestsByOrigin: (account: string, origin: string) =>
+    sendEvent('tray:clearRequestsByOrigin', account, origin),
+
+  // Signer creation
+  createFromPhrase: (phrase: string, password: string) =>
+    rpc('createFromPhrase', phrase, password),
+  createFromPrivateKey: (privateKey: string, password: string) =>
+    rpc('createFromPrivateKey', privateKey, password),
+  createFromKeystore: (keystore: any, password: string, keystorePassword: string) =>
+    rpc('createFromKeystore', keystore, password, keystorePassword),
+  createFromAddress: (address: string, name: string) =>
+    rpc('createFromAddress', address, name),
+  createAccount: (address: string, name: string, options: any) =>
+    rpc('createAccount', address, name, options),
+  locateKeystore: () => rpc('locateKeystore'),
+
+  // Signer management
+  setSigner: (id: string) => rpc('setSigner', id),
+  unsetSigner: (id: string) => rpc('unsetSigner', id),
+  unlockSigner: (id: string, password: string) => rpc('unlockSigner', id, password),
+  lockSigner: (id: string) => rpc('lockSigner', id),
   removeSigner: (id: string) => sendEvent('dash:removeSigner', id),
   reloadSigner: (id: string) => sendEvent('dash:reloadSigner', id),
+  verifyAddress: () => rpc('verifyAddress'),
+
+  // Lattice
+  createLattice: (deviceId: string, deviceName: string) =>
+    rpc('createLattice', deviceId, deviceName),
+  latticePair: (id: string, pin: string) => rpc('latticePair', id, pin),
+
+  // Trezor
+  trezorPin: (id: string, pin: string) => rpc('trezorPin', id, pin),
+  trezorPhrase: (id: string, phrase: string) => rpc('trezorPhrase', id, phrase),
+
+  // Navigation & external
   openExternal: (url: string) => sendEvent('tray:openExternal', url),
   openExplorer: (chain: any, hash?: string, account?: string) =>
     sendEvent('tray:openExplorer', chain, hash, account),
+
+  // Chain management
   addChain: (chain: any) => sendEvent('tray:addChain', chain),
   switchChain: (type: string, id: number, req?: any) =>
     sendEvent('tray:switchChain', type, id, req),
+
+  // Token management
   addToken: (token: any, req?: any) => sendEvent('tray:addToken', token, req),
   removeToken: (token: any) => sendEvent('tray:removeToken', token),
+  getTokenDetails: (contractAddress: string, chainId: number) =>
+    invoke('tray:getTokenDetails', contractAddress, chainId),
+
+  // Settings
   syncPath: (path: string, value: any) => sendEvent('tray:syncPath', path, value),
+
+  // Origins
+  removeOrigin: (handlerId: string) => sendEvent('tray:removeOrigin', handlerId),
+  clearOrigins: () => sendEvent('tray:clearOrigins'),
+
+  // Updates
   installUpdate: () => sendEvent('tray:installAvailableUpdate'),
   dismissUpdate: (version: string, remind: boolean) =>
     sendEvent('tray:dismissUpdate', version, remind),
   resetAllSettings: () => sendEvent('tray:resetAllSettings'),
-  getTokenDetails: (contractAddress: string, chainId: number) =>
-    invoke('tray:getTokenDetails', contractAddress, chainId)
+
+  // ENS
+  resolveEnsName: (name: string) => rpc('resolveEnsName', name)
 }

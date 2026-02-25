@@ -38,6 +38,16 @@ interface NetworkMeta {
   blockHeight: number
   icon: string
   primaryColor: string
+  nativeCurrency: {
+    symbol: string
+    name: string
+    icon: string
+    decimals: number
+    usd: {
+      price: number
+      change24hr: number
+    }
+  }
   gas: {
     price: {
       selected: string
@@ -186,6 +196,39 @@ export const useStore = create<AppState>((set) => ({
 // Typed selector helpers
 export const useMainState = () => useStore((s) => s.main)
 export const useNetworks = () => useStore((s) => s.main?.networks?.ethereum ?? {})
+export const useNetworksMeta = () => useStore((s) => s.main?.networksMeta?.ethereum ?? {})
 export const useAccounts = () => useStore((s) => s.main?.accounts ?? {})
 export const useSigners = () => useStore((s) => s.main?.signers ?? {})
+export const useSavedSigners = () => useStore((s) => s.main?.savedSigners ?? {})
 export const useCurrentView = () => useStore((s) => s.currentView)
+export const useBalances = (address: string) =>
+  useStore((s) => s.main?.balances?.[address] ?? [])
+export const useTokens = () => useStore((s) => s.main?.tokens ?? { custom: [], known: {} })
+export const usePermissions = (address: string) =>
+  useStore((s) => s.main?.permissions?.[address] ?? {})
+export const useOrigins = () => useStore((s) => s.main?.origins ?? {})
+export const usePlatform = () => useStore((s) => s.platform)
+export const useColorway = () => useStore((s) => s.main?.colorway ?? 'dark')
+export const useSelectedAccount = () =>
+  useStore((s) => {
+    const id = s.selectedAccount
+    if (!id || !s.main?.accounts) return null
+    return s.main.accounts[id] ?? null
+  })
+export const useAccountsMeta = () => useStore((s) => s.main?.accountsMeta ?? {})
+
+// Derived selectors for requests across all accounts
+export const usePendingRequests = () =>
+  useStore((s) => {
+    const accounts = s.main?.accounts ?? {}
+    const requests: any[] = []
+    for (const account of Object.values(accounts)) {
+      const accountRequests = (account as any)?.requests ?? {}
+      for (const req of Object.values(accountRequests)) {
+        requests.push(req)
+      }
+    }
+    return requests.filter(
+      (r: any) => r && !['confirmed', 'declined', 'error', 'success'].includes(r.status)
+    )
+  })
