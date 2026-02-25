@@ -1,9 +1,10 @@
 import './styles.css'
 import { createRoot } from 'react-dom/client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { initializeApp, sendEvent, sendAction, actions } from './ipc'
 import { useStore, useCurrentView, useAccounts, usePendingRequests } from './store'
+import { useCompact } from './hooks/useCompact'
 import AccountsView from './views/Accounts'
 import SignersView from './views/Signers'
 import ChainsView from './views/Chains'
@@ -48,6 +49,14 @@ function App() {
 
   const pendingRequests = usePendingRequests()
   const updateBadge = useStore((s) => s.main?.updater?.badge)
+  const compact = useCompact()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Close sidebar when switching views on compact layout
+  const handleViewChange = (view: string) => {
+    setView(view)
+    if (compact) setSidebarOpen(false)
+  }
 
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-gray-100">
@@ -56,19 +65,47 @@ function App() {
 
       <div className="flex flex-1 min-h-0">
       {/* Sidebar navigation */}
-      <nav className="w-48 bg-gray-900 border-r border-gray-800 flex flex-col p-3 gap-1">
-        <div className="text-lg font-semibold text-gray-100 px-3 py-2 mb-2">Frame</div>
-        <NavItem label="Accounts" view="accounts" current={currentView} onClick={setView} />
-        <NavItem label="Send" view="send" current={currentView} onClick={setView} />
-        <NavItem label="Signers" view="signers" current={currentView} onClick={setView} />
-        <NavItem label="Chains" view="chains" current={currentView} onClick={setView} />
-        <NavItem label="Tokens" view="tokens" current={currentView} onClick={setView} />
-        <div className="flex-1" />
-        <NavItem label="Settings" view="settings" current={currentView} onClick={setView} />
-      </nav>
+      {(!compact || sidebarOpen) && (
+        <nav className={`${compact ? 'absolute inset-y-0 left-0 z-30' : ''} w-48 bg-gray-900 border-r border-gray-800 flex flex-col p-3 gap-1`}>
+          <div className="flex items-center justify-between px-3 py-2 mb-2">
+            <span className="text-lg font-semibold text-gray-100">Frame</span>
+            {compact && (
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="text-gray-500 hover:text-gray-300 text-sm"
+              >
+                &times;
+              </button>
+            )}
+          </div>
+          <NavItem label="Accounts" view="accounts" current={currentView} onClick={handleViewChange} />
+          <NavItem label="Send" view="send" current={currentView} onClick={handleViewChange} />
+          <NavItem label="Signers" view="signers" current={currentView} onClick={handleViewChange} />
+          <NavItem label="Chains" view="chains" current={currentView} onClick={handleViewChange} />
+          <NavItem label="Tokens" view="tokens" current={currentView} onClick={handleViewChange} />
+          <div className="flex-1" />
+          <NavItem label="Settings" view="settings" current={currentView} onClick={handleViewChange} />
+        </nav>
+      )}
+
+      {/* Sidebar overlay backdrop on compact */}
+      {compact && sidebarOpen && (
+        <div
+          className="absolute inset-0 z-20 bg-black/40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Main content area */}
-      <main className="flex-1 overflow-y-auto p-6">
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        {compact && !sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="mb-3 text-sm text-gray-400 hover:text-gray-200"
+          >
+            &#9776; Menu
+          </button>
+        )}
         <ViewContent view={currentView} />
       </main>
 
