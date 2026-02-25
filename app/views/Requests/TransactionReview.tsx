@@ -5,6 +5,7 @@ import { useNetworks, useNetworksMeta } from '../../store'
 import Address from '../../components/Address'
 import { weiToGwei, hexToInt, roundGwei, weiIntToEthInt } from '../../../resources/utils'
 import { accountViewTitles } from '../../../resources/domain/request'
+import { chainUsesOptimismFees } from '../../../resources/utils/chains'
 
 interface TransactionReviewProps {
   request: AccountRequest
@@ -129,6 +130,20 @@ export default function TransactionReview({ request }: TransactionReviewProps) {
           />
         )}
       </div>
+
+      {/* L1 data fee for OP Stack chains */}
+      {chainUsesOptimismFees(chainId) && request.chainData?.optimism?.l1Fees && (
+        <div className="bg-gray-800/50 rounded-lg p-3">
+          <div className="text-xs text-gray-500 mb-1">L1 Data Fee</div>
+          <div className="text-sm text-gray-200">
+            {weiIntToEthInt(hexToInt(request.chainData.optimism.l1Fees)).toFixed(6)}{' '}
+            {chain?.symbol || 'ETH'}
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">
+            Estimated cost to post transaction data to Ethereum L1
+          </div>
+        </div>
+      )}
 
       {/* Fee update notice */}
       {request.automaticFeeUpdateNotice && !request.feesUpdatedByUser && (

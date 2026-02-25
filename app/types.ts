@@ -177,6 +177,7 @@ export interface AccountRequest {
   }
   // Transaction-specific
   data?: TransactionData
+  chainData?: { optimism?: { l1Fees: string } }
   decodedData?: { name: string; signature: string; args: Record<string, string> }
   tx?: { hash?: string; receipt?: { gasUsed: string; blockNumber: string }; confirmations: number }
   approvals?: Array<{ type: string; data: unknown; approved: boolean }>
