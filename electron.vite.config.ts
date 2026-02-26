@@ -1,25 +1,42 @@
 import { defineConfig } from 'electron-vite'
 import { resolve } from 'path'
 
+const mainExternals = [
+  'electron',
+  'electron-log',
+  'electron-updater',
+  'node-hid',
+  'usb',
+  'ethereum-provider',
+  'eth-provider',
+  'eth-ens-namehash',
+  'nebula',
+  '@ledgerhq/hw-transport-node-hid-singleton',
+  '@ledgerhq/hw-transport-node-hid-noevents',
+  '@ledgerhq/hw-transport',
+  '@ledgerhq/hw-app-eth'
+]
+
 export default defineConfig({
   main: {
+    resolve: {
+      extensions: ['.ts', '.js', '.mjs', '.mts', '.json']
+    },
     build: {
       outDir: 'compiled/main',
       lib: {
-        entry: resolve(__dirname, 'main/index.ts')
+        entry: {
+          index: resolve(__dirname, 'main/index.ts'),
+          'workers/balances': resolve(__dirname, 'main/externalData/balances/worker.ts'),
+          'workers/ringSigner': resolve(__dirname, 'main/signers/hot/RingSigner/worker.ts'),
+          'workers/seedSigner': resolve(__dirname, 'main/signers/hot/SeedSigner/worker.ts')
+        }
       },
       rollupOptions: {
-        external: [
-          'electron',
-          'electron-log',
-          'electron-updater',
-          'node-hid',
-          'usb',
-          'ethereum-provider',
-          'eth-provider',
-          'content-hash',
-          'eth-ens-namehash'
-        ]
+        external: mainExternals,
+        output: {
+          interop: 'auto'
+        }
       }
     }
   },

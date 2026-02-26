@@ -42,7 +42,9 @@ export default class BalancesWorkerController extends EventEmitter {
     super()
 
     const workerArgs = process.env.NODE_ENV === 'development' ? ['--inspect=127.0.0.1:9230'] : []
-    this.worker = fork(path.resolve(__dirname, 'worker.js'), [], { execArgv: workerArgs })
+    const bundledPath = path.resolve(__dirname, 'workers', 'balances.js')
+    const workerPath = require('fs').existsSync(bundledPath) ? bundledPath : path.resolve(__dirname, 'worker.js')
+    this.worker = fork(workerPath, [], { execArgv: workerArgs })
 
     log.info('created balances worker, pid:', this.worker.pid)
 

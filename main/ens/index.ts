@@ -1,6 +1,5 @@
 import { encodeFunctionData, decodeFunctionResult, type Hex } from 'viem'
 import namehash from 'eth-ens-namehash'
-import contentHash from 'content-hash'
 
 import provider from '../provider'
 import store from '../store'
@@ -43,30 +42,6 @@ export async function resolveAddress(address: string): Promise<string | null> {
 
   const [resolvedName] = decodeFunctionResult({ abi: resolverAbi, functionName: 'name', data: output as Hex })
   return resolvedName as string
-}
-
-export async function resolveContent(name: string): Promise<string | null> {
-  const resolverAddress = await getResolverAddress(name)
-  if (!resolverAddress) return null
-
-  const node = namehash.hash(name)
-  const input = encodeFunctionData({ abi: resolverAbi, functionName: 'contenthash', args: [node as Hex] })
-
-  const params = { to: resolverAddress, data: input }
-  const output = await makeCall('eth_call', params)
-
-  if (output === '0x') return null
-
-  const [contentHashBytes] = decodeFunctionResult({
-    abi: resolverAbi,
-    functionName: 'contenthash',
-    data: output as Hex
-  })
-
-  if (contentHashBytes === null) return null
-
-  const hash = contentHash.decode(contentHashBytes)
-  return hash
 }
 
 async function getResolverAddress(name: string): Promise<string | null> {

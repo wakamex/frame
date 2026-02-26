@@ -1,4 +1,5 @@
 import path from 'path'
+import fs from 'fs'
 import log from 'electron-log'
 import { default as ethWallet } from 'ethereumjs-wallet'
 
@@ -6,7 +7,10 @@ const { fromPrivateKey, fromV1, fromV3 } = ethWallet
 
 import HotSigner from '../HotSigner'
 
-const WORKER_PATH = path.resolve(__dirname, 'worker.js')
+// In Vite bundle: __dirname is compiled/main/, workers are in compiled/main/workers/
+// In source/tests: __dirname is the actual file directory, worker.js is adjacent
+const bundledPath = path.resolve(__dirname, 'workers', 'ringSigner.js')
+const WORKER_PATH = fs.existsSync(bundledPath) ? bundledPath : path.resolve(__dirname, 'worker.js')
 
 interface RingSignerData {
   addresses?: string[]

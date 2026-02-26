@@ -19,6 +19,8 @@ import { showUnhandledExceptionDialog } from './windows/dialog'
 import { openBlockExplorer, openExternal } from './windows/window'
 import Erc20Contract from './contracts/erc20'
 import { getErrorCode } from '../resources/utils'
+import { startApi } from './api'
+import './rpc'
 
 app.commandLine.appendSwitch('enable-gpu-rasterization', 'true')
 app.commandLine.appendSwitch('force-gpu-rasterization', 'true')
@@ -41,8 +43,6 @@ if (!hasInstanceLock) {
   log.info('another instance of Frame is running - exiting...')
   app.exit(1)
 }
-
-require('./rpc')
 errors.init()
 
 log.info(`Chrome: v${process.versions.chrome}`)
@@ -241,7 +241,7 @@ ipcMain.on('tray:syncPath', (e, path, value) => {
 })
 
 ipcMain.on('tray:ready', () => {
-  require('./api')
+  startApi()
 
   if (!isDev) {
     startUpdater()

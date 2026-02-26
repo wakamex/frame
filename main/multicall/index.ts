@@ -6,13 +6,11 @@ import type EthereumProvider from 'ethereum-provider'
 
 import {
   abi,
-  Call,
-  CallResult,
   functionSignatureMatcher,
   multicallAddresses,
-  MulticallConfig,
   MulticallVersion
 } from './constants'
+import type { Call, CallResult, MulticallConfig } from './constants'
 
 export { Call }
 

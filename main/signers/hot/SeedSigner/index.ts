@@ -1,11 +1,13 @@
 import path from 'path'
+import fs from 'fs'
 import HotSigner from '../HotSigner'
 import * as bip39 from 'bip39'
 import hdKey from 'hdkey'
 import { publicKeyToAddress } from 'viem/accounts'
 import secp256k1 from 'secp256k1'
 
-const WORKER_PATH = path.resolve(__dirname, 'worker.js')
+const bundledPath = path.resolve(__dirname, 'workers', 'seedSigner.js')
+const WORKER_PATH = fs.existsSync(bundledPath) ? bundledPath : path.resolve(__dirname, 'worker.js')
 
 interface SeedSignerData {
   addresses?: string[]

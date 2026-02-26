@@ -54,14 +54,6 @@ declare module 'ethereumjs-abi' {
   export default _default
 }
 
-declare module 'content-hash' {
-  export function decode(hash: string): string
-  export function fromIpfs(hash: string): string
-  export function fromSwarm(hash: string): string
-  export function getCodec(hash: string): string
-  export function encode(codec: string, value: string): string
-}
-
 declare module '@ledgerhq/hw-transport-node-hid-noevents' {
   import Transport from '@ledgerhq/hw-transport'
   export function getDevices(): any[]
