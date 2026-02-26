@@ -4,7 +4,7 @@ import { generateMnemonic } from 'bip39'
 import log from 'electron-log'
 
 const PASSWORD = 'fr@///3_password'
-const SIGNER_PATH = path.resolve(__dirname, '../.userData/signers')
+const SIGNER_PATH = path.resolve(__dirname, `../.userData${process.env.JEST_WORKER_ID ? `-${process.env.JEST_WORKER_ID}` : ''}/signers`)
 
 jest.mock('electron')
 jest.mock('../../../../../main/store/persist')
@@ -22,9 +22,9 @@ describe('Seed signer', () => {
   beforeAll(async () => {
     log.transports.console.level = false
 
-    clean()
+    await clean()
 
-    hot = await import('../../../../../main/signers/hot')
+    hot = (await import('../../../../../main/signers/hot')).default
     store = require('../../../../../main/store').default
   })
 
@@ -98,8 +98,8 @@ describe('Seed signer', () => {
 
     hot.scan(signers)
 
-    jest.runAllTimers()
-  }, 800)
+    jest.runAllTimersAsync()
+  }, 5000)
 
   test('Unlock with wrong password', (done) => {
     try {

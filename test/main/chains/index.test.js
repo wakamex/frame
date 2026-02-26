@@ -220,12 +220,15 @@ Object.values(mockConnections).forEach((chain) => {
       number: addHexPrefix((8897988 - 20).toString(16))
     }
 
+    let resolved = false
     observer = store.observer(() => {
+      if (resolved) return
       const gas = store(`main.networksMeta.ethereum.${chain.id}.gas.price.levels`)
 
       if (gas.fast) {
         expect(gas.fast).toBe(gweiToHex(6))
 
+        resolved = true
         done()
       }
     })
@@ -242,7 +245,9 @@ Object.values(mockConnections).forEach((chain) => {
     const expectedBaseFee = 7e9 * 1.125 * 1.125
     const expectedPriorityFee = 32e9
 
+    let resolved = false
     observer = store.observer(() => {
+      if (resolved) return
       const gas = store(`main.networksMeta.ethereum.${chain.id}.gas.price`)
 
       if (gas.fees.maxBaseFeePerGas) {
@@ -253,6 +258,7 @@ Object.values(mockConnections).forEach((chain) => {
         expect(gas.selected).toBe('fast')
         expect(gas.levels.fast).toBe(intToHex(expectedBaseFee + expectedPriorityFee))
 
+        resolved = true
         done()
       }
     })

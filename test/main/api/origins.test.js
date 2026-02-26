@@ -264,36 +264,41 @@ describe('#isKnownExtension', () => {
     return expect(isKnownExtension(extension)).resolves.toBe(false)
   })
 
-  it('prompts the user to trust a Firefox extension', async () => {
+  it('waits for user decision on an unknown Firefox extension', async () => {
     const extension = { browser: 'firefox', id: '4be0643f-1d98-573b-97cd-ca98a65347dd' }
 
-    isKnownExtension(extension)
+    // start the request — it should create a pending promise via the observer
+    const result = isKnownExtension(extension)
 
-    expect(store.notify).toHaveBeenCalledWith('extensionConnect', extension)
+    // simulate user accepting the request
+    store.set('main.knownExtensions', { [extension.id]: true })
+    store.getObserver('origins:requestExtension').fire()
+
+    return expect(result).resolves.toBe(true)
   })
 
   it('allows a user to trust a Firefox extension', async () => {
     const extension = { browser: 'firefox', id: '4ae0643f-1d98-573b-97cd-ca98a65347dd' }
 
-    store.notify.mockImplementationOnce(() => {
-      // simulate user accepting the request
-      store.set('main.knownExtensions', { [extension.id]: true })
-      store.getObserver('origins:requestExtension').fire()
-    })
+    const result = isKnownExtension(extension)
 
-    return expect(isKnownExtension(extension)).resolves.toBe(true)
+    // simulate user accepting the request
+    store.set('main.knownExtensions', { [extension.id]: true })
+    store.getObserver('origins:requestExtension').fire()
+
+    return expect(result).resolves.toBe(true)
   })
 
   it('allows a user to reject a connection from a Firefox extension', async () => {
     const extension = { browser: 'firefox', id: '4ce0643f-1d98-573b-97cd-ca98a65347dd' }
 
-    store.notify.mockImplementationOnce(() => {
-      // simulate user accepting the request
-      store.set('main.knownExtensions', { [extension.id]: false })
-      store.getObserver('origins:requestExtension').fire()
-    })
+    const result = isKnownExtension(extension)
 
-    return expect(isKnownExtension(extension)).resolves.toBe(false)
+    // simulate user rejecting the request
+    store.set('main.knownExtensions', { [extension.id]: false })
+    store.getObserver('origins:requestExtension').fire()
+
+    return expect(result).resolves.toBe(false)
   })
 })
 

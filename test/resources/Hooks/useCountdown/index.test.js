@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { render, screen, act } from '../../../componentSetup'
 import useCountdown from '../../../../resources/Hooks/useCountdown'
 

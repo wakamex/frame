@@ -3,7 +3,7 @@ import fs from 'fs'
 import { ensureDirSync } from 'fs-extra'
 import { app } from 'electron'
 import log from 'electron-log'
-import bip39 from 'bip39'
+import * as bip39 from 'bip39'
 import zxcvbn from 'zxcvbn'
 
 import crypt from '../../crypt'
@@ -14,7 +14,7 @@ import { stripHexPrefix } from '@ethereumjs/util'
 
 const USER_DATA = app
   ? app.getPath('userData')
-  : path.resolve(path.dirname(require.main!.filename!), '../.userData')
+  : path.resolve(path.dirname(require.main!.filename!), `../.userData${process.env.JEST_WORKER_ID ? `-${process.env.JEST_WORKER_ID}` : ''}`)
 const SIGNERS_PATH = path.resolve(USER_DATA, 'signers')
 
 const wait = async (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))

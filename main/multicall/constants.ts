@@ -22,8 +22,8 @@ export interface Call<R, T> {
 }
 
 export const abi = [
-  'function aggregate(tuple(address target, bytes callData)[] calls) returns (uint256 blockNumber, bytes[] returndata)',
-  'function tryAggregate(bool requireSuccess, tuple(address target, bytes callData)[] calls) returns (tuple(bool success, bytes returndata)[] result)'
+  'function aggregate((address target, bytes callData)[] calls) returns (uint256 blockNumber, bytes[] returndata)',
+  'function tryAggregate(bool requireSuccess, (address target, bytes callData)[] calls) returns ((bool success, bytes returndata)[] result)'
 ]
 
 export const functionSignatureMatcher = /function\s+(?<signature>\w+)/

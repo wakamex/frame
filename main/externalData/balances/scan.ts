@@ -43,10 +43,11 @@ export default function (eth: EthereumProvider) {
   function balanceCalls(owner: string, tokens: TokenDefinition[]): Call<bigint, ExternalBalance>[] {
     return tokens.map((token) => ({
       target: token.address,
-      call: ['function balanceOf(address address) returns (uint256 value)', owner],
+      call: ['function balanceOf(address account) returns (uint256 value)', owner],
       returns: [
         (bn?: bigint) => {
-          const hexString = bn ? ('0x' + bn.toString(16)) : '0x00'
+          const hex = bn ? bn.toString(16) : '0'
+          const hexString = '0x' + (hex.length % 2 ? '0' : '') + hex
           return createBalance(hexString, token.decimals)
         }
       ]
@@ -82,13 +83,14 @@ export default function (eth: EthereumProvider) {
       params: [{ to: token.address, value: '0x0', data: functionData }, 'latest']
     })
 
-    const [balance] = decodeFunctionResult({
+    const balance = decodeFunctionResult({
       abi: erc20Abi,
       functionName: 'balanceOf',
       data: response
-    }) as [bigint]
+    }) as bigint
 
-    return '0x' + balance.toString(16)
+    const hex = balance.toString(16)
+    return '0x' + (hex.length % 2 ? '0' : '') + hex
   }
 
   async function getTokenBalancesFromContracts(owner: string, tokens: TokenDefinition[]) {

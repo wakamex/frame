@@ -741,10 +741,13 @@ describe('#signerCompatibility', () => {
 
     activeSigner = {
       id: '12',
+      type: 'seed',
+      status: 'ok',
       addresses: [account.id],
       summary: jest.fn()
     }
 
+    store.newSigner(activeSigner)
     store.newSigner(lockedSeedSigner)
 
     signers.get.mockImplementation((id) => {

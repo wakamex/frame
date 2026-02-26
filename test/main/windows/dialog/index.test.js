@@ -18,7 +18,6 @@ describe('#showUnhandledExceptionDialog', () => {
     showUnhandledExceptionDialog('something bad happened')
 
     expect(dialog.showMessageBoxSync).toHaveBeenCalledWith(
-      undefined,
       expect.objectContaining({
         detail: 'something bad happened'
       })
@@ -29,7 +28,6 @@ describe('#showUnhandledExceptionDialog', () => {
     showUnhandledExceptionDialog('something bad happened')
 
     expect(dialog.showMessageBoxSync).toHaveBeenCalledWith(
-      undefined,
       expect.objectContaining({
         buttons: ['OK', 'Quit']
       })

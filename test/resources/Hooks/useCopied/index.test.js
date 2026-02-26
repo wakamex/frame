@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { render, screen } from '../../../componentSetup'
 import useCopiedMessage from '../../../../resources/Hooks/useCopiedMessage'
 import link from '../../../../resources/link'

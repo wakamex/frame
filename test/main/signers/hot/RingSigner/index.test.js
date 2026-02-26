@@ -5,7 +5,7 @@ import { remove } from 'fs-extra'
 import log from 'electron-log'
 
 const PASSWORD = 'fr@///3_password'
-const SIGNER_PATH = path.resolve(__dirname, '../.userData/signers')
+const SIGNER_PATH = path.resolve(__dirname, `../.userData${process.env.JEST_WORKER_ID ? `-${process.env.JEST_WORKER_ID}` : ''}/signers`)
 const FILE_PATH = path.resolve(__dirname, 'keystore.json')
 
 jest.mock('electron')
@@ -26,7 +26,7 @@ describe('Ring signer', () => {
 
     clean()
 
-    hot = await import('../../../../../main/signers/hot')
+    hot = (await import('../../../../../main/signers/hot')).default
     store = require('../../../../../main/store').default
   })
 

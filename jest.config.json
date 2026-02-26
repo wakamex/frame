@@ -1,6 +1,6 @@
 {
   "roots": ["test"],
-  "testPathIgnorePatterns": ["/node_modules/", "<rootDir>/test/main/signers/ledger/adapter"],
+  "testPathIgnorePatterns": ["/node_modules/", "<rootDir>/test/main/signers/ledger/adapter", "<rootDir>/test/e2e"],
   "moduleNameMapper": {
     "@ledgerhq/cryptoassets/data/eip712": "@ledgerhq/cryptoassets/lib/data/eip712.js",
     "@ledgerhq/cryptoassets/data/erc20-signatures": "@ledgerhq/cryptoassets/lib/data/erc20-signatures.js",
@@ -11,5 +11,6 @@
     "enableGlobally": true
   },
   "clearMocks": true,
+  "setupFiles": ["<rootDir>/test/setupGlobals.js"],
   "setupFilesAfterEnv": ["<rootDir>/test/toMatchPath.js"]
 }

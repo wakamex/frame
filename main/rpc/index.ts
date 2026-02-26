@@ -253,11 +253,7 @@ const rpc: Record<string, (...args: any[]) => void> = {
     accounts.signerCompatibility(handlerId, cb)
   },
   openExplorer(chain: any) {
-    if (store('main.mute.explorerWarning')) {
-      openBlockExplorer(chain)
-    } else {
-      store.notify('openExplorer', { chain })
-    }
+    openBlockExplorer(chain)
   }
 }
 

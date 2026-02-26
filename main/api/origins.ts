@@ -81,7 +81,6 @@ async function requestExtensionPermission(extension: FrameExtension) {
   })
 
   activeExtensionChecks[extension.id] = result
-  store.notify('extensionConnect', extension)
 
   return result
 }

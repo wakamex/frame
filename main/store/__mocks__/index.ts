@@ -61,8 +61,21 @@ const create = function () {
     return internal.observers[id]
   }
 
+  store.updateSigner = function (signer) {
+    if (signer && signer.id) {
+      store.set('main.signers', signer.id, signer)
+    }
+  }
+
+  store.removeSigner = function (id) {
+    if (internal.state.main && internal.state.main.signers) {
+      delete internal.state.main.signers[id]
+    }
+  }
+
   return store
 }
 
-module.exports = create()
-export default create()
+const instance = create()
+module.exports = instance
+module.exports.default = instance

@@ -146,13 +146,21 @@ export function createCompatStore(initialState: any, actions: Record<string, (..
   const observers: Observer[] = []
 
   // Subscribe to zustand changes and notify all observers
+  // Re-entrancy guard prevents infinite recursion when observer callbacks trigger state updates
+  let notifying = false
   zustandStore.subscribe(() => {
-    for (const observer of observers) {
-      try {
-        observer.callback()
-      } catch (e) {
-        console.error('Observer error:', e)
+    if (notifying) return
+    notifying = true
+    try {
+      for (const observer of observers) {
+        try {
+          observer.callback()
+        } catch (e) {
+          console.error('Observer error:', e)
+        }
       }
+    } finally {
+      notifying = false
     }
   })
 

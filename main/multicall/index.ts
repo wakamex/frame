@@ -16,7 +16,7 @@ import {
 
 export { Call }
 
-const multicallAbi = abi as unknown as Abi
+const multicallAbi = parseAbi(abi)
 const memoizedAbis: Record<string, Abi> = {}
 
 function chainConfig(chainId: number, eth: EthereumProvider): MulticallConfig {
@@ -91,9 +91,10 @@ function getAbi(functionSignature: string) {
 async function aggregate<R, T>(calls: Call<R, T>[], config: MulticallConfig): Promise<CallResult<T>[]> {
   const aggData = buildCallData(calls)
   const response = await makeCall('aggregate', [aggData], config) as any
+  const returndata = response[1] as string[]
 
   return calls.map(({ call, returns, target }, i) => {
-    const resultData = getResultData(response.returndata[i], call, target)
+    const resultData = getResultData(returndata[i], call, target)
 
     return { success: true, returnValues: returns.map((handler, j) => handler(resultData[j])) }
   })
@@ -104,13 +105,13 @@ async function tryAggregate<R, T>(calls: Call<R, T>[], config: MulticallConfig) 
   const response = await makeCall('tryAggregate', [false, aggData], config) as any
 
   return calls.map(({ call, returns, target }, i) => {
-    const results = response.result[i]
+    const result = response[i]
 
-    if (!results.success) {
+    if (!result.success) {
       return { success: false, returnValues: [] }
     }
 
-    const resultData = getResultData(results.returndata, call, target)
+    const resultData = getResultData(result.returndata, call, target)
 
     return { success: true, returnValues: returns.map((handler, j) => handler(resultData[j])) }
   })

@@ -12,7 +12,6 @@ import {
 import nebulaApi from '../../nebula'
 import signers from '../../signers'
 import windows from '../../windows'
-import nav from '../../windows/nav'
 import store from '../../store'
 import { TransactionData } from '../../../resources/domain/transaction'
 import { Type as SignerType, getSignerType } from '../../../resources/domain/signer'
@@ -381,49 +380,6 @@ class FrameAccount {
       this.revealDetails(req)
 
       this.update()
-      store.setSignerView('default')
-      store.setPanelView('default')
-
-      // Display request
-      const { account } = req
-
-      // Check if this account is open
-      const accountOpen = store('selected.current') === account
-
-      // Does the current panel nav include a 'requestView'
-      const panelNav = store('windows.panel.nav') || []
-      const inExpandedRequestsView =
-        panelNav[0]?.view === 'expandedModule' && panelNav[0]?.data?.id === 'requests'
-      const inRequestView = panelNav.map((crumb: any) => crumb.view).includes('requestView')
-
-      if (accountOpen) {
-        if (inRequestView) {
-          nav.back('panel')
-          nav.back('panel')
-        } else if (inExpandedRequestsView) {
-          nav.back('panel')
-        }
-
-        nav.forward('panel', {
-          view: 'expandedModule',
-          data: {
-            id: 'requests',
-            account: account
-          }
-        })
-
-        if (!store('tray.open') || !inRequestView) {
-          const crumb = {
-            view: 'requestView',
-            data: {
-              step: 'confirm',
-              accountId: account,
-              requestId: req.handlerId
-            }
-          } as const
-          nav.forward('panel', crumb)
-        }
-      }
 
       setTimeout(() => {
         windows.showWindow()

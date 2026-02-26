@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import { screen, render } from '../../../componentSetup'
 import Confirm from '../../../../resources/Components/Confirm'
 

@@ -121,9 +121,7 @@ const registarController = ({
       }
 
       if (['register', 'registerWithConfig'].includes(functionName)) {
-        const { owner, name, duration } = Object.fromEntries(
-          Object.entries(args as any)
-        ) as unknown as ENS.Register
+        const [name, owner, duration] = args as readonly [string, string, bigint, ...unknown[]]
 
         return {
           id: 'ens:register',
@@ -132,9 +130,7 @@ const registarController = ({
       }
 
       if (functionName === 'renew') {
-        const { name, duration } = Object.fromEntries(
-          Object.entries(args as any)
-        ) as unknown as ENS.Renew
+        const [name, duration] = args as readonly [string, bigint]
 
         return {
           id: 'ens:renew',

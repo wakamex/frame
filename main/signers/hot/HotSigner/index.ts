@@ -9,10 +9,10 @@ import { v4 as uuid } from 'uuid'
 import Signer from '../../Signer'
 import store from '../../../store'
 
-// Mock user data dir during tests
+// Mock user data dir during tests, using worker ID to isolate parallel test workers
 const USER_DATA = app
   ? app.getPath('userData')
-  : path.resolve(path.dirname(require.main!.filename!), '../.userData')
+  : path.resolve(path.dirname(require.main!.filename!), `../.userData${process.env.JEST_WORKER_ID ? `-${process.env.JEST_WORKER_ID}` : ''}`)
 const SIGNERS_PATH = path.resolve(USER_DATA, 'signers')
 
 interface SignerData {
@@ -155,7 +155,6 @@ class HotSigner extends Signer {
     this._callWorker(payload, (err: Error | null, verified?: boolean) => {
       if (err || !verified) {
         if (!err) {
-          ;(store as any).notify('hotSignerMismatch')
           err = new Error('Unable to verify address')
         }
         this.lock(() => {

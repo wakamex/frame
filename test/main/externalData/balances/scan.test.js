@@ -77,7 +77,7 @@ describe('#getTokenBalances', () => {
         return {
           batchCall: async function (tokenCalls) {
             return tokenCalls.map((tc) => {
-              expect(tc.call[0]).toBe('function balanceOf(address address) returns (uint256 value)')
+              expect(tc.call[0]).toBe('function balanceOf(address account) returns (uint256 value)')
               expect(tc.call[1]).toBe(ownerAddress)
 
               const token = knownTokens.find(

@@ -39,25 +39,25 @@ it('encodes aggregated calls correctly', async () => {
     {
       target: '0x0b3F868E0BE5597D5DB7fEB59E1CADBb0fdDa50a',
       call: [
-        'function balanceOf(address address) returns (uint256 value)',
+        'function balanceOf(address account) returns (uint256 value)',
         '0x1ad91ee08f21be3de0ba2ba6918e714da6b45836'
       ],
-      returns: [(bn) => bn.toHexString()]
+      returns: [(bn) => '0x' + bn.toString(16)]
     },
     {
       target: '0xe94D89243a7Aeaf88857461ce555caEB344765Fc',
       call: [
-        'function balanceOf(address address) returns (uint256 value)',
+        'function balanceOf(address account) returns (uint256 value)',
         '0x1ad91ee08f21be3de0ba2ba6918e714da6b45836'
       ],
-      returns: [(bn) => bn.toHexString()]
+      returns: [(bn) => '0x' + bn.toString(16)]
     }
   ]
 
   const result = await caller.batchCall(calls)
 
   expect(result).toEqual([
-    { success: true, returnValues: ['0x017c7aa0a3'] },
+    { success: true, returnValues: ['0x17c7aa0a3'] },
     { success: true, returnValues: ['0xfeca4525'] }
   ])
 })
@@ -81,25 +81,25 @@ it('handles an error when using tryAggregate', async () => {
     {
       target: '0xBcca60bB61934080951369a648Fb03DF4F96263C',
       call: [
-        'function balanceOf(address address) returns (uint256 value)',
+        'function balanceOf(address account) returns (uint256 value)',
         '0x1aD91ee08f21bE3dE0BA2ba6918E714dA6B45836'
       ],
-      returns: [(bn) => bn.toHexString()]
+      returns: [(bn) => '0x' + bn.toString(16)]
     },
     {
       target: '0x089a502032166e07ae83eb434c16790ca2fa4661',
       call: [
-        'function balanceOf(address address) returns (uint256 value)',
+        'function balanceOf(address account) returns (uint256 value)',
         '0x1aD91ee08f21bE3dE0BA2ba6918E714dA6B45836'
       ],
-      returns: [(bn) => bn.toHexString()]
+      returns: [(bn) => '0x' + bn.toString(16)]
     }
   ]
 
   const result = await caller.batchCall(calls)
 
   expect(result).toEqual([
-    { success: true, returnValues: ['0x017c7aa4bb'] },
+    { success: true, returnValues: ['0x17c7aa4bb'] },
     { success: false, returnValues: [] }
   ])
 })
@@ -118,18 +118,18 @@ it('returns one batch if another errors', async () => {
     {
       target: '0xBcca60bB61934080951369a648Fb03DF4F96263C',
       call: [
-        'function balanceOf(address address) returns (uint256 value)',
+        'function balanceOf(address account) returns (uint256 value)',
         '0x1aD91ee08f21bE3dE0BA2ba6918E714dA6B45836'
       ],
-      returns: [(bn) => bn.toHexString()]
+      returns: [(bn) => '0x' + bn.toString(16)]
     },
     {
       target: '0xe94D89243a7Aeaf88857461ce555caEB344765Fc',
       call: [
-        'function balanceOf(address address) returns (uint256 value)',
+        'function balanceOf(address account) returns (uint256 value)',
         '0x1aD91ee08f21bE3dE0BA2ba6918E714dA6B45836'
       ],
-      returns: [(bn) => bn.toHexString()]
+      returns: [(bn) => '0x' + bn.toString(16)]
     }
   ]
 
