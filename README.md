@@ -40,6 +40,16 @@ Frame is a web3 platform that creates a secure system-wide interface to your cha
 - **Cross Platform**
   - MacOS, Windows and Linux!
 
+### Changes from upstream Frame
+
+This fork includes the following improvements over the original [floating/frame](https://github.com/floating/frame):
+
+- **Removed Pylon dependency** — The original Frame relied on Pylon (`evm.pylon.link`, `data.pylon.link`), a proprietary service run by Frame Labs for RPC proxying, token price data, and NFT inventory. Since the original project is no longer maintained, these servers could go offline without warning. This fork eliminates Pylon entirely:
+  - **RPC connections** now use [PublicNode](https://publicnode.com) HTTPS endpoints — fast (~70ms), no-tracking public RPCs for all supported chains (Ethereum, Optimism, Polygon, Base, Arbitrum, and testnets).
+  - **Token price rates** now come from [DefiLlama](https://defillama.com)'s free price API — no API key required, generous rate limits, and contract-address-based lookups that align naturally with Frame's data model.
+  - **NFT inventory** subscription removed — it only served ENS token ID lookups in transaction descriptions and was never displayed in any UI. ENS registration, renewal, and transfer transactions are still fully decoded.
+  - The `@framelabs/pylon-client` package has been removed from dependencies.
+
 ### Talks
 
 - [Frame at Aracon](https://www.youtube.com/watch?v=wlZWLiy2GD0)
