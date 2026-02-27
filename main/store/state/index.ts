@@ -86,7 +86,6 @@ type M = Main & {
   addresses: any
   tokens: any
   rates: any
-  inventory: any
   signers: any
   savedSigners: any
   ipfs: any
@@ -96,7 +95,7 @@ type M = Main & {
 }
 
 const mainState: M = {
-  _version: main('_version', 41),
+  _version: main('_version', 42),
   instanceId: main('instanceId', generateUuid()),
   colorway: main('colorway', 'dark'),
   colorwayPrimary: {
@@ -118,7 +117,6 @@ const mainState: M = {
     gasFeeWarning: main('mute.gasFeeWarning', false),
     betaDisclosure: main('mute.betaDisclosure', false),
     onboardingWindow: main('mute.onboardingWindow', false),
-    migrateToPylon: main('mute.migrateToPylon', true),
     signerCompatibilityWarning: main('mute.signerCompatibilityWarning', false)
   },
   shortcuts: {
@@ -163,7 +161,6 @@ const mainState: M = {
   balances: {},
   tokens: main('tokens', { custom: [], known: {} }),
   rates: {}, // main('rates', {}),
-  inventory: {}, // main('rates', {}),
   signers: {},
   savedSigners: {},
   updater: {
@@ -188,7 +185,7 @@ const mainState: M = {
         connection: {
           primary: {
             on: true,
-            current: 'pylon',
+            current: 'public',
             status: 'loading',
             connected: false,
             type: '',
@@ -223,7 +220,7 @@ const mainState: M = {
         connection: {
           primary: {
             on: true,
-            current: 'pylon',
+            current: 'public',
             status: 'loading',
             connected: false,
             type: '',
@@ -293,7 +290,7 @@ const mainState: M = {
         connection: {
           primary: {
             on: true,
-            current: 'pylon',
+            current: 'public',
             status: 'loading',
             connected: false,
             type: '',
@@ -328,7 +325,7 @@ const mainState: M = {
         connection: {
           primary: {
             on: true,
-            current: 'pylon',
+            current: 'public',
             status: 'loading',
             connected: false,
             type: '',
@@ -363,7 +360,7 @@ const mainState: M = {
         connection: {
           primary: {
             on: true,
-            current: 'pylon',
+            current: 'public',
             status: 'loading',
             connected: false,
             type: '',
@@ -398,7 +395,7 @@ const mainState: M = {
         connection: {
           primary: {
             on: true,
-            current: 'pylon',
+            current: 'public',
             status: 'loading',
             connected: false,
             type: '',
@@ -433,7 +430,7 @@ const mainState: M = {
         connection: {
           primary: {
             on: true,
-            current: 'pylon',
+            current: 'public',
             status: 'loading',
             connected: false,
             type: '',
@@ -468,7 +465,7 @@ const mainState: M = {
         connection: {
           primary: {
             on: true,
-            current: 'pylon',
+            current: 'public',
             status: 'loading',
             connected: false,
             type: '',
@@ -738,7 +735,6 @@ const initial = {
         // 'gas',
         'chains',
         'balances',
-        'inventory',
         'permissions',
         // 'verify',
         'signer',
@@ -752,9 +748,6 @@ const initial = {
           height: 0
         },
         balances: {
-          height: 0
-        },
-        inventory: {
           height: 0
         },
         permissions: {

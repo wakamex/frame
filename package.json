@@ -55,7 +55,6 @@
     "@ethereumjs/common": "3.1.1",
     "@ethereumjs/tx": "4.1.1",
     "@ethereumjs/util": "8.0.3",
-    "@framelabs/pylon-client": "0.0.10",
     "@githubprimer/octicons-react": "8.5.0",
     "@ledgerhq/hw-app-eth": "6.42.1",
     "@ledgerhq/hw-transport-node-hid-noevents": "6.31.0",

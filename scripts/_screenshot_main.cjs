@@ -102,25 +102,25 @@ const mockState = {
       ethereum: {
         1: { id: 1, type: 'ethereum', name: 'Ethereum', layer: 'mainnet', isTestnet: false, on: true, explorer: 'https://etherscan.io', symbol: 'ETH',
           connection: {
-            primary: { on: true, current: 'pylon', status: 'connected', connected: true, custom: '', type: '', network: '' },
+            primary: { on: true, current: 'public', status: 'connected', connected: true, custom: '', type: '', network: '' },
             secondary: { on: false, current: 'custom', status: 'off', connected: false, custom: '', type: '', network: '' }
           }
         },
         10: { id: 10, type: 'ethereum', name: 'Optimism', layer: 'rollup', isTestnet: false, on: true, explorer: 'https://optimistic.etherscan.io', symbol: 'ETH',
           connection: {
-            primary: { on: true, current: 'pylon', status: 'connected', connected: true, custom: '', type: '', network: '' },
+            primary: { on: true, current: 'public', status: 'connected', connected: true, custom: '', type: '', network: '' },
             secondary: { on: false, current: 'custom', status: 'off', connected: false, custom: '', type: '', network: '' }
           }
         },
         137: { id: 137, type: 'ethereum', name: 'Polygon', layer: 'sidechain', isTestnet: false, on: true, explorer: 'https://polygonscan.com', symbol: 'MATIC',
           connection: {
-            primary: { on: true, current: 'pylon', status: 'connected', connected: true, custom: '', type: '', network: '' },
+            primary: { on: true, current: 'public', status: 'connected', connected: true, custom: '', type: '', network: '' },
             secondary: { on: false, current: 'custom', status: 'off', connected: false, custom: '', type: '', network: '' }
           }
         },
         42161: { id: 42161, type: 'ethereum', name: 'Arbitrum', layer: 'rollup', isTestnet: false, on: false, explorer: 'https://arbiscan.io', symbol: 'ETH',
           connection: {
-            primary: { on: true, current: 'pylon', status: 'off', connected: false, custom: '', type: '', network: '' },
+            primary: { on: true, current: 'public', status: 'off', connected: false, custom: '', type: '', network: '' },
             secondary: { on: false, current: 'custom', status: 'off', connected: false, custom: '', type: '', network: '' }
           }
         }

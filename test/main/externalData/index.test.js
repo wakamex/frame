@@ -6,11 +6,7 @@ jest.mock('valtio', () => ({
   subscribe: jest.fn((_state, _cb) => jest.fn()),
   snapshot: jest.fn((s) => JSON.parse(JSON.stringify(s)))
 }))
-jest.mock('@framelabs/pylon-client', () => jest.fn())
 jest.mock('../../../main/store')
-jest.mock('../../../main/externalData/inventory', () =>
-  jest.fn(() => ({ start: jest.fn(), stop: jest.fn() }))
-)
 jest.mock('../../../main/externalData/assets', () => jest.fn(() => ({ start: jest.fn(), stop: jest.fn() })))
 jest.mock('../../../main/externalData/balances', () => jest.fn(() => mockBalances))
 

@@ -1,10 +1,8 @@
 import log from 'electron-log'
-import Pylon from '@framelabs/pylon-client'
 
 import { subscribe } from 'valtio'
 
 import state from '../store'
-import Inventory from './inventory'
 import Rates from './assets'
 import Balances from './balances'
 import { arraysMatch, debounce } from '../../resources/utils'
@@ -28,17 +26,13 @@ const storeApi = {
 }
 
 export default function () {
-  const pylon = new Pylon('wss://data.pylon.link')
-
-  const inventory = Inventory(pylon, state)
-  const rates = Rates(pylon, state)
+  const rates = Rates(state)
   const balances = Balances(state)
 
   let connectedChains: number[] = [],
     activeAccount: Address = ''
   let pauseScanningDelay: NodeJS.Timeout | undefined
 
-  inventory.start()
   rates.start()
   balances.start()
 
@@ -56,7 +50,6 @@ export default function () {
     log.verbose('updating external data due to address update(s)', { activeAccount })
 
     balances.setAddress(activeAccount)
-    inventory.setAddresses([activeAccount])
     rates.updateSubscription(connectedChains, activeAccount)
   }, 800)
 
@@ -126,7 +119,6 @@ export default function () {
       unsubCustomTokens()
       unsubTray()
 
-      inventory.stop()
       rates.stop()
       balances.stop()
 

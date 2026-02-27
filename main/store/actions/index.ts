@@ -494,10 +494,6 @@ export function setRates(rates: any) {
   Object.assign(state.main.rates, rates)
 }
 
-export function setInventory(address: string, inventory: any) {
-  ;(state.main.inventory as any)[address] = inventory
-}
-
 // ---- Origins & Permissions ----
 
 export function initOrigin(originId: string, origin: any) {
@@ -660,27 +656,6 @@ export function muteBetaDisclosure() {
   navDash({ view: 'accounts', data: {} })
 }
 
-export function mutePylonMigrationNotice() {
-  state.main.mute.migrateToPylon = true
-}
-
-export function migrateToPylonConnections() {
-  const pylonChains = ['1', '5', '10', '137', '42161', '11155111']
-
-  const switchToPylon = (connection: any = {}) => {
-    if (connection.current === 'custom' && connection.custom === '') {
-      connection.current = 'pylon'
-    }
-  }
-
-  const chains = state.main.networks.ethereum as any
-  Object.entries(chains).forEach(([id, chain]: [string, any]) => {
-    if (pylonChains.includes(id)) {
-      switchToPylon(chain.connection.primary)
-      switchToPylon(chain.connection.secondary)
-    }
-  })
-}
 
 export function completeOnboarding() {
   state.main.mute.onboardingWindow = true

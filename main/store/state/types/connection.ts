@@ -10,7 +10,7 @@ const statusValues = [
   'chain mismatch'
 ] as const
 
-const presetValues = ['local', 'custom', 'pylon'] as const
+const presetValues = ['local', 'custom', 'public'] as const
 
 export const ConnectionSchema = z.object({
   on: z.boolean(),

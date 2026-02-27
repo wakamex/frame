@@ -15,7 +15,7 @@
 function createDefaultState(): any {
   return {
     main: {
-      _version: 41,
+      _version: 42,
       instanceId: 'test-instance',
       colorway: 'dark',
       launch: false,
@@ -31,7 +31,6 @@ function createDefaultState(): any {
         gasFeeWarning: false,
         betaDisclosure: false,
         onboardingWindow: false,
-        migrateToPylon: true,
         signerCompatibilityWarning: false
       },
       shortcuts: {
@@ -46,7 +45,6 @@ function createDefaultState(): any {
       balances: {},
       tokens: { custom: [], known: {} },
       rates: {},
-      inventory: {},
       signers: {},
       savedSigners: {},
       lattice: {},

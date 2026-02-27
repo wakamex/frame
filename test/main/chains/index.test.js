@@ -86,7 +86,7 @@ const state = {
           connection: {
             primary: {
               on: false,
-              current: 'pylon',
+              current: 'public',
               status: 'loading',
               connected: false,
               type: '',
@@ -112,7 +112,7 @@ const state = {
           connection: {
             primary: {
               on: false,
-              current: 'pylon',
+              current: 'public',
               status: 'loading',
               connected: false,
               type: '',
@@ -162,12 +162,12 @@ jest.mock('../../../main/accounts', () => ({ updatePendingFees: jest.fn() }))
 jest.mock('../../../main/store/persist')
 
 const mockConnections = {
-  'wss://evm.pylon.link/sepolia': {
+  'https://ethereum-sepolia-rpc.publicnode.com': {
     id: '11155111',
     name: 'sepolia',
     connection: new MockConnection(5)
   },
-  'wss://evm.pylon.link/polygon': {
+  'https://polygon-bor-rpc.publicnode.com': {
     id: '137',
     name: 'polygon',
     connection: new MockConnection(137)

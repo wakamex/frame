@@ -1,7 +1,6 @@
 import { decodeFunctionData, type Abi, type Hex } from 'viem'
 
 import { registrar as registrarAbi, registrarController as registrarControllerAbi } from './abi'
-import state from '../../../store'
 
 import type {
   ApproveAction as EnsApprovalAction,
@@ -50,15 +49,6 @@ function decode(abi: Abi, calldata: string) {
   return decodeFunctionData({ abi, data: calldata as Hex })
 }
 
-function getNameForTokenId(account: string, tokenId: string) {
-  const ensInventory: InventoryCollection = (state.main.inventory as any)?.[account]?.ens || {}
-  const items = ensInventory.items || {}
-
-  const record = Object.values(items).find((ens) => ens.tokenId === tokenId) || { name: '' }
-
-  return record.name
-}
-
 function ethName(name: string) {
   // assumes all names will be registered in the .eth domain, in the future this may not be the case
   return name.includes('.eth') ? name : `${name}.eth`
@@ -75,12 +65,11 @@ const registrar = ({ name = 'ENS Registrar', address, chainId }: DeploymentLocat
       if (['transferFrom', 'safeTransferFrom'].includes(functionName)) {
         const [from, to, tokenId] = args as unknown as [string, string, bigint]
         const token = tokenId.toString()
-        const name = (account && getNameForTokenId(account, token)) || ''
 
         return {
           id: 'ens:transfer',
           data: {
-            name: name,
+            name: '',
             from,
             to,
             tokenId: token
@@ -91,11 +80,10 @@ const registrar = ({ name = 'ENS Registrar', address, chainId }: DeploymentLocat
       if (functionName === 'approve') {
         const [to, tokenId] = args as unknown as [string, bigint]
         const token = tokenId.toString()
-        const name = (account && getNameForTokenId(account, token)) || ''
 
         return {
           id: 'ens:approve',
-          data: { name, operator: to, tokenId: token }
+          data: { name: '', operator: to, tokenId: token }
         } as EnsApprovalAction
       }
     }

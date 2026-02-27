@@ -1,121 +1,147 @@
 import log from 'electron-log'
 
-import Pylon, { AssetType } from '@framelabs/pylon-client'
-
-import type { AssetId } from '@framelabs/pylon-client/dist/assetId'
 import type { UsdRate } from '../../provider/assets'
-import type { NativeCurrency, Rate, Token } from '../../store/state'
+import type { Rate, Token } from '../../store/state'
+import { NATIVE_CURRENCY } from '../../../resources/constants'
 
 import { setNativeCurrencyData, setRates } from '../../store/actions'
 
-interface RateUpdate {
-  id: AssetId
-  data: {
-    usd: number
-    usd_24h_change: number
-  }
+const CHAIN_ID_TO_LLAMA: Record<number, string> = {
+  1: 'ethereum',
+  10: 'optimism',
+  137: 'polygon',
+  8453: 'base',
+  42161: 'arbitrum',
+  84532: 'base',
+  11155111: 'ethereum',
+  11155420: 'optimism'
 }
 
-export default function rates(pylon: Pylon, state: any) {
+const POLL_INTERVAL = 30_000 // 30 seconds
+
+function buildCoinId(chainId: number, address?: string): string | undefined {
+  const chain = CHAIN_ID_TO_LLAMA[chainId]
+  if (!chain) return undefined
+  return `${chain}:${address || NATIVE_CURRENCY}`
+}
+
+export default function rates(state: any) {
   const storeApi = {
     getKnownTokens: (address?: Address) =>
       ((address && (state.main.tokens.known as any)?.[address]) || []) as Token[],
     getCustomTokens: () => (state.main.tokens.custom || []) as Token[],
-    setNativeCurrencyData: (chainId: number, currencyData: NativeCurrency) =>
-      setNativeCurrencyData('ethereum', chainId, currencyData),
     setNativeCurrencyRate: (chainId: number, rate: Rate) =>
       setNativeCurrencyData('ethereum', chainId, { usd: rate } as any),
     setTokenRates: (rates: Record<Address, UsdRate>) => setRates(rates)
   }
 
-  function handleRatesUpdates(updates: RateUpdate[]) {
-    if (updates.length === 0) return
+  let pollTimer: ReturnType<typeof setInterval> | undefined
+  let currentChains: number[] = []
+  let currentAddress: Address | undefined
 
-    const nativeCurrencyUpdates = updates.filter((u) => u.id.type === AssetType.NativeCurrency)
+  async function fetchRates() {
+    const knownTokens = storeApi.getKnownTokens(currentAddress).filter((t) => currentChains.includes(t.chainId))
+    const customTokens = storeApi
+      .getCustomTokens()
+      .filter((t) => !knownTokens.some((kt) => kt.address === t.address && kt.chainId === t.chainId))
 
-    if (nativeCurrencyUpdates.length > 0) {
-      log.debug(`got currency rate updates for chains: ${nativeCurrencyUpdates.map((u) => u.id.chainId)}`)
+    const allTokens = [...knownTokens, ...customTokens]
 
-      nativeCurrencyUpdates.forEach((u) => {
-        storeApi.setNativeCurrencyRate(u.id.chainId, {
-          price: u.data.usd,
-          change24hr: u.data.usd_24h_change
-        })
-      })
-    }
+    // Build coin IDs for native currencies and tokens
+    const nativeCoinIds = currentChains
+      .map((chainId) => ({ chainId, coinId: buildCoinId(chainId) }))
+      .filter((e): e is { chainId: number; coinId: string } => !!e.coinId)
 
-    const tokenUpdates = updates.filter((u) => u.id.type === AssetType.Token)
+    const tokenCoinIds = allTokens
+      .map((t) => ({ address: t.address, chainId: t.chainId, coinId: buildCoinId(t.chainId, t.address) }))
+      .filter((e): e is { address: string; chainId: number; coinId: string } => !!e.coinId)
 
-    if (tokenUpdates.length > 0) {
-      log.debug(`got token rate updates for addresses: ${tokenUpdates.map((u) => u.id.address)}`)
+    const allCoinIds = [...nativeCoinIds.map((n) => n.coinId), ...tokenCoinIds.map((t) => t.coinId)]
 
-      const tokenRates = tokenUpdates.reduce((allRates, update) => {
-        // address is always defined for tokens
-        const address = update.id.address as string
+    if (allCoinIds.length === 0) return
 
-        allRates[address] = {
-          usd: {
-            price: update.data.usd,
-            change24hr: update.data.usd_24h_change
+    const coinIdsParam = allCoinIds.join(',')
+
+    try {
+      const [pricesRes, changeRes] = await Promise.all([
+        fetch(`https://coins.llama.fi/prices/current/${coinIdsParam}`),
+        fetch(`https://coins.llama.fi/percentage/${coinIdsParam}`)
+      ])
+
+      if (!pricesRes.ok || !changeRes.ok) {
+        log.warn('DefiLlama rate fetch failed', { prices: pricesRes.status, change: changeRes.status })
+        return
+      }
+
+      const pricesData = (await pricesRes.json()) as { coins: Record<string, { price: number }> }
+      const changeData = (await changeRes.json()) as { coins: Record<string, number> }
+
+      // Update native currency rates
+      for (const { chainId, coinId } of nativeCoinIds) {
+        const price = pricesData.coins[coinId]?.price
+        if (price !== undefined) {
+          storeApi.setNativeCurrencyRate(chainId, {
+            price,
+            change24hr: changeData.coins[coinId] ?? 0
+          })
+        }
+      }
+
+      // Update token rates
+      if (tokenCoinIds.length > 0) {
+        const tokenRates: Record<string, UsdRate> = {}
+
+        for (const { address, coinId } of tokenCoinIds) {
+          const price = pricesData.coins[coinId]?.price
+          if (price !== undefined) {
+            tokenRates[address] = {
+              usd: {
+                price,
+                change24hr: changeData.coins[coinId] ?? 0
+              }
+            }
           }
         }
 
-        return allRates
-      }, {} as Record<string, UsdRate>)
+        if (Object.keys(tokenRates).length > 0) {
+          storeApi.setTokenRates(tokenRates)
+        }
+      }
 
-      storeApi.setTokenRates(tokenRates)
+      log.debug(
+        `updated rates for ${nativeCoinIds.length} native currencies and ${tokenCoinIds.length} tokens`
+      )
+    } catch (err) {
+      log.warn('DefiLlama rate fetch error', err)
     }
   }
 
   function updateSubscription(chains: number[], address?: Address) {
-    const subscribedCurrencies = chains.map((chainId) => ({ type: AssetType.NativeCurrency, chainId }))
-    const knownTokens = storeApi.getKnownTokens(address).filter((token) => chains.includes(token.chainId))
-    const customTokens = storeApi
-      .getCustomTokens()
-      .filter(
-        (token) => !knownTokens.some((kt) => kt.address === token.address && kt.chainId === token.chainId)
-      )
+    currentChains = chains
+    currentAddress = address
 
-    const subscribedTokens = [...knownTokens, ...customTokens].map((token) => ({
-      type: AssetType.Token,
-      chainId: token.chainId,
-      address: token.address
-    }))
-
-    setAssets([...subscribedCurrencies, ...subscribedTokens])
+    // Fetch immediately on subscription change
+    fetchRates()
   }
 
   function start() {
-    log.verbose('starting asset updates')
+    log.verbose('starting DefiLlama rate polling')
 
-    pylon.on('rates', handleRatesUpdates)
+    pollTimer = setInterval(fetchRates, POLL_INTERVAL)
   }
 
   function stop() {
-    log.verbose('stopping asset updates')
+    log.verbose('stopping DefiLlama rate polling')
 
-    pylon.off('rates', handleRatesUpdates)
-
-    pylon.rates([])
-  }
-
-  function setAssets(assetIds: AssetId[]) {
-    log.verbose(
-      'subscribing to rates updates for native currencies on chains:',
-      assetIds.filter((a) => a.type === AssetType.NativeCurrency).map((a) => a.chainId)
-    )
-    log.verbose(
-      'subscribing to rates updates for tokens:',
-      assetIds.filter((a) => a.type === AssetType.Token).map((a) => a.address)
-    )
-
-    pylon.rates(assetIds)
+    if (pollTimer) {
+      clearInterval(pollTimer)
+      pollTimer = undefined
+    }
   }
 
   return {
     start,
     stop,
-    setAssets,
     updateSubscription
   }
 }

@@ -1,17 +1,10 @@
 import { encodeFunctionData, parseAbi, stringToHex } from 'viem'
 
-import store from '../../../../../main/store'
 import ensContracts from '../../../../../main/contracts/deployments/ens'
-
-jest.mock('../../../../../main/store')
 
 const from = '0x6fBdDB7200c95f8f648C7bF6E99606CB8AdfF6F9'
 const to = '0x388C818CA8B9251b393131C08a736A67ccB19297'
 const tokenId = '79233663829379634837589865448569342784712482819484549289560981379859480642508'
-
-beforeEach(() => {
-  store.set('main.inventory', {})
-})
 
 describe('registrar', () => {
   const registrar = ensContracts.find((c) => c.name.toLowerCase().includes('permanent registrar'))
@@ -35,23 +28,6 @@ describe('registrar', () => {
           data: { name: '', from, to, tokenId }
         })
       })
-
-      it(`resolves the ENS name for a ${fn} call from the user's asset collection`, () => {
-        const asset = {
-          name: 'frame.eth',
-          tokenId
-        }
-
-        store.set('main.inventory', from, 'ens.items', { someId: asset })
-
-        const calldata = encodeFunctionData({ abi: registrarAbi, functionName: fn, args: [from, to, BigInt(tokenId)] })
-        const action = registrar.decode(calldata, { account: from })
-
-        expect(action).toStrictEqual({
-          id: 'ens:transfer',
-          data: { name: 'frame.eth', from, to, tokenId }
-        })
-      })
     })
   })
 
@@ -63,23 +39,6 @@ describe('registrar', () => {
       expect(action).toStrictEqual({
         id: 'ens:approve',
         data: { name: '', operator: to, tokenId }
-      })
-    })
-
-    it(`resolves the ENS name for an approve call from the user's asset collection`, () => {
-      const asset = {
-        name: 'frame.eth',
-        tokenId
-      }
-
-      store.set('main.inventory', from, 'ens.items', { someId: asset })
-
-      const calldata = encodeFunctionData({ abi: registrarAbi, functionName: 'approve', args: [to, BigInt(tokenId)] })
-      const action = registrar.decode(calldata, { account: from })
-
-      expect(action).toStrictEqual({
-        id: 'ens:approve',
-        data: { name: 'frame.eth', operator: to, tokenId }
       })
     })
   })
