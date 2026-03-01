@@ -536,6 +536,12 @@
   .inset-y-0 {
     inset-block: calc(var(--spacing) * 0);
   }
+  .top-full {
+    top: 100%;
+  }
+  .right-0 {
+    right: calc(var(--spacing) * 0);
+  }
   .left-0 {
     left: calc(var(--spacing) * 0);
   }
@@ -652,6 +658,9 @@
   }
   .w-16 {
     width: calc(var(--spacing) * 16);
+  }
+  .w-44 {
+    width: calc(var(--spacing) * 44);
   }
   .w-48 {
     width: calc(var(--spacing) * 48);
@@ -876,6 +885,9 @@
   .bg-green-400 {
     background-color: var(--color-green-400);
   }
+  .bg-green-600 {
+    background-color: var(--color-green-600);
+  }
   .bg-green-600\/20 {
     background-color: color-mix(in oklab, var(--color-green-600) 20%, transparent);
   }
@@ -1026,6 +1038,9 @@
   .text-red-400\/70 {
     color: color-mix(in oklab, var(--color-red-400) 70%, transparent);
   }
+  .text-white {
+    color: var(--color-white);
+  }
   .text-yellow-400 {
     color: var(--color-yellow-400);
   }
@@ -1106,6 +1121,13 @@
       }
     }
   }
+  .hover\:bg-green-500 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-green-500);
+      }
+    }
+  }
   .hover\:bg-green-600\/30 {
     &:hover {
       @media (hover: hover) {
@@ -1124,6 +1146,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-white);
+      }
+    }
+  }
+  .hover\:text-gray-100 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-gray-100);
       }
     }
   }
