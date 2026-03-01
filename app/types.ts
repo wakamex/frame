@@ -94,6 +94,7 @@ export interface ChainMetadata {
       levels: GasLevels
     }
   }
+  rpcHealth?: RpcHealth
 }
 
 // --- Tokens ---
@@ -217,6 +218,15 @@ export interface PermitData {
   verifyingContract: { address: string; ens: string; type: string }
   chainId: number
   nonce: string | number
+}
+
+// --- RPC Health ---
+
+export interface RpcHealth {
+  latencyMs: number
+  lastChecked: number
+  status: 'healthy' | 'degraded' | 'down'
+  consecutiveErrors: number
 }
 
 // --- Settings ---

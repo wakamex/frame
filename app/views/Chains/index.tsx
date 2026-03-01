@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import type { Chain, ChainMetadata } from '../../types'
+import type { Chain, ChainMetadata, RpcHealth } from '../../types'
 import { useNetworks, useNetworksMeta } from '../../store'
 import { actions, sendAction } from '../../ipc'
 import { useCompact } from '../../hooks/useCompact'
@@ -138,6 +138,14 @@ function ChainDetail({ chain, meta, chainId }: { chain: Chain; meta: ChainMetada
         </div>
       </section>
 
+      {/* RPC Health */}
+      {meta?.rpcHealth && (
+        <section>
+          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">RPC Health</h3>
+          <RpcHealthBadge health={meta.rpcHealth} />
+        </section>
+      )}
+
       {/* Gas */}
       {meta?.gas && (
         <section>
@@ -206,6 +214,28 @@ function ConnectionRow({ label, connection }: { label: string; connection: Chain
       <span className="text-xs text-gray-500 capitalize">
         {connection.current}{connection.custom ? ` (${connection.custom})` : ''}
       </span>
+    </div>
+  )
+}
+
+const healthStatusMap: Record<RpcHealth['status'], string> = {
+  healthy: 'connected',
+  degraded: 'loading',
+  down: 'error'
+}
+
+const healthLabels: Record<RpcHealth['status'], string> = {
+  healthy: 'Healthy',
+  degraded: 'Degraded',
+  down: 'Down'
+}
+
+function RpcHealthBadge({ health }: { health: RpcHealth }) {
+  return (
+    <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg px-3 py-2">
+      <StatusDot status={healthStatusMap[health.status]} />
+      <span className="text-sm text-gray-300">{healthLabels[health.status]}</span>
+      <span className="text-xs text-gray-500 ml-auto">{health.latencyMs}ms</span>
     </div>
   )
 }
