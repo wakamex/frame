@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { Chain } from '../../types'
 import { useSnapshot } from 'valtio'
-import { state, useAccounts, useBalances, useNetworks } from '../../store'
+import { state, useAccounts, useBalances, useNetworks, useAddressBook } from '../../store'
 import { rpc } from '../../ipc'
 
 export default function SendView() {
@@ -35,6 +35,7 @@ function SendForm({
   networks: Record<string, Chain>
 }) {
   const balances = useBalances(accountId)
+  const addressBook = useAddressBook()
 
   const [recipient, setRecipient] = useState('')
   const [amount, setAmount] = useState('')
@@ -44,6 +45,17 @@ function SendForm({
   const [sending, setSending] = useState(false)
   const [resolvedAddress, setResolvedAddress] = useState('')
   const [resolving, setResolving] = useState(false)
+  const [showSuggestions, setShowSuggestions] = useState(false)
+
+  // Filter contacts by recipient input
+  const suggestions = useMemo(() => {
+    if (!recipient) return []
+    const q = recipient.toLowerCase()
+    return Object.entries(addressBook).filter(
+      ([, c]) =>
+        c.name.toLowerCase().includes(q) || c.address.toLowerCase().startsWith(q)
+    )
+  }, [addressBook, recipient])
 
   // Build token list from balances for the selected chain
   const tokens = useMemo(() => {
@@ -191,13 +203,15 @@ function SendForm({
         </div>
 
         {/* Recipient */}
-        <div>
+        <div className="relative">
           <label className="text-xs text-gray-500 mb-1 block">Recipient</label>
           <div className="flex gap-2">
             <input
               value={recipient}
-              onChange={(e) => { setRecipient(e.target.value); setResolvedAddress('') }}
-              placeholder="0x... or ENS name"
+              onChange={(e) => { setRecipient(e.target.value); setResolvedAddress(''); setShowSuggestions(true) }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => { setTimeout(() => setShowSuggestions(false), 150) }}
+              placeholder="0x..., ENS name, or contact name"
               className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 outline-none focus:border-gray-600 font-mono"
             />
             {isEns && !resolvedAddress && (
@@ -211,6 +225,29 @@ function SendForm({
               </button>
             )}
           </div>
+          {/* Contact autocomplete dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div
+              className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-lg"
+            >
+              {suggestions.slice(0, 5).map(([id, contact]) => (
+                <button
+                  key={id}
+                  type="button"
+                  className="w-full text-left px-3 py-2 hover:bg-gray-700 transition-colors"
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    setRecipient(contact.address)
+                    setResolvedAddress('')
+                    setShowSuggestions(false)
+                  }}
+                >
+                  <div className="text-sm text-gray-100">{contact.name}</div>
+                  <div className="text-xs text-gray-400 font-mono truncate">{contact.address}</div>
+                </button>
+              ))}
+            </div>
+          )}
           {resolvedAddress && (
             <div className="text-xs text-gray-400 font-mono mt-1 truncate">
               {resolvedAddress}

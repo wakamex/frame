@@ -219,6 +219,15 @@ export interface PermitData {
   nonce: string | number
 }
 
+// --- Address Book ---
+
+export interface AddressBookEntry {
+  address: string
+  name: string
+  notes: string
+  createdAt: number
+}
+
 // --- Settings ---
 
 export interface Shortcut {
