@@ -18,6 +18,6 @@ jobs:
       - run: |
           sudo apt update -y
           sudo apt install -y libudev-dev libusb-1.0-0-dev
-      - run: npm run setup:ci
+      - run: npm ci --ignore-scripts
       - run: npm run compile
       - run: npm run test:unit
