@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import type { Chain, ChainMetadata } from '../../types'
 import { useNetworks, useNetworksMeta } from '../../store'
 import { actions, sendAction } from '../../ipc'
+import { useCompact } from '../../hooks/useCompact'
 import { isNetworkConnected } from '../../../resources/utils/chains'
 import { weiToGwei, hexToInt, roundGwei } from '../../../resources/utils'
 import StatusDot from '../../components/StatusDot'
@@ -10,6 +11,7 @@ export default function ChainsView() {
   const networks = useNetworks()
   const networksMeta = useNetworksMeta()
   const [selectedChain, setSelectedChain] = useState<string | null>(null)
+  const compact = useCompact()
 
   const chains = useMemo(() => {
     return Object.entries(networks).sort(([, a], [, b]) => {
@@ -22,11 +24,10 @@ export default function ChainsView() {
   const selectedNetwork = selectedChain ? networks[selectedChain] : null
   const selectedMeta = selectedChain ? networksMeta[selectedChain] : null
 
-  return (
-    <div className="flex gap-6 h-full">
-      {/* Chain list */}
-      <div className="w-72 shrink-0 overflow-y-auto">
-        <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">Networks</h2>
+  // Compact: show chain list or detail, not both
+  const chainListContent = (
+    <>
+      <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">Networks</h2>
         <div className="flex flex-col gap-1">
           {chains.map(([id, chain]) => {
             const meta = networksMeta[id]
@@ -82,9 +83,29 @@ export default function ChainsView() {
             )
           })}
         </div>
-      </div>
+    </>
+  )
 
-      {/* Chain detail */}
+  if (compact) {
+    if (selectedChain && selectedNetwork) {
+      return (
+        <div className="h-full overflow-y-auto">
+          <button
+            onClick={() => setSelectedChain(null)}
+            className="text-xs text-gray-500 hover:text-gray-300 mb-3"
+          >
+            &larr; All Networks
+          </button>
+          <ChainDetail chain={selectedNetwork} meta={selectedMeta} chainId={selectedChain} />
+        </div>
+      )
+    }
+    return <div className="h-full overflow-y-auto">{chainListContent}</div>
+  }
+
+  return (
+    <div className="flex gap-6 h-full">
+      <div className="w-72 shrink-0 overflow-y-auto">{chainListContent}</div>
       <div className="flex-1 overflow-y-auto">
         {selectedNetwork ? (
           <ChainDetail chain={selectedNetwork} meta={selectedMeta} chainId={selectedChain!} />
