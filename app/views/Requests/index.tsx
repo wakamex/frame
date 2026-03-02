@@ -37,7 +37,7 @@ export default function RequestOverlay({ requests }: RequestOverlayProps) {
               &larr; Prev
             </button>
             <span className="text-xs text-gray-500">
-              Request {currentIndex + 1} of {requests.length}
+              {requestTypeLabel(current.type)} · {currentIndex + 1} of {requests.length}
             </span>
             <button
               onClick={() => setCurrentIndex(Math.min(requests.length - 1, currentIndex + 1))}
@@ -55,6 +55,20 @@ export default function RequestOverlay({ requests }: RequestOverlayProps) {
       </div>
     </div>
   )
+}
+
+function requestTypeLabel(type: string): string {
+  switch (type) {
+    case 'transaction': return 'Transaction'
+    case 'sign': return 'Signature'
+    case 'signTypedData': return 'Typed Data'
+    case 'signErc20Permit': return 'Token Permit'
+    case 'access': return 'Connection'
+    case 'addChain': return 'Add Chain'
+    case 'addToken': return 'Add Token'
+    case 'switchChain': return 'Switch Chain'
+    default: return 'Request'
+  }
 }
 
 function RequestRouter({ request }: { request: any }) {
