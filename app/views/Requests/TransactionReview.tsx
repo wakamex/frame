@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { AccountRequest } from '../../types'
 import { actions } from '../../ipc'
 import { useNetworks, useNetworksMeta } from '../../store'
 import Address from '../../components/Address'
@@ -6,7 +7,7 @@ import { weiToGwei, hexToInt, roundGwei, weiIntToEthInt } from '../../../resourc
 import { accountViewTitles } from '../../../resources/domain/request'
 
 interface TransactionReviewProps {
-  request: any
+  request: AccountRequest
 }
 
 export default function TransactionReview({ request }: TransactionReviewProps) {
@@ -74,7 +75,7 @@ export default function TransactionReview({ request }: TransactionReviewProps) {
       {request.recognizedActions?.length > 0 && (
         <div className="bg-gray-800/50 rounded-lg p-3">
           <div className="text-xs text-gray-500 mb-1">Actions</div>
-          {request.recognizedActions.map((action: any, i: number) => (
+          {request.recognizedActions.map((action, i) => (
             <div key={i} className="text-sm text-gray-300">{action.type}</div>
           ))}
         </div>
@@ -185,7 +186,7 @@ export default function TransactionReview({ request }: TransactionReviewProps) {
   )
 }
 
-function GasAdjuster({ request, isEIP1559 }: { request: any; isEIP1559: boolean }) {
+function GasAdjuster({ request, isEIP1559 }: { request: AccountRequest; isEIP1559: boolean }) {
   const [baseFee, setBaseFee] = useState('')
   const [priorityFee, setPriorityFee] = useState('')
   const [gasPrice, setGasPrice] = useState('')

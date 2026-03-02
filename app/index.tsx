@@ -88,7 +88,7 @@ function NavItem({
   label: string
   view: string
   current: string
-  onClick: (view: any) => void
+  onClick: (view: string) => void
 }) {
   const isActive = current === view
   return (

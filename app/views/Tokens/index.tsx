@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { Token } from '../../types'
 import { useTokens, useNetworks } from '../../store'
 import { actions } from '../../ipc'
 import Address from '../../components/Address'
@@ -8,19 +9,19 @@ export default function TokensView() {
   const tokens = useTokens()
   const networks = useNetworks()
   const [showAdd, setShowAdd] = useState(false)
-  const [confirmRemove, setConfirmRemove] = useState<any>(null)
+  const [confirmRemove, setConfirmRemove] = useState<Token | null>(null)
   const [filter, setFilter] = useState('')
 
   const customTokens = tokens.custom || []
   const filtered = filter
-    ? customTokens.filter((t: any) =>
+    ? customTokens.filter((t) =>
         (t.name || '').toLowerCase().includes(filter.toLowerCase()) ||
         (t.symbol || '').toLowerCase().includes(filter.toLowerCase()) ||
         (t.address || '').toLowerCase().includes(filter.toLowerCase())
       )
     : customTokens
 
-  const handleRemove = (token: any) => {
+  const handleRemove = (token: Token) => {
     actions.removeToken(token)
     setConfirmRemove(null)
   }
@@ -54,7 +55,7 @@ export default function TokensView() {
         </div>
       ) : (
         <div className="space-y-1">
-          {filtered.map((token: any, i: number) => {
+          {filtered.map((token, i) => {
             const chain = networks[token.chainId]
             return (
               <div
@@ -103,7 +104,7 @@ export default function TokensView() {
 function AddTokenForm({ onDone }: { onDone: () => void }) {
   const [contractAddress, setContractAddress] = useState('')
   const [chainId, setChainId] = useState('1')
-  const [tokenData, setTokenData] = useState<any>(null)
+  const [tokenData, setTokenData] = useState<{ name: string; symbol: string; decimals: number } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -117,8 +118,8 @@ function AddTokenForm({ onDone }: { onDone: () => void }) {
       } else {
         setError('Could not find token at this address')
       }
-    } catch (err: any) {
-      setError(err?.message || 'Failed to fetch token details')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch token details')
     } finally {
       setLoading(false)
     }

@@ -46,15 +46,15 @@ export default function SignerDetail({ signerId }: SignerDetailProps) {
     try {
       await actions.unlockSigner(signerId, password)
       setPassword('')
-    } catch (err: any) {
-      setUnlockError(err?.message || 'Failed to unlock')
+    } catch (err: unknown) {
+      setUnlockError(err instanceof Error ? err.message : 'Failed to unlock')
     }
   }
 
   const handleLock = async () => {
     try {
       await actions.lockSigner(signerId)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to lock signer:', err)
     }
   }

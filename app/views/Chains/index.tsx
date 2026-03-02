@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import type { Chain, ChainMetadata } from '../../types'
 import { useNetworks, useNetworksMeta } from '../../store'
 import { actions, sendAction } from '../../ipc'
 import { isNetworkConnected } from '../../../resources/utils/chains'
@@ -11,7 +12,7 @@ export default function ChainsView() {
   const [selectedChain, setSelectedChain] = useState<string | null>(null)
 
   const chains = useMemo(() => {
-    return Object.entries(networks).sort(([, a]: any, [, b]: any) => {
+    return Object.entries(networks).sort(([, a], [, b]) => {
       // Mainnets first, then testnets
       if (a.isTestnet !== b.isTestnet) return a.isTestnet ? 1 : -1
       return (a.name || '').localeCompare(b.name || '')
@@ -27,7 +28,7 @@ export default function ChainsView() {
       <div className="w-72 shrink-0 overflow-y-auto">
         <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">Networks</h2>
         <div className="flex flex-col gap-1">
-          {chains.map(([id, chain]: [string, any]) => {
+          {chains.map(([id, chain]) => {
             const meta = networksMeta[id]
             const connected = isNetworkConnected(chain)
             const gasLevel = meta?.gas?.price?.levels?.fast
@@ -97,7 +98,7 @@ export default function ChainsView() {
   )
 }
 
-function ChainDetail({ chain, meta, chainId }: { chain: any; meta: any; chainId: string }) {
+function ChainDetail({ chain, meta, chainId }: { chain: Chain; meta: ChainMetadata | null; chainId: string }) {
   const connected = isNetworkConnected(chain)
 
   return (
@@ -173,7 +174,7 @@ function ChainDetail({ chain, meta, chainId }: { chain: any; meta: any; chainId:
   )
 }
 
-function ConnectionRow({ label, connection }: { label: string; connection: any }) {
+function ConnectionRow({ label, connection }: { label: string; connection: Chain['connection']['primary'] | undefined }) {
   if (!connection) return null
   return (
     <div className="flex items-center justify-between bg-gray-800/50 rounded-lg px-3 py-2">

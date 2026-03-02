@@ -82,8 +82,8 @@ function PhraseForm({ onBack, onDone }: { onBack: () => void; onDone: () => void
     try {
       await actions.createFromPhrase(phrase.trim(), password)
       onDone()
-    } catch (err: any) {
-      setError(err?.message || 'Failed to create account')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to create account')
     } finally {
       setLoading(false)
     }
@@ -141,8 +141,8 @@ function PrivateKeyForm({ onBack, onDone }: { onBack: () => void; onDone: () => 
     try {
       await actions.createFromPrivateKey(key.trim(), password)
       onDone()
-    } catch (err: any) {
-      setError(err?.message || 'Failed to import key')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to import key')
     } finally {
       setLoading(false)
     }
@@ -185,7 +185,7 @@ function PrivateKeyForm({ onBack, onDone }: { onBack: () => void; onDone: () => 
 }
 
 function KeystoreForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
-  const [keystore, setKeystore] = useState<any>(null)
+  const [keystore, setKeystore] = useState<Record<string, unknown> | null>(null)
   const [keystorePassword, setKeystorePassword] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -196,8 +196,8 @@ function KeystoreForm({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     try {
       const ks = await actions.locateKeystore()
       setKeystore(ks)
-    } catch (err: any) {
-      setError(err?.message || 'Failed to load keystore')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load keystore')
     }
   }
 
@@ -210,8 +210,8 @@ function KeystoreForm({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     try {
       await actions.createFromKeystore(keystore, password, keystorePassword)
       onDone()
-    } catch (err: any) {
-      setError(err?.message || 'Failed to import keystore')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to import keystore')
     } finally {
       setLoading(false)
     }
@@ -291,8 +291,8 @@ function WatchAddressForm({ onBack, onDone }: { onBack: () => void; onDone: () =
       } else {
         setError('Could not resolve ENS name')
       }
-    } catch (err: any) {
-      setError(err?.message || 'ENS resolution failed')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'ENS resolution failed')
     } finally {
       setResolving(false)
     }
@@ -306,8 +306,8 @@ function WatchAddressForm({ onBack, onDone }: { onBack: () => void; onDone: () =
     try {
       await actions.createFromAddress(addr, name || 'Watch Account')
       onDone()
-    } catch (err: any) {
-      setError(err?.message || 'Failed to add address')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to add address')
     } finally {
       setLoading(false)
     }

@@ -46,14 +46,14 @@ export default function AccountDetail() {
   const displayedBalances = useMemo(() => {
     if (!balances || !Array.isArray(balances)) return []
     return balances
-      .map((b: any) => {
+      .map((b) => {
         const chainMeta = networksMeta[b.chainId]
         const quote = chainMeta?.nativeCurrency?.usd
           ? { price: chainMeta.nativeCurrency.usd.price, change24hr: chainMeta.nativeCurrency.usd.change24hr }
           : undefined
         return createBalance(b, quote)
       })
-      .sort(sortByTotalValue as any)
+      .sort((a, b) => sortByTotalValue(a, b))
   }, [balances, networksMeta])
 
   const totalUsd = useMemo(() => {
@@ -171,7 +171,7 @@ export default function AccountDetail() {
         <section>
           <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Connected Origins</h3>
           <div className="space-y-1">
-            {permissionEntries.map((perm: any) => {
+            {permissionEntries.map((perm) => {
               const origin = origins[perm.handlerId]
               return (
                 <div key={perm.handlerId} className="flex items-center justify-between px-3 py-2 rounded hover:bg-gray-800/50">

@@ -1,24 +1,25 @@
 import link from '../resources/link'
 import { useStore } from './store'
+import type { Token, AccountRequest } from './types'
 
 // Initialize the renderer: fetch full state from main, subscribe to updates
 export function initializeApp(): Promise<void> {
   return new Promise((resolve, reject) => {
-    link.rpc('getState', (err: Error | null, state: any) => {
+    link.rpc('getState', (err: Error | null, state: unknown) => {
       if (err) {
         reject(new Error('Could not get initial state from main process'))
         return
       }
 
       // Populate Zustand store with initial state
-      useStore.getState().initialize(state)
+      useStore.getState().initialize(state as Parameters<ReturnType<typeof useStore.getState>['initialize']>[0])
 
       // Listen for incremental state updates from main process
-      link.on('action', (action: string, ...args: any[]) => {
+      link.on('action', (action: string, ...args: unknown[]) => {
         if (action === 'stateSync') {
           try {
-            const actionBatch = JSON.parse(args[0])
-            const updates: Array<{ path: string; value: any }> = []
+            const actionBatch = JSON.parse(args[0] as string)
+            const updates: Array<{ path: string; value: unknown }> = []
             for (const actionItem of actionBatch) {
               for (const update of actionItem.updates) {
                 updates.push({ path: update.path, value: update.value })
@@ -40,24 +41,24 @@ export function initializeApp(): Promise<void> {
 }
 
 // Send an action to the main process store
-export function sendAction(action: string, ...args: any[]) {
+export function sendAction(action: string, ...args: unknown[]) {
   link.send('tray:action', action, ...args)
 }
 
 // Send an IPC event to the main process
-export function sendEvent(channel: string, ...args: any[]) {
+export function sendEvent(channel: string, ...args: unknown[]) {
   link.send(channel, ...args)
 }
 
 // Invoke an IPC method on the main process and await a response
-export function invoke<T = any>(channel: string, ...args: any[]): Promise<T> {
+export function invoke<T = unknown>(channel: string, ...args: unknown[]): Promise<T> {
   return link.invoke(channel, ...args)
 }
 
 // RPC call to main process with callback
-export function rpc(method: string, ...args: any[]): Promise<any> {
+export function rpc(method: string, ...args: unknown[]): Promise<unknown> {
   return new Promise((resolve, reject) => {
-    link.rpc(method, ...args, (err: Error | null, result: any) => {
+    link.rpc(method, ...args, (err: Error | null, result: unknown) => {
       if (err) reject(err)
       else resolve(result)
     })
@@ -70,13 +71,13 @@ export const actions = {
   clipboardData: (data: string) => sendEvent('tray:clipboardData', data),
 
   // Request management
-  resolveRequest: (req: any, result?: any) => sendEvent('tray:resolveRequest', req, result),
-  rejectRequest: (req: any) => sendEvent('tray:rejectRequest', req),
-  approveRequest: (req: any) => rpc('approveRequest', req),
-  declineRequest: (req: any) => rpc('declineRequest', req),
-  confirmRequestApproval: (req: any, type: string, data: any) =>
+  resolveRequest: (req: AccountRequest, result?: unknown) => sendEvent('tray:resolveRequest', req, result),
+  rejectRequest: (req: AccountRequest) => sendEvent('tray:rejectRequest', req),
+  approveRequest: (req: AccountRequest) => rpc('approveRequest', req),
+  declineRequest: (req: AccountRequest) => rpc('declineRequest', req),
+  confirmRequestApproval: (req: AccountRequest, type: string, data: unknown) =>
     rpc('confirmRequestApproval', req, type, data),
-  updateRequest: (reqId: string, data: any, actionId: string) =>
+  updateRequest: (reqId: string, data: Record<string, unknown>, actionId: string) =>
     rpc('updateRequest', reqId, data, actionId),
 
   // Gas fee controls
@@ -89,7 +90,7 @@ export const actions = {
   // Account management
   removeAccount: (id: string) => sendEvent('tray:removeAccount', id),
   renameAccount: (id: string, name: string) => sendEvent('tray:renameAccount', id, name),
-  giveAccess: (req: any, access: boolean) => sendEvent('tray:giveAccess', req, access),
+  giveAccess: (req: AccountRequest, access: boolean) => sendEvent('tray:giveAccess', req, access),
   clearRequestsByOrigin: (account: string, origin: string) =>
     sendEvent('tray:clearRequestsByOrigin', account, origin),
 
@@ -98,13 +99,13 @@ export const actions = {
     rpc('createFromPhrase', phrase, password),
   createFromPrivateKey: (privateKey: string, password: string) =>
     rpc('createFromPrivateKey', privateKey, password),
-  createFromKeystore: (keystore: any, password: string, keystorePassword: string) =>
+  createFromKeystore: (keystore: Record<string, unknown> | null, password: string, keystorePassword: string) =>
     rpc('createFromKeystore', keystore, password, keystorePassword),
   createFromAddress: (address: string, name: string) =>
     rpc('createFromAddress', address, name),
-  createAccount: (address: string, name: string, options: any) =>
+  createAccount: (address: string, name: string, options: Record<string, unknown>) =>
     rpc('createAccount', address, name, options),
-  locateKeystore: () => rpc('locateKeystore'),
+  locateKeystore: () => rpc('locateKeystore') as Promise<Record<string, unknown>>,
 
   // Signer management
   setSigner: (id: string) => rpc('setSigner', id),
@@ -126,22 +127,23 @@ export const actions = {
 
   // Navigation & external
   openExternal: (url: string) => sendEvent('tray:openExternal', url),
-  openExplorer: (chain: any, hash?: string, account?: string) =>
+  openExplorer: (chain: { type: string; id: number }, hash?: string, account?: string) =>
     sendEvent('tray:openExplorer', chain, hash, account),
 
   // Chain management
-  addChain: (chain: any) => sendEvent('tray:addChain', chain),
-  switchChain: (type: string, id: number, req?: any) =>
+  addChain: (chain: Record<string, unknown>) => sendEvent('tray:addChain', chain),
+  switchChain: (type: string, id: number, req?: AccountRequest) =>
     sendEvent('tray:switchChain', type, id, req),
 
   // Token management
-  addToken: (token: any, req?: any) => sendEvent('tray:addToken', token, req),
-  removeToken: (token: any) => sendEvent('tray:removeToken', token),
+  addToken: (token: Partial<Token> & { address: string; chainId: number }, req?: AccountRequest) =>
+    sendEvent('tray:addToken', token, req),
+  removeToken: (token: Token) => sendEvent('tray:removeToken', token),
   getTokenDetails: (contractAddress: string, chainId: number) =>
-    invoke('tray:getTokenDetails', contractAddress, chainId),
+    invoke<{ name: string; symbol: string; decimals: number }>('tray:getTokenDetails', contractAddress, chainId),
 
   // Settings
-  syncPath: (path: string, value: any) => sendEvent('tray:syncPath', path, value),
+  syncPath: (path: string, value: unknown) => sendEvent('tray:syncPath', path, value),
 
   // Origins
   removeOrigin: (handlerId: string) => sendEvent('tray:removeOrigin', handlerId),
@@ -154,5 +156,5 @@ export const actions = {
   resetAllSettings: () => sendEvent('tray:resetAllSettings'),
 
   // ENS
-  resolveEnsName: (name: string) => rpc('resolveEnsName', name)
+  resolveEnsName: (name: string) => rpc('resolveEnsName', name) as Promise<string | null>
 }

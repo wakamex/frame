@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import type { Account } from '../../types'
 import { useAccounts, useSigners, useAccountsMeta, useStore, useNetworksMeta } from '../../store'
 import { accountSort } from '../../../resources/domain/account'
 import { getSignerDisplayType } from '../../../resources/domain/signer'
@@ -37,7 +38,7 @@ export default function AccountList({ onAdd }: AccountListProps) {
           No accounts yet
         </div>
       ) : (
-        sortedAccounts.map((account: any) => {
+        sortedAccounts.map((account: Account) => {
           const signer = account.signer ? signers[account.signer] : null
           const signerStatus = signer?.status ?? 'disconnected'
           const signerType = signer ? getSignerDisplayType(signer.type) : 'watch'

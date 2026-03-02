@@ -1,3 +1,4 @@
+import type { Signer } from '../../types'
 import { useSigners, useSavedSigners } from '../../store'
 import { getSignerDisplayType } from '../../../resources/domain/signer'
 import StatusDot from '../../components/StatusDot'
@@ -28,7 +29,7 @@ export default function SignerList({ selectedSigner, onSelect }: SignerListProps
           No signers detected
         </div>
       ) : (
-        signerList.map(([id, signer]: [string, any]) => {
+        signerList.map(([id, signer]: [string, Signer]) => {
           const signerType = getSignerDisplayType(signer.type || '')
           const status = signer.status || 'disconnected'
           const addressCount = signer.addresses?.length ?? 0
