@@ -95,14 +95,15 @@ export const actions = {
     sendEvent('tray:clearRequestsByOrigin', account, origin),
 
   // Signer creation
-  createFromPhrase: (phrase: string, password: string) =>
-    rpc('createFromPhrase', phrase, password),
+  createFromPhrase: (phrase: string, password: string) => rpc('createFromPhrase', phrase, password),
   createFromPrivateKey: (privateKey: string, password: string) =>
     rpc('createFromPrivateKey', privateKey, password),
-  createFromKeystore: (keystore: Record<string, unknown> | null, password: string, keystorePassword: string) =>
-    rpc('createFromKeystore', keystore, password, keystorePassword),
-  createFromAddress: (address: string, name: string) =>
-    rpc('createFromAddress', address, name),
+  createFromKeystore: (
+    keystore: Record<string, unknown> | null,
+    password: string,
+    keystorePassword: string
+  ) => rpc('createFromKeystore', keystore, password, keystorePassword),
+  createFromAddress: (address: string, name: string) => rpc('createFromAddress', address, name),
   createAccount: (address: string, name: string, options: Record<string, unknown>) =>
     rpc('createAccount', address, name, options),
   locateKeystore: () => rpc('locateKeystore') as Promise<Record<string, unknown>>,
@@ -117,8 +118,7 @@ export const actions = {
   verifyAddress: () => rpc('verifyAddress'),
 
   // Lattice
-  createLattice: (deviceId: string, deviceName: string) =>
-    rpc('createLattice', deviceId, deviceName),
+  createLattice: (deviceId: string, deviceName: string) => rpc('createLattice', deviceId, deviceName),
   latticePair: (id: string, pin: string) => rpc('latticePair', id, pin),
 
   // Trezor
@@ -140,7 +140,11 @@ export const actions = {
     sendEvent('tray:addToken', token, req),
   removeToken: (token: Token) => sendEvent('tray:removeToken', token),
   getTokenDetails: (contractAddress: string, chainId: number) =>
-    invoke<{ name: string; symbol: string; decimals: number }>('tray:getTokenDetails', contractAddress, chainId),
+    invoke<{ name: string; symbol: string; decimals: number }>(
+      'tray:getTokenDetails',
+      contractAddress,
+      chainId
+    ),
 
   // Settings
   syncPath: (path: string, value: unknown) => sendEvent('tray:syncPath', path, value),
@@ -151,10 +155,12 @@ export const actions = {
 
   // Updates
   installUpdate: () => sendEvent('tray:installAvailableUpdate'),
-  dismissUpdate: (version: string, remind: boolean) =>
-    sendEvent('tray:dismissUpdate', version, remind),
+  dismissUpdate: (version: string, remind: boolean) => sendEvent('tray:dismissUpdate', version, remind),
   resetAllSettings: () => sendEvent('tray:resetAllSettings'),
 
   // ENS
-  resolveEnsName: (name: string) => rpc('resolveEnsName', name) as Promise<string | null>
+  resolveEnsName: (name: string) => rpc('resolveEnsName', name) as Promise<string | null>,
+
+  // Chain discovery
+  fetchChainlist: () => invoke<any[]>('tray:fetchChainlist')
 }
