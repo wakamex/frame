@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useMainState, usePlatform, useStore } from '../../store'
-import { actions } from '../../ipc'
+import { actions, sendAction } from '../../ipc'
+import { getDisplayShortcut, getShortcutFromKeyEvent, isShortcutKey } from '../../../resources/keyboard'
 import Modal from '../../components/Modal'
 
 export default function SettingsView() {
@@ -23,6 +24,15 @@ export default function SettingsView() {
           description="Use dark color scheme"
           value={main.colorway === 'dark'}
           onChange={() => actions.syncPath('main.colorway', main.colorway === 'dark' ? 'light' : 'dark')}
+        />
+      </Section>
+
+      {/* Keyboard Shortcut */}
+      <Section title="Keyboard Shortcut">
+        <ShortcutConfigurator
+          shortcut={main.shortcuts?.summon}
+          platform={platform}
+          label="Summon Frame"
         />
       </Section>
 
@@ -184,6 +194,103 @@ function NumberRow({ label, value, min, max, onChange }: {
         onChange={(e) => onChange(parseInt(e.target.value) || min)}
         className="w-16 bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-gray-200 outline-none text-center"
       />
+    </div>
+  )
+}
+
+function ShortcutConfigurator({ shortcut, platform, label }: {
+  shortcut: { modifierKeys: string[]; shortcutKey: string; enabled: boolean; configuring: boolean } | undefined
+  platform: string
+  label: string
+}) {
+  const [configuring, setConfiguring] = useState(false)
+  const [pressedKeys, setPressedKeys] = useState<number[]>([])
+
+  const display = shortcut ? getDisplayShortcut(platform as 'darwin' | 'win32' | 'linux', shortcut) : null
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    setPressedKeys((prev) => {
+      if (!prev.includes(e.keyCode)) return [...prev, e.keyCode]
+      return prev
+    })
+
+    const allowedModifiers = ['Meta', 'Alt', 'Control', 'Command']
+    if (!allowedModifiers.includes(e.key) && isShortcutKey(e)) {
+      const newShortcut = getShortcutFromKeyEvent(e, [...pressedKeys, e.keyCode], platform as 'darwin' | 'win32' | 'linux')
+      sendAction('setShortcut', 'summon', {
+        ...newShortcut,
+        configuring: false,
+        enabled: true
+      })
+      setConfiguring(false)
+      setPressedKeys([])
+    }
+  }, [platform, pressedKeys])
+
+  useEffect(() => {
+    if (!configuring) return
+    window.addEventListener('keydown', handleKeyDown, true)
+    return () => window.removeEventListener('keydown', handleKeyDown, true)
+  }, [configuring, handleKeyDown])
+
+  if (!shortcut) return null
+
+  const toggleEnabled = () => {
+    sendAction('setShortcut', 'summon', {
+      ...shortcut,
+      enabled: !shortcut.enabled
+    })
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between py-2">
+        <div>
+          <div className="text-sm text-gray-200">{label}</div>
+          <div className="text-xs text-gray-500">Global hotkey to show/hide Frame</div>
+        </div>
+        <button
+          onClick={toggleEnabled}
+          className={`w-10 h-5 rounded-full transition-colors ${shortcut.enabled ? 'bg-green-600/40' : 'bg-gray-700'}`}
+        >
+          <span
+            className={`block w-4 h-4 rounded-full transition-transform ${
+              shortcut.enabled ? 'translate-x-5 bg-green-400' : 'translate-x-0.5 bg-gray-500'
+            }`}
+          />
+        </button>
+      </div>
+
+      {shortcut.enabled && (
+        <div className="flex items-center justify-between bg-gray-800/50 rounded-lg px-3 py-2.5">
+          {configuring ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-300">Press a new shortcut...</span>
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              {display && [...display.modifierKeys, display.shortcutKey].map((key, i, arr) => (
+                <span key={i} className="flex items-center gap-1.5">
+                  <kbd className="px-2 py-1 bg-gray-700 border border-gray-600 rounded text-xs text-gray-200 font-mono">
+                    {key}
+                  </kbd>
+                  {i < arr.length - 1 && <span className="text-gray-600 text-xs">+</span>}
+                </span>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={() => { setConfiguring(!configuring); setPressedKeys([]) }}
+            className="text-xs text-gray-400 hover:text-gray-200 px-2 py-1 rounded hover:bg-gray-700 transition-colors"
+          >
+            {configuring ? 'Cancel' : 'Change'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
