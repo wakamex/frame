@@ -94,7 +94,6 @@ export interface ChainMetadata {
       levels: GasLevels
     }
   }
-  rpcHealth?: RpcHealth
 }
 
 // --- Tokens ---
@@ -220,13 +219,13 @@ export interface PermitData {
   nonce: string | number
 }
 
-// --- RPC Health ---
+// --- Address Book ---
 
-export interface RpcHealth {
-  latencyMs: number
-  lastChecked: number
-  status: 'healthy' | 'degraded' | 'down'
-  consecutiveErrors: number
+export interface AddressBookEntry {
+  address: string
+  name: string
+  notes: string
+  createdAt: number
 }
 
 // --- Settings ---

@@ -1,5 +1,5 @@
 import log from 'electron-log'
-import { v5 as uuidv5 } from 'uuid'
+import { v4 as generateUuid, v5 as uuidv5 } from 'uuid'
 import { accountNS, isDefaultAccountName } from '../../../resources/domain/account'
 import { toTokenId } from '../../../resources/domain/balance'
 import state from '..'
@@ -752,19 +752,26 @@ export function updateTypedDataRequest(account: string, reqId: string, data: any
   Object.assign(requests[reqId], data)
 }
 
-// ---- RPC Health ----
+// ---- Address Book ----
 
-export function setRpcHealth(
-  chainId: string | number,
-  healthData: {
-    latencyMs: number
-    lastChecked: number
-    status: 'healthy' | 'degraded' | 'down'
-    consecutiveErrors: number
+export function addContact(entry: { address: string; name: string; notes?: string }) {
+  const id = generateUuid()
+  ;(state.main as any).addressBook[id] = {
+    address: entry.address,
+    name: entry.name,
+    notes: entry.notes || '',
+    createdAt: Date.now()
   }
-) {
-  const chainsMeta = state.main.networksMeta.ethereum as any
-  if (chainsMeta[chainId]) {
-    chainsMeta[chainId].rpcHealth = healthData
-  }
+}
+
+export function updateContact(id: string, update: { address?: string; name?: string; notes?: string }) {
+  const existing = (state.main as any).addressBook[id]
+  if (!existing) return
+  if (update.address !== undefined) existing.address = update.address
+  if (update.name !== undefined) existing.name = update.name
+  if (update.notes !== undefined) existing.notes = update.notes
+}
+
+export function removeContact(id: string) {
+  delete (state.main as any).addressBook[id]
 }

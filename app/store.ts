@@ -3,6 +3,7 @@ import type {
   Account,
   AccountMetadata,
   AccountRequest,
+  AddressBookEntry,
   Balance,
   Chain,
   ChainMetadata,
@@ -35,6 +36,7 @@ export interface MainState {
   }
   accounts: Record<string, Account>
   accountsMeta: Record<string, AccountMetadata>
+  addressBook: Record<string, AddressBookEntry>
   origins: Record<string, Origin>
   permissions: Record<string, Record<string, Permission>>
   balances: Record<string, Balance[]>
@@ -71,7 +73,7 @@ export interface AppState {
 
   // Local UI state
   initialized: boolean
-  currentView: 'accounts' | 'signers' | 'chains' | 'settings' | 'send' | 'tokens'
+  currentView: 'accounts' | 'signers' | 'chains' | 'settings' | 'send' | 'tokens' | 'contacts'
   selectedAccount: string | null
 }
 
@@ -123,11 +125,9 @@ export const useAccounts = () => useSnapshot(state).main?.accounts ?? {}
 export const useSigners = () => useSnapshot(state).main?.signers ?? {}
 export const useSavedSigners = () => useSnapshot(state).main?.savedSigners ?? {}
 export const useCurrentView = () => useSnapshot(state).currentView
-export const useBalances = (address: string) =>
-  useSnapshot(state).main?.balances?.[address] ?? []
+export const useBalances = (address: string) => useSnapshot(state).main?.balances?.[address] ?? []
 export const useTokens = () => useSnapshot(state).main?.tokens ?? { custom: [], known: {} }
-export const usePermissions = (address: string) =>
-  useSnapshot(state).main?.permissions?.[address] ?? {}
+export const usePermissions = (address: string) => useSnapshot(state).main?.permissions?.[address] ?? {}
 export const useOrigins = () => useSnapshot(state).main?.origins ?? {}
 export const usePlatform = () => useSnapshot(state).platform
 export const useColorway = () => useSnapshot(state).main?.colorway ?? 'dark'
@@ -150,10 +150,10 @@ export const usePendingRequests = () => {
       requests.push(req as AccountRequest)
     }
   }
-  return requests.filter(
-    (r) => r && !['confirmed', 'declined', 'error', 'success'].includes(r.status ?? '')
-  )
+  return requests.filter((r) => r && !['confirmed', 'declined', 'error', 'success'].includes(r.status ?? ''))
 }
+
+export const useAddressBook = () => useSnapshot(state).main?.addressBook ?? {}
 
 // Re-export useSnapshot for components that need direct access
 export { useSnapshot }

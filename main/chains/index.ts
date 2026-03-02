@@ -17,11 +17,8 @@ import {
   setBlockHeight,
   setPrimary,
   setSecondary,
-  addSampleGasCosts,
-  setRpcHealth
+  addSampleGasCosts
 } from '../store/actions'
-import RpcHealthChecker from './health'
-import type { RpcHealth, SendFn } from './health'
 import BlockMonitor from './blocks'
 import chainConfig from './config'
 import GasMonitor from '../transaction/gasMonitor'
@@ -88,11 +85,7 @@ interface JsonRpcResponse {
 
 type ResCallback = (response: JsonRpcResponse) => void
 
-const resError = (
-  error: string | { message: string; code: number },
-  payload: JsonRpcPayload,
-  res: ResCallback
-) =>
+const resError = (error: string | { message: string; code: number }, payload: JsonRpcPayload, res: ResCallback) =>
   res({
     id: payload.id,
     jsonrpc: payload.jsonrpc,
@@ -117,7 +110,6 @@ class ChainConnection extends EventEmitter {
   secondary: ConnectionStatus
   network?: string
   private unsubscribe: () => void
-  private healthChecker: RpcHealthChecker | null = null
 
   constructor(type: string, chainId: string) {
     super()
@@ -167,40 +159,6 @@ class ChainConnection extends EventEmitter {
   _handleConnection(priority: 'primary' | 'secondary') {
     this._updateStatus(priority, 'connected')
     this.emit('connect')
-
-    if (priority === 'primary') {
-      this._startHealthChecker()
-    }
-  }
-
-  private _startHealthChecker() {
-    this._stopHealthChecker()
-
-    const provider = this.primary.provider
-    if (!provider) return
-
-    const send: SendFn = (payload, cb) => {
-      provider.sendAsync(payload, (err: Error | null, result: any) => cb(err, result))
-    }
-
-    this.healthChecker = new RpcHealthChecker(send, (health: RpcHealth) => {
-      setRpcHealth(this.chainId, health)
-
-      if (health.status !== 'healthy' && this.secondary.connected && this.secondary.provider) {
-        log.info(
-          `Primary RPC degraded for chain ${this.chainId} (${health.status}), falling back to secondary`
-        )
-        this.primary.connected = false
-      }
-    })
-    this.healthChecker.start()
-  }
-
-  private _stopHealthChecker() {
-    if (this.healthChecker) {
-      this.healthChecker.stop()
-      this.healthChecker = null
-    }
   }
 
   async txEstimates(
@@ -282,13 +240,10 @@ class ChainConnection extends EventEmitter {
     }))
   }
 
-  async feeEstimatesUSD(
-    chainId: number,
-    gasPrice: BigNumber,
-    connectedProvider: any
-  ): Promise<GasSampleResult[]> {
+  async feeEstimatesUSD(chainId: number, gasPrice: BigNumber, connectedProvider: any): Promise<GasSampleResult[]> {
     const type = 'ethereum'
-    const currentSymbol = state.main.networksMeta[type]?.[chainId]?.nativeCurrency?.symbol || 'ETH'
+    const currentSymbol =
+      state.main.networksMeta[type]?.[chainId]?.nativeCurrency?.symbol || 'ETH'
 
     return this.txEstimates(type, chainId, gasPrice, currentSymbol, connectedProvider)
   }
@@ -420,7 +375,6 @@ class ChainConnection extends EventEmitter {
     this[priority].type = ''
 
     this.stopBlockMonitor(priority)
-    if (priority === 'primary') this._stopHealthChecker()
 
     if (['off', 'disconnected', 'standby'].includes(status)) {
       if (this[priority].status !== status) {
@@ -619,7 +573,6 @@ class ChainConnection extends EventEmitter {
 
     if (this.unsubscribe) this.unsubscribe()
 
-    this._stopHealthChecker()
     this.killProvider(this.primary.provider)
     this.stopBlockMonitor('primary')
     this.primary.provider = null

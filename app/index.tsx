@@ -14,6 +14,7 @@ import SettingsView from './views/Settings'
 import RequestOverlay from './views/Requests'
 import OnboardView from './views/Onboard'
 import SendView from './views/Send'
+import AddressBookView from './views/AddressBook'
 
 function App() {
   const snap = useSnapshot(state)
@@ -81,6 +82,7 @@ function App() {
           </div>
           <NavItem label="Accounts" view="accounts" current={currentView} onClick={handleViewChange} />
           <NavItem label="Send" view="send" current={currentView} onClick={handleViewChange} />
+          <NavItem label="Contacts" view="contacts" current={currentView} onClick={handleViewChange} />
           <NavItem label="Signers" view="signers" current={currentView} onClick={handleViewChange} />
           <NavItem label="Chains" view="chains" current={currentView} onClick={handleViewChange} />
           <NavItem label="Tokens" view="tokens" current={currentView} onClick={handleViewChange} />
@@ -149,6 +151,8 @@ function ViewContent({ view }: { view: string }) {
       return <AccountsView />
     case 'send':
       return <SendView />
+    case 'contacts':
+      return <AddressBookView />
     case 'signers':
       return <SignersView />
     case 'chains':
