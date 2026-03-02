@@ -11,7 +11,6 @@ const signers = require('../signers').default
 const launch = require('../launch')
 const provider = require('../provider').default
 const store = require('../store').default
-const dapps = require('../dapps')
 const nebulaApi = require('../nebula').default
 
 const { arraysEqual, randomLetters } = require('../../resources/utils')
@@ -30,13 +29,6 @@ const callbackWhenDone = (fn, cb) => {
 const rpc = {
   getState: (cb) => {
     cb(null, store())
-  },
-  getFrameId(window, cb) {
-    if (window.frameId) {
-      cb(null, window.frameId)
-    } else {
-      cb(new Error('No frameId set for this window'))
-    }
   },
   signTransaction: accounts.signTransaction,
   signMessage: accounts.signMessage,
@@ -269,38 +261,6 @@ const rpc = {
   signerCompatibility(handlerId, cb) {
     accounts.signerCompatibility(handlerId, cb)
   },
-  // flow
-  async flowCommand(command) {
-    // console.log('flowCommand', command, cb)
-    await dapps.add(command.input, {}, (err, res) => {
-      if (err || res) console.log(err, res)
-    })
-    await dapps.launch(command.input, (err, res) => {
-      if (err || res) console.log(err, res)
-    })
-  },
-  addDapp(domain, options, cb) {
-    if (!(domain.endsWith('.eth') || domain.endsWith('.xyz'))) domain += '.eth'
-    // console.log('addDapp', domain, options, cb)
-    dapps.add(domain, options, cb)
-  },
-  removeDapp(domain, cb) {
-    dapps.remove(domain, cb)
-  },
-  moveDapp(fromArea, fromIndex, toArea, toIndex, cb) {
-    dapps.move(fromArea, fromIndex, toArea, toIndex, cb)
-  },
-  launchDapp(domain, cb) {
-    dapps.launch(domain, cb)
-  },
-  openDapp(domain, options, cb) {
-    if (domain.endsWith('.eth')) {
-      // console.log(' RPC openDapp ', domain, options, cb)
-      dapps.add(domain, options, cb)
-    } else {
-      console.log('input needs to be ens name')
-    }
-  },
   openExplorer(chain) {
     if (store('main.mute.explorerWarning')) {
       openBlockExplorer(chain)
@@ -318,23 +278,13 @@ ipcMain.on('main:rpc', (event, id, method, ...args) => {
   method = unwrap(method)
   args = args.map((arg) => unwrap(arg))
   if (rpc[method]) {
-    if (method === 'getFrameId') {
-      rpc[method](event.sender.getOwnerBrowserWindow(), ...args, (...args) => {
-        event.sender.send(
-          'main:rpc',
-          id,
-          ...args.map((arg) => (arg instanceof Error ? wrap(arg.message) : wrap(arg)))
-        )
-      })
-    } else {
-      rpc[method](...args, (...args) => {
-        event.sender.send(
-          'main:rpc',
-          id,
-          ...args.map((arg) => (arg instanceof Error ? wrap(arg.message) : wrap(arg)))
-        )
-      })
-    }
+    rpc[method](...args, (...args) => {
+      event.sender.send(
+        'main:rpc',
+        id,
+        ...args.map((arg) => (arg instanceof Error ? wrap(arg.message) : wrap(arg)))
+      )
+    })
   } else {
     const args = [new Error('Unknown RPC method: ' + method)]
     event.sender.send(

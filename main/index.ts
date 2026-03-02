@@ -1,4 +1,4 @@
-import { app, ipcMain, protocol, clipboard, powerMonitor, BrowserWindow } from 'electron'
+import { app, ipcMain, protocol, clipboard, powerMonitor } from 'electron'
 import path from 'path'
 import log from 'electron-log'
 import url from 'url'
@@ -10,7 +10,6 @@ import * as errors from './errors'
 import windows from './windows'
 import menu from './menu'
 import store from './store'
-import dapps from './dapps'
 import accounts from './accounts'
 import * as launch from './launch'
 import updater from './updater'
@@ -18,7 +17,6 @@ import signers from './signers'
 import persist from './store/persist'
 import { showUnhandledExceptionDialog } from './windows/dialog'
 import { openBlockExplorer, openExternal } from './windows/window'
-import { FrameInstance } from './windows/frames/frameInstances'
 import Erc20Contract from './contracts/erc20'
 import { getErrorCode } from '../resources/utils'
 
@@ -271,36 +269,6 @@ ipcMain.on('frame:max', (e) => {
 
 ipcMain.on('frame:unmax', (e) => {
   windows.unmax(e)
-})
-
-dapps.add({
-  ens: 'send.frame.eth',
-  checkStatusRetryCount: 0,
-  openWhenReady: false,
-  config: {
-    key: 'value'
-  },
-  status: 'initial'
-})
-
-ipcMain.on('unsetCurrentView', async (e) => {
-  const win = BrowserWindow.fromWebContents(e.sender) as FrameInstance
-  dapps.unsetCurrentView(win.frameId as string)
-})
-
-ipcMain.on('*:addFrame', (e, id) => {
-  const existingFrame = store('main.frames', id)
-
-  if (existingFrame) {
-    windows.refocusFrame(id)
-  } else {
-    store.addFrame({
-      id,
-      currentView: '',
-      views: {}
-    })
-    dapps.open(id, 'send.frame.eth')
-  }
 })
 
 app.on('ready', () => {

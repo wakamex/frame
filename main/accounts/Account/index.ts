@@ -29,12 +29,6 @@ import type { Permission } from '../../store/state'
 
 const nebula = nebulaApi()
 
-const storeApi = {
-  getPermissions: function (address: Address) {
-    return (store('main.permissions', address) || {}) as Record<string, Permission>
-  }
-}
-
 interface SignerOptions {
   type?: string
 }
@@ -85,19 +79,6 @@ class FrameAccount {
 
     this.signer = '' // Matched Signer ID
     this.signerStatus = ''
-
-    const existingPermissions = storeApi.getPermissions(this.address)
-    const currentSendDappPermission = Object.values(existingPermissions).find((p) =>
-      (p.origin || '').toLowerCase().includes('send.frame.eth')
-    )
-
-    if (!currentSendDappPermission) {
-      store.setPermission(this.address, {
-        handlerId: 'send-dapp-native',
-        origin: 'send.frame.eth',
-        provider: true
-      })
-    }
 
     this.update()
 

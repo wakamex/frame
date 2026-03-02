@@ -1,4 +1,4 @@
-import { BrowserWindow, BrowserView, BrowserWindowConstructorOptions, shell } from 'electron'
+import { BrowserWindow, BrowserWindowConstructorOptions, shell } from 'electron'
 import log from 'electron-log'
 import path from 'path'
 
@@ -44,33 +44,6 @@ export function createWindow(
   browserWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' })) // Prevent new windows
 
   return browserWindow
-}
-
-export function createViewInstance(
-  ens = '',
-  webPreferences: BrowserWindowConstructorOptions['webPreferences'] = {}
-) {
-  const viewInstance = new BrowserView({
-    webPreferences: {
-      ...webPreferences,
-      contextIsolation: true,
-      webviewTag: false,
-      sandbox: true,
-      defaultEncoding: 'utf-8',
-      nodeIntegration: false,
-      scrollBounce: true,
-      navigateOnDragDrop: false,
-      disableBlinkFeatures: 'Auxclick',
-      preload: path.resolve('./main/windows/viewPreload.js'),
-      partition: `persist:${ens}`
-    }
-  })
-
-  viewInstance.webContents.on('will-navigate', (e) => e.preventDefault())
-  viewInstance.webContents.on('will-attach-webview', (e) => e.preventDefault())
-  viewInstance.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
-
-  return viewInstance
 }
 
 const externalWhitelist = [
