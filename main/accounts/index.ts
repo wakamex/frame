@@ -28,7 +28,7 @@ import {
   PermitSignatureRequest
 } from './types'
 
-import type { Chain } from '../chains'
+type Chain = { type: 'ethereum'; id: number }
 import { ActionType } from '../transaction/actions'
 import { openBlockExplorer } from '../windows/window'
 import { ApprovalType } from '../../resources/constants'
@@ -81,8 +81,7 @@ const storeApi = {
   }
 }
 
-export {
-  RequestMode,
+export type {
   AccountRequest,
   AccessRequest,
   TransactionRequest,
@@ -90,6 +89,8 @@ export {
   AddChainRequest,
   AddTokenRequest
 } from './types'
+
+export { RequestMode } from './types'
 
 type RequestWithId = [string, TransactionRequest]
 
@@ -585,7 +586,8 @@ export class Accounts extends EventEmitter {
         l2Transactions.forEach(async ([_id, req]) => {
           let estimate = ''
           try {
-            estimate = (await provider.getL1GasCost(req.data)).toHexString()
+            const cost = await provider.getL1GasCost(req.data)
+            estimate = '0x' + cost.toString(16)
           } catch (e) {
             log.error('Error estimating L1 gas cost', e)
           }

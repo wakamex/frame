@@ -30,6 +30,7 @@ class SeedSignerWorker extends HotSignerWorker {
     pseudoCallback(null, this._encrypt(seed.toString(), password))
   }
 
+  // @ts-expect-error - overrides base with different params signature
   signMessage({ index, message }: { index: number; message: string }, pseudoCallback: PseudoCallback): void {
     // Make sure signer is unlocked
     if (!this.seed) return pseudoCallback('Signer locked')
@@ -39,6 +40,7 @@ class SeedSignerWorker extends HotSignerWorker {
     super.signMessage(key, message, pseudoCallback)
   }
 
+  // @ts-expect-error - overrides base with different params signature
   signTypedData({ index, typedMessage }: { index: number; typedMessage: any }, pseudoCallback: PseudoCallback): void {
     // Make sure signer is unlocked
     if (!this.seed) return pseudoCallback('Signer locked')
@@ -48,6 +50,7 @@ class SeedSignerWorker extends HotSignerWorker {
     super.signTypedData(key, typedMessage, pseudoCallback)
   }
 
+  // @ts-expect-error - overrides base with different params signature
   signTransaction({ index, rawTx }: { index: number; rawTx: any }, pseudoCallback: PseudoCallback): void {
     // Make sure signer is unlocked
     if (!this.seed) return pseudoCallback('Signer locked')

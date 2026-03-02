@@ -1,6 +1,6 @@
 // Translated to TypeScript from https://github.com/dicether/eip712/blob/master/src/eip712.ts
 import abi from 'ethereumjs-abi'
-import * as ethUtil from '@ethereumjs/util'
+import { keccak256, toBytes, toHex } from 'viem'
 
 interface TypeField {
   name: string
@@ -60,8 +60,12 @@ function encodeType(primaryType: string, types: TypeDefinitions) {
   return Buffer.from(result)
 }
 
+function keccak256Buffer(input: Buffer): Buffer {
+  return Buffer.from(toBytes(keccak256(input)))
+}
+
 function typeHash(primaryType: string, types: TypeDefinitions) {
-  return ethUtil.keccak256(encodeType(primaryType, types))
+  return keccak256Buffer(encodeType(primaryType, types))
 }
 
 function encodeData(primaryType: string, types: TypeDefinitions, data: Record<string, any>): Buffer {
@@ -81,11 +85,11 @@ function encodeData(primaryType: string, types: TypeDefinitions, data: Record<st
 
     if (field.type === 'string' || field.type === 'bytes') {
       encTypes.push('bytes32')
-      const valueHash = ethUtil.keccak256(Buffer.from(value))
+      const valueHash = keccak256Buffer(Buffer.from(value))
       encValues.push(valueHash)
     } else if (types[field.type] !== undefined) {
       encTypes.push('bytes32')
-      const valueHash = ethUtil.keccak256(encodeData(field.type, types, value))
+      const valueHash = keccak256Buffer(encodeData(field.type, types, value))
       encValues.push(valueHash)
     } else if (field.type.lastIndexOf(']') === field.type.length - 1) {
       throw new Error('Arrays currently not implemented!')
@@ -103,7 +107,7 @@ function encodeData(primaryType: string, types: TypeDefinitions, data: Record<st
 }
 
 function structHash(primaryType: string, types: TypeDefinitions, data: Record<string, any>) {
-  return ethUtil.keccak256(encodeData(primaryType, types, data))
+  return keccak256Buffer(encodeData(primaryType, types, data))
 }
 
 interface TypedData {
@@ -114,7 +118,7 @@ interface TypedData {
 }
 
 export function hashTypedData(typedData: TypedData) {
-  return ethUtil.keccak256(
+  return keccak256Buffer(
     Buffer.concat([
       Buffer.from('1901', 'hex'),
       structHash('EIP712Domain', typedData.types, typedData.domain),

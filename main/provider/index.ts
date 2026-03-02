@@ -20,7 +20,9 @@ import accounts, {
 } from '../accounts'
 
 import FrameAccount from '../accounts/Account'
-import Chains, { Chain } from '../chains'
+import Chains from '../chains'
+
+type Chain = { type: string; id: number }
 import reveal from '../reveal'
 import { getSignerType, Type as SignerType } from '../../resources/domain/signer'
 import { normalizeChainId, TransactionData } from '../../resources/domain/transaction'
@@ -443,7 +445,7 @@ export class Provider extends EventEmitter {
 
     return new Promise<string>((resolve, reject) => {
       this.connection.send(
-        payload,
+        payload as any,
         (response) => {
           if (response.error) {
             log.warn(`error estimating gas for tx to ${txParams.to}: ${response.error}`)
@@ -470,8 +472,8 @@ export class Provider extends EventEmitter {
     }
 
     this.connection.send(
-      { id: 1, jsonrpc: '2.0', method: 'eth_getTransactionCount', params: [rawTx.from, 'pending'] },
-      res,
+      { id: 1, jsonrpc: '2.0', method: 'eth_getTransactionCount', params: [rawTx.from, 'pending'] } as any,
+      res as any,
       targetChain
     )
   }
@@ -602,7 +604,7 @@ export class Provider extends EventEmitter {
       cb(response)
     }
 
-    this.connection.send(payload, res, targetChain)
+    this.connection.send(payload as any, res as any, targetChain)
   }
 
   _personalSign(payload: RPCRequestPayload, res: RPCRequestCallback) {
@@ -1083,7 +1085,7 @@ export class Provider extends EventEmitter {
     const { _origin, chainId, ...rpcPayload } = payload
 
     // Pass everything else to our connection
-    this.connection.send(rpcPayload, res, targetChain)
+    this.connection.send(rpcPayload as any, res as any, targetChain)
   }
 
   emit(type: string | symbol, ...args: any[]) {

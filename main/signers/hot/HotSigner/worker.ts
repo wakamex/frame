@@ -95,7 +95,7 @@ class HotSignerWorker {
 
   verifyAddress({ index, address }: { index: number; address: string }, pseudoCallback: PseudoCallback): void {
     const message = '0x' + crypto.randomBytes(32).toString('hex')
-    this.signMessage({ index, message } as any, (err: string | null, signedMessage?: string) => {
+    ;(this as any).signMessage({ index, message }, (err: string | null, signedMessage?: string) => {
       // Handle signing errors
       if (err) return pseudoCallback(err)
       // Signature -> buffer

@@ -15,14 +15,14 @@ window.addEventListener(
     const data = unwrap(e.data)
     if (data.source !== source) {
       if (data.method === 'rpc') {
-        return rpc(...data.args, (...args: any[]) =>
+        return rpc(...(data.args as [any, ...any[]]), (...args: any[]) =>
           (e.source as Window).postMessage(wrap({ method: 'rpc', id: data.id, args, source }), e.origin)
         )
       }
-      if (data.method === 'event') return ipcRenderer.send(...data.args)
+      if (data.method === 'event') return ipcRenderer.send(...(data.args as [string, ...any[]]))
       if (data.method === 'invoke') {
         ;(async () => {
-          const args = await ipcRenderer.invoke(...data.args)
+          const args = await ipcRenderer.invoke(...(data.args as [string, ...any[]]))
           window.postMessage(wrap({ method: 'invoke', channel: 'action', id: data.id, args, source }), '*')
         })()
       }

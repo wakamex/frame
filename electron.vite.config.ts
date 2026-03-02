@@ -10,7 +10,18 @@ export default defineConfig({
         entry: resolve(__dirname, 'main/index.ts')
       },
       rollupOptions: {
-        external: ['electron', 'electron-log', 'electron-updater', 'node-hid', 'usb']
+        external: [
+          'electron',
+          'electron-log',
+          'electron-updater',
+          'node-hid',
+          'usb',
+          'react-restore',
+          'ethereum-provider',
+          'eth-provider',
+          'content-hash',
+          'eth-ens-namehash'
+        ]
       }
     }
   },

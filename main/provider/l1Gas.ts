@@ -65,13 +65,13 @@ export async function estimateL1GasCost(
       ...(chainId && { chainId })
     })
 
-    const [fee] = decodeFunctionResult({
+    const decoded = decodeFunctionResult({
       abi: gasPriceOracleAbi,
       functionName: 'getL1Fee',
       data: result
-    }) as [bigint]
+    })
 
-    return fee
+    return decoded as unknown as bigint
   } catch (e) {
     // Return 0 if oracle call fails (non-OP chain or network error)
     return 0n

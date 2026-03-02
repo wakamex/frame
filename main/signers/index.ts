@@ -217,7 +217,7 @@ class Signers extends EventEmitter {
 
     // @ts-ignore
     if (signer && signer.lock) {
-      ;(signer as HotSigner).lock(cb)
+      ;(signer as HotSigner).lock(cb as any)
     }
   }
 
@@ -226,7 +226,7 @@ class Signers extends EventEmitter {
 
     // @ts-ignore
     if (signer && signer.unlock) {
-      ;(signer as HotSigner).unlock(password, cb)
+      ;(signer as HotSigner).unlock(password, {}, cb as any)
     } else {
       log.error('Signer not unlockable via password, no unlock method')
     }

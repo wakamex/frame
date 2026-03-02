@@ -88,7 +88,7 @@ async function getResolverAddress(name: string): Promise<string | null> {
 
 function makeCall(method: string, params: { to: string; data: string }): Promise<string> {
   return new Promise((resolve) => {
-    const payload = { jsonrpc: '2.0' as const, id: 1, method, params: [params, 'latest'] }
-    provider.send(payload, ({ result }: { result: string }) => resolve(result))
+    const payload = { jsonrpc: '2.0' as const, id: 1, method, params: [params, 'latest'] } as any
+    provider.send(payload, (({ result }: { result: string }) => resolve(result)) as any)
   })
 }

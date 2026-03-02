@@ -202,8 +202,8 @@ export default class LedgerSignerAdapter extends SignerAdapter {
   private detectDeviceChanges() {
     // all Ledger devices that are currently connected
     const ledgerDevices = getLedgerDevices()
-      .filter((device) => !!device.path)
-      .map((d) => ({ ...d, path: d.path as string, product: d.product || '' }))
+      .filter((device: any) => !!device.path)
+      .map((d: any) => ({ ...d, path: d.path as string, product: d.product || '' }))
 
     const { pendingDisconnections, reconnections } = this.getReconnectedLedgers(ledgerDevices)
     const detachedLedgers = this.getDetachedLedgers(ledgerDevices)

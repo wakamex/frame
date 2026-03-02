@@ -90,9 +90,9 @@ const rpc: Record<string, (...args: any[]) => void> = {
   async latticePair(id: string, pin: string, cb: RpcCallback) {
     const signer = signers.get(id)
 
-    if (signer && signer.pair) {
+    if (signer && (signer as any).pair) {
       try {
-        const hasActiveWallet = await signer.pair(pin)
+        const hasActiveWallet = await (signer as any).pair(pin)
         cb(null, hasActiveWallet)
       } catch (e: any) {
         cb(e.message)
@@ -104,27 +104,27 @@ const rpc: Record<string, (...args: any[]) => void> = {
   connectionStatus: (cb: RpcCallback) => {
     cb(null, {
       primary: {
-        status: provider.connection.primary.status,
-        network: provider.connection.primary.network,
-        type: provider.connection.primary.type,
-        connected: provider.connection.primary.connected
+        status: (provider.connection as any).primary?.status,
+        network: (provider.connection as any).primary?.network,
+        type: (provider.connection as any).primary?.type,
+        connected: (provider.connection as any).primary?.connected
       },
       secondary: {
-        status: provider.connection.secondary.status,
-        network: provider.connection.secondary.network,
-        type: provider.connection.secondary.type,
-        connected: provider.connection.secondary.connected
+        status: (provider.connection as any).secondary?.status,
+        network: (provider.connection as any).secondary?.network,
+        type: (provider.connection as any).secondary?.type,
+        connected: (provider.connection as any).secondary?.connected
       }
     })
   },
   confirmRequestApproval(req: any, approvalType: string, approvalData: any) {
-    accounts.confirmRequestApproval(req.handlerId, approvalType, approvalData)
+    accounts.confirmRequestApproval(req.handlerId, approvalType as any, approvalData)
   },
   respondToExtensionRequest(id: string, approved: boolean, cb: RpcCallback) {
     callbackWhenDone(() => store.trustExtension(id, approved), cb)
   },
   updateRequest(reqId: string, data: any, actionId: string) {
-    accounts.updateRequest(reqId, data, actionId)
+    accounts.updateRequest(reqId, data, actionId as any)
   },
   approveRequest(req: any) {
     accounts.setRequestPending(req)
@@ -136,12 +136,12 @@ const rpc: Record<string, (...args: any[]) => void> = {
     } else if (req.type === 'sign') {
       provider.approveSign(req, (err: any, res: any) => {
         if (err) return accounts.setRequestError(req.handlerId, err)
-        accounts.setRequestSuccess(req.handlerId, res)
+        accounts.setRequestSuccess(req.handlerId)
       })
     } else if (req.type === 'signTypedData' || req.type === 'signErc20Permit') {
       provider.approveSignTypedData(req, (err: any, res: any) => {
         if (err) return accounts.setRequestError(req.handlerId, err)
-        accounts.setRequestSuccess(req.handlerId, res)
+        accounts.setRequestSuccess(req.handlerId)
       })
     }
   },

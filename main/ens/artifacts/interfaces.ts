@@ -6,6 +6,7 @@ const registry = [
     inputs: [{ name: 'node', type: 'bytes32' }],
     name: 'resolver',
     outputs: [{ name: '', type: 'address' }],
+    stateMutability: 'view',
     type: 'function'
   },
   {
@@ -13,6 +14,7 @@ const registry = [
     inputs: [{ name: 'node', type: 'bytes32' }],
     name: 'owner',
     outputs: [{ name: '', type: 'address' }],
+    stateMutability: 'view',
     type: 'function'
   },
   {
@@ -23,6 +25,7 @@ const registry = [
     ],
     name: 'setResolver',
     outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function'
   },
   {
@@ -34,6 +37,7 @@ const registry = [
     ],
     name: 'setSubnodeOwner',
     outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function'
   },
   {
@@ -44,6 +48,7 @@ const registry = [
     ],
     name: 'setOwner',
     outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function'
   }
 ] as const satisfies Abi

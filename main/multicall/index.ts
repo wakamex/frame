@@ -16,7 +16,7 @@ import {
 
 export { Call }
 
-const multicallAbi = abi as Abi
+const multicallAbi = abi as unknown as Abi
 const memoizedAbis: Record<string, Abi> = {}
 
 function chainConfig(chainId: number, eth: EthereumProvider): MulticallConfig {

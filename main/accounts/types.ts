@@ -5,7 +5,7 @@ import type {
   TypedMessage as BaseTypedMessage
 } from '@metamask/eth-sig-util'
 import type { DecodedCallData } from '../contracts'
-import type { Chain } from '../chains'
+type Chain = { type: string; id: number }
 import type { TransactionData } from '../../resources/domain/transaction'
 import type { Action } from '../transaction/actions'
 import type { TokenData } from '../contracts/erc20'

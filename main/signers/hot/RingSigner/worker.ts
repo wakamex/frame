@@ -49,6 +49,7 @@ class RingSignerWorker extends HotSignerWorker {
     pseudoCallback(null, result)
   }
 
+  // @ts-expect-error - overrides base with different params signature (takes index, dispatches to super with key)
   signMessage({ index, message }: { index: number; message: string }, pseudoCallback: PseudoCallback): void {
     // Make sure signer is unlocked
     if (!this.keys) return pseudoCallback('Signer locked')
@@ -56,6 +57,7 @@ class RingSignerWorker extends HotSignerWorker {
     super.signMessage(this.keys[index], message, pseudoCallback)
   }
 
+  // @ts-expect-error - overrides base with different params signature
   signTypedData({ index, typedMessage }: { index: number; typedMessage: any }, pseudoCallback: PseudoCallback): void {
     // Make sure signer is unlocked
     if (!this.keys) return pseudoCallback('Signer locked')
@@ -63,6 +65,7 @@ class RingSignerWorker extends HotSignerWorker {
     super.signTypedData(this.keys[index], typedMessage, pseudoCallback)
   }
 
+  // @ts-expect-error - overrides base with different params signature
   signTransaction({ index, rawTx }: { index: number; rawTx: any }, pseudoCallback: PseudoCallback): void {
     // Make sure signer is unlocked
     if (!this.keys) return pseudoCallback('Signer locked')

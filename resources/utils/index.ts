@@ -1,4 +1,3 @@
-import { randomInt } from 'crypto'
 import { addHexPrefix, intToHex, stripHexPrefix } from '@ethereumjs/util'
 import { getAddress as getChecksumAddress } from 'viem'
 
@@ -25,7 +24,7 @@ function roundGwei(gwei: number) {
 }
 
 function randomLetters(num: number) {
-  return [...Array(num)].map(() => String.fromCharCode(65 + randomInt(0, 26))).join('')
+  return [...Array(num)].map(() => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('')
 }
 
 function capitalize(s: string) {

@@ -84,7 +84,7 @@ export default class Erc20Contract {
       try {
         const data = encodeFunctionData({ abi: erc20Abi as Abi, functionName: 'decimals' })
         const result = await this.ethCall(data)
-        const [decimals] = decodeFunctionResult({ abi: erc20Abi as Abi, functionName: 'decimals', data: result })
+        const decimals = decodeFunctionResult({ abi: erc20Abi as Abi, functionName: 'decimals', data: result }) as unknown
         return Number(decimals)
       } catch {
         return 0
@@ -95,7 +95,7 @@ export default class Erc20Contract {
       try {
         const data = encodeFunctionData({ abi: erc20Abi as Abi, functionName: 'name' })
         const result = await this.ethCall(data)
-        const [name] = decodeFunctionResult({ abi: erc20Abi as Abi, functionName: 'name', data: result })
+        const name = decodeFunctionResult({ abi: erc20Abi as Abi, functionName: 'name', data: result }) as unknown
         return name as string
       } catch {
         return ''
@@ -106,7 +106,7 @@ export default class Erc20Contract {
       try {
         const data = encodeFunctionData({ abi: erc20Abi as Abi, functionName: 'symbol' })
         const result = await this.ethCall(data)
-        const [symbol] = decodeFunctionResult({ abi: erc20Abi as Abi, functionName: 'symbol', data: result })
+        const symbol = decodeFunctionResult({ abi: erc20Abi as Abi, functionName: 'symbol', data: result }) as unknown
         return symbol as string
       } catch {
         return ''
@@ -117,7 +117,7 @@ export default class Erc20Contract {
       try {
         const data = encodeFunctionData({ abi: erc20Abi as Abi, functionName: 'totalSupply' })
         const result = await this.ethCall(data)
-        const [supply] = decodeFunctionResult({ abi: erc20Abi as Abi, functionName: 'totalSupply', data: result })
+        const supply = decodeFunctionResult({ abi: erc20Abi as Abi, functionName: 'totalSupply', data: result }) as unknown
         return (supply as bigint).toString()
       } catch {
         return ''

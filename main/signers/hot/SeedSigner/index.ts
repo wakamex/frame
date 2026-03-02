@@ -33,7 +33,7 @@ class SeedSigner extends HotSigner {
       const addresses: string[] = []
       for (let i = 0; i < 100; i++) {
         const publicKey = wallet.derive("m/44'/60'/0'/0/" + i).publicKey
-        const address = publicKeyToAddress('0x' + publicKey.toString('hex'))
+        const address = publicKeyToAddress(('0x' + publicKey.toString('hex')) as `0x${string}`)
         addresses.push(address)
       }
 
