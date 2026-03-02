@@ -4,7 +4,7 @@ import { actions } from '../../ipc'
 type AccountType = 'phrase' | 'privateKey' | 'keystore' | 'address' | 'ledger' | 'trezor' | 'lattice'
 
 interface AddAccountProps {
-  onClose: () => void
+  onClose: (createdAddress?: string) => void
 }
 
 export default function AddAccount({ onClose }: AddAccountProps) {
@@ -15,7 +15,7 @@ export default function AddAccount({ onClose }: AddAccountProps) {
       <div className="space-y-4">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-base font-semibold text-gray-100">Add Account</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-300 text-sm">Cancel</button>
+          <button onClick={() => onClose()} className="text-gray-500 hover:text-gray-300 text-sm">Cancel</button>
         </div>
         <div className="grid grid-cols-2 gap-2">
           {([
@@ -66,7 +66,7 @@ function FormHeader({ title, onBack }: { title: string; onBack: () => void }) {
   )
 }
 
-function PhraseForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+function PhraseForm({ onBack, onDone }: { onBack: () => void; onDone: (address?: string) => void }) {
   const [phrase, setPhrase] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -80,8 +80,8 @@ function PhraseForm({ onBack, onDone }: { onBack: () => void; onDone: () => void
     setError('')
     setLoading(true)
     try {
-      await actions.createFromPhrase(phrase.trim(), password)
-      onDone()
+      const result = await actions.createFromPhrase(phrase.trim(), password) as string | undefined
+      onDone(result)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create account')
     } finally {
@@ -125,7 +125,7 @@ function PhraseForm({ onBack, onDone }: { onBack: () => void; onDone: () => void
   )
 }
 
-function PrivateKeyForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+function PrivateKeyForm({ onBack, onDone }: { onBack: () => void; onDone: (address?: string) => void }) {
   const [key, setKey] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -139,8 +139,8 @@ function PrivateKeyForm({ onBack, onDone }: { onBack: () => void; onDone: () => 
     setError('')
     setLoading(true)
     try {
-      await actions.createFromPrivateKey(key.trim(), password)
-      onDone()
+      const result = await actions.createFromPrivateKey(key.trim(), password) as string | undefined
+      onDone(result)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to import key')
     } finally {
@@ -184,7 +184,7 @@ function PrivateKeyForm({ onBack, onDone }: { onBack: () => void; onDone: () => 
   )
 }
 
-function KeystoreForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+function KeystoreForm({ onBack, onDone }: { onBack: () => void; onDone: (address?: string) => void }) {
   const [keystore, setKeystore] = useState<Record<string, unknown> | null>(null)
   const [keystorePassword, setKeystorePassword] = useState('')
   const [password, setPassword] = useState('')
@@ -208,8 +208,8 @@ function KeystoreForm({ onBack, onDone }: { onBack: () => void; onDone: () => vo
     setError('')
     setLoading(true)
     try {
-      await actions.createFromKeystore(keystore, password, keystorePassword)
-      onDone()
+      const result = await actions.createFromKeystore(keystore, password, keystorePassword) as string | undefined
+      onDone(result)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to import keystore')
     } finally {
@@ -270,7 +270,7 @@ function KeystoreForm({ onBack, onDone }: { onBack: () => void; onDone: () => vo
   )
 }
 
-function WatchAddressForm({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+function WatchAddressForm({ onBack, onDone }: { onBack: () => void; onDone: (address?: string) => void }) {
   const [address, setAddress] = useState('')
   const [resolvedAddress, setResolvedAddress] = useState('')
   const [name, setName] = useState('')
@@ -305,7 +305,7 @@ function WatchAddressForm({ onBack, onDone }: { onBack: () => void; onDone: () =
     const addr = resolvedAddress || address
     try {
       await actions.createFromAddress(addr, name || 'Watch Account')
-      onDone()
+      onDone(addr)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to add address')
     } finally {

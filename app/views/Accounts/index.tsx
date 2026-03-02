@@ -13,7 +13,16 @@ export default function AccountsView() {
   const selectedAccount = snap.selectedAccount
 
   if (showAdd) {
-    return <AddAccount onClose={() => setShowAdd(false)} />
+    return (
+      <AddAccount
+        onClose={(createdAddress) => {
+          setShowAdd(false)
+          if (createdAddress) {
+            setSelectedAccount(createdAddress)
+          }
+        }}
+      />
+    )
   }
 
   // On compact layout, show list or detail — not both
