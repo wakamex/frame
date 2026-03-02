@@ -18,6 +18,7 @@ import Balance from '../../components/Balance'
 import StatusDot from '../../components/StatusDot'
 import ChainBadge from '../../components/ChainBadge'
 import Modal from '../../components/Modal'
+import BuyButton from '../../components/BuyButton'
 
 export default function AccountDetail() {
   const account = useSelectedAccount()
@@ -116,7 +117,10 @@ export default function AccountDetail() {
             </h2>
           )}
         </div>
-        <Address address={account.id} full className="text-gray-400" />
+        <div className="flex items-center justify-between">
+          <Address address={account.id} full className="text-gray-400" />
+          <BuyButton address={account.id} chainId={displayedBalances[0]?.chainId ?? 1} />
+        </div>
       </div>
 
       {/* Signer info */}
