@@ -111,27 +111,18 @@ export function addNetwork(net: any) {
       connection: {
         presets: { local: 'direct' },
         primary: {
-          on: true,
-          current: 'custom',
-          status: 'loading',
-          connected: false,
-          type: '',
-          network: '',
-          custom: primaryRpc
+          on: true, current: 'custom', status: 'loading', connected: false,
+          type: '', network: '', custom: primaryRpc
         },
         secondary: {
-          on: false,
-          current: 'custom',
-          status: 'loading',
-          connected: false,
-          type: '',
-          network: '',
-          custom: secondaryRpc
+          on: false, current: 'custom', status: 'loading', connected: false,
+          type: '', network: '', custom: secondaryRpc
         }
       },
       on: true,
       ...net
     }
+
     ;(state.main.networksMeta as any)[net.type][net.id] = {
       blockHeight: 0,
       name: net.name,
@@ -411,7 +402,9 @@ export function removeBalance(chainId: number, address: string) {
   const key = address.toLowerCase()
   for (const accountAddress in state.main.balances) {
     const balances = state.main.balances[accountAddress] as any[]
-    const idx = balances.findIndex((b: any) => b.chainId === chainId && b.address.toLowerCase() === key)
+    const idx = balances.findIndex(
+      (b: any) => b.chainId === chainId && b.address.toLowerCase() === key
+    )
     if (idx > -1) balances.splice(idx, 1)
   }
 }
@@ -663,6 +656,7 @@ export function muteBetaDisclosure() {
   navDash({ view: 'accounts', data: {} })
 }
 
+
 export function completeOnboarding() {
   state.main.mute.onboardingWindow = true
   ;(state as any).windows.onboard = (state as any).windows.onboard || {}
@@ -750,43 +744,4 @@ export function updateTypedDataRequest(account: string, reqId: string, data: any
     return
   }
   Object.assign(requests[reqId], data)
-}
-
-// ---- Transaction History ----
-
-const TX_HISTORY_LIMIT = 200
-
-export function addTxRecord(address: string, record: any) {
-  const key = address.toLowerCase()
-  if (!state.main.txHistory[key]) (state.main.txHistory as any)[key] = []
-  const records = state.main.txHistory[key] as any[]
-  records.unshift(record)
-  // Drop oldest entries beyond the limit
-  if (records.length > TX_HISTORY_LIMIT) {
-    records.splice(TX_HISTORY_LIMIT)
-  }
-}
-
-export function updateTxStatus(
-  address: string,
-  hash: string,
-  status: 'confirmed' | 'failed',
-  receipt?: { gasUsed: string; blockNumber: number }
-) {
-  const key = address.toLowerCase()
-  const records = state.main.txHistory[key] as any[] | undefined
-  if (!records) return
-  const record = records.find((r: any) => r.hash === hash)
-  if (!record) return
-  record.status = status
-  if (receipt) {
-    record.confirmedAt = Date.now()
-    record.gasUsed = receipt.gasUsed
-    record.blockNumber = receipt.blockNumber
-  }
-}
-
-export function clearTxHistory(address: string) {
-  const key = address.toLowerCase()
-  ;(state.main.txHistory as any)[key] = []
 }

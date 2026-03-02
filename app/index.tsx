@@ -14,7 +14,6 @@ import SettingsView from './views/Settings'
 import RequestOverlay from './views/Requests'
 import OnboardView from './views/Onboard'
 import SendView from './views/Send'
-import HistoryView from './views/History'
 
 function App() {
   const snap = useSnapshot(state)
@@ -83,7 +82,6 @@ function App() {
           <NavItem label="Accounts" view="accounts" current={currentView} onClick={handleViewChange} />
           <NavItem label="Send" view="send" current={currentView} onClick={handleViewChange} />
           <NavItem label="Signers" view="signers" current={currentView} onClick={handleViewChange} />
-          <NavItem label="History" view="history" current={currentView} onClick={handleViewChange} />
           <NavItem label="Chains" view="chains" current={currentView} onClick={handleViewChange} />
           <NavItem label="Tokens" view="tokens" current={currentView} onClick={handleViewChange} />
           <div className="flex-1" />
@@ -157,8 +155,6 @@ function ViewContent({ view }: { view: string }) {
       return <ChainsView />
     case 'tokens':
       return <TokensView />
-    case 'history':
-      return <HistoryView />
     case 'settings':
       return <SettingsView />
     default:

@@ -876,9 +876,6 @@
   .bg-green-400 {
     background-color: var(--color-green-400);
   }
-  .bg-green-500\/20 {
-    background-color: color-mix(in oklab, var(--color-green-500) 20%, transparent);
-  }
   .bg-green-600\/20 {
     background-color: color-mix(in oklab, var(--color-green-600) 20%, transparent);
   }
@@ -896,9 +893,6 @@
   }
   .bg-yellow-500\/10 {
     background-color: color-mix(in oklab, var(--color-yellow-500) 10%, transparent);
-  }
-  .bg-yellow-500\/20 {
-    background-color: color-mix(in oklab, var(--color-yellow-500) 20%, transparent);
   }
   .p-3 {
     padding: calc(var(--spacing) * 3);
@@ -947,9 +941,6 @@
   }
   .py-8 {
     padding-block: calc(var(--spacing) * 8);
-  }
-  .py-12 {
-    padding-block: calc(var(--spacing) * 12);
   }
   .pt-2 {
     padding-top: calc(var(--spacing) * 2);

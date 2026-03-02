@@ -227,20 +227,3 @@ export interface Shortcut {
   enabled: boolean
   configuring: boolean
 }
-
-// --- Transaction History ---
-
-export interface TxRecord {
-  hash: string
-  chainId: number
-  from: string
-  to: string
-  value: string
-  data?: string
-  decodedName?: string
-  status: 'pending' | 'confirmed' | 'failed'
-  submittedAt: number
-  confirmedAt?: number
-  gasUsed?: string
-  blockNumber?: number
-}

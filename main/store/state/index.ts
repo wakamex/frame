@@ -23,7 +23,6 @@ export type { NativeCurrency } from './types/nativeCurrency'
 export type { Gas, GasFees } from './types/gas'
 export type { Rate } from './types/rate'
 export type { ColorwayPalette } from './types/colors'
-export type { TxRecord, TxHistory } from './types/txHistory'
 
 const StateSchema = z.object({
   main: MainSchema
@@ -96,7 +95,7 @@ type M = Main & {
 }
 
 const mainState: M = {
-  _version: main('_version', 44),
+  _version: main('_version', 42),
   instanceId: main('instanceId', generateUuid()),
   colorway: main('colorway', 'dark'),
   colorwayPrimary: {
@@ -160,7 +159,6 @@ const mainState: M = {
   addresses: main('addresses', {}), // Should be removed after 0.5 release
   permissions: main('permissions', {}),
   balances: {},
-  txHistory: main('txHistory', {}),
   tokens: main('tokens', { custom: [], known: {} }),
   rates: {}, // main('rates', {}),
   signers: {},

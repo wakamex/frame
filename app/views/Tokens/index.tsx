@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import type { Token } from '../../types'
 import { useTokens, useNetworks } from '../../store'
 import { actions } from '../../ipc'
@@ -101,20 +101,38 @@ export default function TokensView() {
   )
 }
 
+const ADDRESS_RE = /^0x[a-fA-F0-9]{40}$/
+
 function AddTokenForm({ onDone }: { onDone: () => void }) {
+  const networks = useNetworks()
+  const activeChains = useMemo(
+    () => Object.values(networks).filter((c) => c.on).sort((a, b) => a.name.localeCompare(b.name)),
+    [networks]
+  )
+
   const [contractAddress, setContractAddress] = useState('')
-  const [chainId, setChainId] = useState('1')
-  const [tokenData, setTokenData] = useState<{ name: string; symbol: string; decimals: number } | null>(null)
+  const [chainId, setChainId] = useState(() =>
+    activeChains.length > 0 ? String(activeChains[0].id) : ''
+  )
+  const [name, setName] = useState('')
+  const [symbol, setSymbol] = useState('')
+  const [decimals, setDecimals] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [fetched, setFetched] = useState(false)
 
-  const handleFetch = async () => {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const fetchDetails = useCallback(async (address: string, chain: string) => {
     setError('')
     setLoading(true)
     try {
-      const data = await actions.getTokenDetails(contractAddress, parseInt(chainId))
+      const data = await actions.getTokenDetails(address, parseInt(chain))
       if (data && data.name) {
-        setTokenData(data)
+        setName(data.name)
+        setSymbol(data.symbol)
+        setDecimals(String(data.decimals))
+        setFetched(true)
       } else {
         setError('Could not find token at this address')
       }
@@ -123,63 +141,126 @@ function AddTokenForm({ onDone }: { onDone: () => void }) {
     } finally {
       setLoading(false)
     }
+  }, [])
+
+  // Auto-fetch with 500ms debounce when address is valid and chain is set
+  useEffect(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+
+    if (ADDRESS_RE.test(contractAddress) && chainId) {
+      timerRef.current = setTimeout(() => fetchDetails(contractAddress, chainId), 500)
+    }
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [contractAddress, chainId, fetchDetails])
+
+  const resetFields = () => {
+    setName('')
+    setSymbol('')
+    setDecimals('')
+    setError('')
+    setFetched(false)
   }
 
+  const canAdd = contractAddress && chainId && name && symbol && decimals
+
   const handleAdd = () => {
-    if (!tokenData) return
+    if (!canAdd) return
     actions.addToken({
-      ...tokenData,
+      name,
+      symbol,
+      decimals: parseInt(decimals),
       address: contractAddress,
       chainId: parseInt(chainId)
     })
     onDone()
   }
 
+  const inputClass =
+    'w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 outline-none focus:border-gray-600'
+
   return (
     <div className="space-y-3">
-      <input
-        value={contractAddress}
-        onChange={(e) => { setContractAddress(e.target.value); setTokenData(null) }}
-        placeholder="Token contract address"
-        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 outline-none focus:border-gray-600 font-mono"
-      />
-      <select
-        value={chainId}
-        onChange={(e) => { setChainId(e.target.value); setTokenData(null) }}
-        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 outline-none"
-      >
-        <option value="1">Ethereum Mainnet</option>
-        <option value="10">Optimism</option>
-        <option value="137">Polygon</option>
-        <option value="8453">Base</option>
-        <option value="42161">Arbitrum</option>
-      </select>
-
-      {!tokenData && (
-        <button
-          onClick={handleFetch}
-          disabled={loading || !contractAddress}
-          className="w-full py-2 rounded-lg text-sm font-medium bg-gray-700 text-gray-200 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      {/* Chain selector */}
+      <div>
+        <label className="block text-xs text-gray-400 mb-1">Network</label>
+        <select
+          value={chainId}
+          onChange={(e) => { setChainId(e.target.value); resetFields() }}
+          className={inputClass}
         >
-          {loading ? 'Fetching...' : 'Fetch Token Info'}
-        </button>
+          {activeChains.length === 0 && <option value="">No active networks</option>}
+          {activeChains.map((c) => (
+            <option key={c.id} value={String(c.id)}>{c.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Contract address */}
+      <div>
+        <label className="block text-xs text-gray-400 mb-1">Contract Address</label>
+        <input
+          value={contractAddress}
+          onChange={(e) => { setContractAddress(e.target.value); resetFields() }}
+          placeholder="0x..."
+          className={`${inputClass} font-mono`}
+        />
+      </div>
+
+      {/* Loading indicator */}
+      {loading && (
+        <p className="text-xs text-gray-400 animate-pulse">Fetching token details...</p>
       )}
 
+      {/* Error */}
       {error && <p className="text-red-400 text-xs">{error}</p>}
 
-      {tokenData && (
-        <>
-          <div className="bg-gray-800/50 rounded-lg p-3 space-y-1">
-            <div className="text-sm text-gray-200">{tokenData.name}</div>
-            <div className="text-xs text-gray-400">{tokenData.symbol} &middot; {tokenData.decimals} decimals</div>
+      {/* Editable token fields -- shown once we have a valid address or fetched data */}
+      {(fetched || error) && (
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Name</label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Token Name"
+              className={inputClass}
+            />
           </div>
-          <button
-            onClick={handleAdd}
-            className="w-full py-2 rounded-lg text-sm font-medium bg-green-600/20 text-green-400 border border-green-600/30 hover:bg-green-600/30 transition-colors"
-          >
-            Add Token
-          </button>
-        </>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Symbol</label>
+              <input
+                value={symbol}
+                onChange={(e) => setSymbol(e.target.value)}
+                placeholder="TKN"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Decimals</label>
+              <input
+                value={decimals}
+                onChange={(e) => setDecimals(e.target.value.replace(/\D/g, ''))}
+                placeholder="18"
+                className={inputClass}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add button */}
+      {(fetched || error) && (
+        <button
+          onClick={handleAdd}
+          disabled={!canAdd}
+          className="w-full py-2 rounded-lg text-sm font-medium bg-green-600/20 text-green-400 border border-green-600/30 hover:bg-green-600/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          Add Token
+        </button>
       )}
     </div>
   )

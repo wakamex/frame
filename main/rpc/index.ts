@@ -12,8 +12,7 @@ import signers from '../signers'
 import * as launch from '../launch'
 import provider from '../provider'
 import state from '../store'
-import { updateLattice, trustExtension, addTxRecord } from '../store/actions'
-import txTracker from '../txHistory'
+import { updateLattice, trustExtension } from '../store/actions'
 import nebulaApi from '../nebula'
 
 import { arraysEqual, randomLetters } from '../../resources/utils'
@@ -132,29 +131,9 @@ const rpc: Record<string, (...args: any[]) => void> = {
   approveRequest(req: any) {
     accounts.setRequestPending(req)
     if (req.type === 'transaction') {
-      provider.approveTransactionRequest(req, (err: any, txHash: any) => {
+      provider.approveTransactionRequest(req, (err: any, res: any) => {
         if (err) return accounts.setRequestError(req.handlerId, err)
-
-        // Record transaction in history
-        if (txHash && req.data) {
-          const chainId = parseInt(req.data.chainId, 16) || 1
-          const from = (req.data.from || req.account || '').toLowerCase()
-          const record = {
-            hash: txHash,
-            chainId,
-            from,
-            to: req.data.to || '',
-            value: req.data.value || '0x0',
-            data: req.data.data,
-            decodedName: req.decodedData?.name || req.recognizedActions?.[0]?.type,
-            status: 'pending',
-            submittedAt: Date.now()
-          }
-          addTxRecord(from, record)
-          txTracker.track(txHash, chainId, from)
-        }
-
-        setTimeout(() => accounts.setTxSent(req.handlerId, txHash), 1800)
+        setTimeout(() => accounts.setTxSent(req.handlerId, res), 1800)
       })
     } else if (req.type === 'sign') {
       provider.approveSign(req, (err: any, res: any) => {

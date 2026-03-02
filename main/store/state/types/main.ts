@@ -8,7 +8,6 @@ import { DappSchema } from './dapp'
 import { OriginSchema } from './origin'
 import { PermissionSchema } from './permission'
 import { ShortcutSchema } from './shortcuts'
-import { TxHistorySchema } from './txHistory'
 
 const ShortcutsSchema = z.object({
   summon: ShortcutSchema
@@ -69,7 +68,6 @@ export const MainSchema = z.object({
   colorwayPrimary: ColorwayPrimarySchema,
   shortcuts: ShortcutsSchema,
   updater: UpdaterPreferencesSchema,
-  txHistory: TxHistorySchema,
   ...PreferencesSchema
 })
 
