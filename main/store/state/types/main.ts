@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { AccountMetadataSchema, AccountSchema } from './account'
+import { AddressBookEntrySchema } from './addressBook'
 import { BalanceSchema } from './balance'
 import { ChainMetadataSchema, ChainSchema } from './chain'
 import { ColorwayPrimarySchema } from './colors'
@@ -63,6 +64,7 @@ export const MainSchema = z.object({
   accounts: z.record(z.string(), AccountSchema),
   accountsMeta: z.record(z.string(), AccountMetadataSchema),
   balances: z.record(z.string().describe('Address'), z.array(BalanceSchema)),
+  addressBook: z.record(z.string(), AddressBookEntrySchema).default({}),
   dapps: z.record(z.string(), DappSchema),
   mute: z.record(notificationTypes, z.boolean()),
   colorway: z.enum(['light', 'dark']),

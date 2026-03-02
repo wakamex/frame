@@ -3,6 +3,7 @@ import type {
   Account,
   AccountMetadata,
   AccountRequest,
+  AddressBookEntry,
   Balance,
   Chain,
   ChainMetadata,
@@ -36,6 +37,7 @@ export interface MainState {
   }
   accounts: Record<string, Account>
   accountsMeta: Record<string, AccountMetadata>
+  addressBook: Record<string, AddressBookEntry>
   origins: Record<string, Origin>
   permissions: Record<string, Record<string, Permission>>
   balances: Record<string, Balance[]>
@@ -73,7 +75,7 @@ export interface AppState {
 
   // Local UI state
   initialized: boolean
-  currentView: 'accounts' | 'portfolio' | 'signers' | 'chains' | 'settings' | 'send' | 'tokens'
+  currentView: 'accounts' | 'portfolio' | 'signers' | 'chains' | 'settings' | 'send' | 'tokens' | 'contacts'
   selectedAccount: string | null
 }
 
@@ -154,6 +156,8 @@ export const usePendingRequests = () => {
   }
   return requests.filter((r) => r && !['confirmed', 'declined', 'error', 'success'].includes(r.status ?? ''))
 }
+
+export const useAddressBook = () => useSnapshot(state).main?.addressBook ?? {}
 
 // Re-export useSnapshot for components that need direct access
 export { useSnapshot }

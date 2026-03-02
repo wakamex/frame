@@ -168,5 +168,11 @@ export const actions = {
   setGasAlert: (chainId: string, threshold: number, enabled: boolean) =>
     sendAction('setGasAlert', chainId, threshold, enabled),
   removeGasAlert: (chainId: string) => sendAction('removeGasAlert', chainId),
-  toggleGasAlert: (chainId: string) => sendAction('toggleGasAlert', chainId)
+  toggleGasAlert: (chainId: string) => sendAction('toggleGasAlert', chainId),
+
+  // Address Book
+  addContact: (entry: { address: string; name: string; notes?: string }) => sendAction('addContact', entry),
+  updateContact: (id: string, update: { address?: string; name?: string; notes?: string }) =>
+    sendAction('updateContact', id, update),
+  removeContact: (id: string) => sendAction('removeContact', id)
 }

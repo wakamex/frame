@@ -1,5 +1,5 @@
 import log from 'electron-log'
-import { v5 as uuidv5 } from 'uuid'
+import { v4 as generateUuid, v5 as uuidv5 } from 'uuid'
 import { accountNS, isDefaultAccountName } from '../../../resources/domain/account'
 import { toTokenId } from '../../../resources/domain/balance'
 import state from '..'
@@ -765,4 +765,28 @@ export function removeGasAlert(chainId: string) {
 export function toggleGasAlert(chainId: string) {
   const alert = (state.main as any).gasAlerts[chainId]
   if (alert) alert.enabled = !alert.enabled
+}
+
+// ---- Address Book ----
+
+export function addContact(entry: { address: string; name: string; notes?: string }) {
+  const id = generateUuid()
+  ;(state.main as any).addressBook[id] = {
+    address: entry.address,
+    name: entry.name,
+    notes: entry.notes || '',
+    createdAt: Date.now()
+  }
+}
+
+export function updateContact(id: string, update: { address?: string; name?: string; notes?: string }) {
+  const existing = (state.main as any).addressBook[id]
+  if (!existing) return
+  if (update.address !== undefined) existing.address = update.address
+  if (update.name !== undefined) existing.name = update.name
+  if (update.notes !== undefined) existing.notes = update.notes
+}
+
+export function removeContact(id: string) {
+  delete (state.main as any).addressBook[id]
 }
