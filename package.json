@@ -183,7 +183,12 @@
       "hdkey>secp256k1": true,
       "node-hid": false,
       "ws>bufferutil": false,
-      "ws>utf-8-validate": false
+      "ws>utf-8-validate": false,
+      "@ledgerhq/hw-transport-node-hid-singleton>node-hid": false,
+      "electron-builder>app-builder-lib>electron-builder-squirrel-windows>electron-winstaller": false,
+      "electron-vite>@swc/core": false,
+      "electron-vite>esbuild": false,
+      "nebula>ipfs-http-client>ipfs-core-types>ipfs-unixfs>protobufjs": false
     }
   }
 }
