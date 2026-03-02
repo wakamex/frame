@@ -1,5 +1,4 @@
 import { defineConfig } from 'electron-vite'
-import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
 
 export default defineConfig({
@@ -39,9 +38,13 @@ export default defineConfig({
   },
   renderer: {
     root: 'app',
-    plugins: [tailwindcss()],
+    esbuild: {
+      jsx: 'automatic',
+      jsxImportSource: 'react'
+    },
     build: {
       outDir: resolve(__dirname, 'bundle'),
+      emptyOutDir: false,
       rollupOptions: {
         input: resolve(__dirname, 'app/index.html')
       }

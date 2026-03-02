@@ -1,4 +1,4 @@
-import 'tailwindcss'
+import './styles.css'
 import { createRoot } from 'react-dom/client'
 import { useEffect } from 'react'
 
@@ -50,7 +50,7 @@ function App() {
   const updateBadge = useStore((s) => s.main?.updater?.badge)
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-gray-950 text-gray-100">
       {/* Update banner */}
       {updateBadge && <UpdateBanner badge={updateBadge} />}
 

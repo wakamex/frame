@@ -2,16 +2,12 @@ import { useState, useMemo } from 'react'
 import { useNetworks, useNetworksMeta } from '../../store'
 import { actions, sendAction } from '../../ipc'
 import { isNetworkConnected } from '../../../resources/utils/chains'
-import { getColor, Colorway } from '../../../resources/colors'
-import { useColorway } from '../../store'
 import { weiToGwei, hexToInt, roundGwei } from '../../../resources/utils'
 import StatusDot from '../../components/StatusDot'
-import type { ColorwayPalette } from '../../../main/store/state'
 
 export default function ChainsView() {
   const networks = useNetworks()
   const networksMeta = useNetworksMeta()
-  const colorway = useColorway()
   const [selectedChain, setSelectedChain] = useState<string | null>(null)
 
   const chains = useMemo(() => {
@@ -37,9 +33,7 @@ export default function ChainsView() {
             const gasLevel = meta?.gas?.price?.levels?.fast
             const gasDisplay = gasLevel ? roundGwei(weiToGwei(hexToInt(gasLevel))) : null
             const isSelected = selectedChain === id
-            const chainColor = meta?.primaryColor
-              ? getColor(meta.primaryColor as keyof ColorwayPalette, colorway as Colorway)
-              : null
+            const chainColor = meta?.primaryColor || null
 
             return (
               <button
@@ -53,7 +47,7 @@ export default function ChainsView() {
               >
                 <div className="flex items-center gap-2">
                   {chainColor && (
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: chainColor.hex }} />
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: chainColor }} />
                   )}
                   <StatusDot status={connected ? 'connected' : chain.on ? 'loading' : 'off'} />
                   <div className="flex-1 min-w-0">
