@@ -22,7 +22,7 @@ export async function resolveName(name: string): Promise<string | null> {
 
   if (output === '0x') return null
 
-  const [address] = decodeFunctionResult({ abi: resolverAbi, functionName: 'addr', data: output as Hex })
+  const address = decodeFunctionResult({ abi: resolverAbi, functionName: 'addr', data: output as Hex })
   return address as string
 }
 
@@ -40,7 +40,7 @@ export async function resolveAddress(address: string): Promise<string | null> {
 
   if (output === '0x') return null
 
-  const [resolvedName] = decodeFunctionResult({ abi: resolverAbi, functionName: 'name', data: output as Hex })
+  const resolvedName = decodeFunctionResult({ abi: resolverAbi, functionName: 'name', data: output as Hex })
   return resolvedName as string
 }
 
@@ -57,7 +57,7 @@ async function getResolverAddress(name: string): Promise<string | null> {
 
   if (output === '0x') return null
 
-  const [resolverAddress] = decodeFunctionResult({ abi: registryAbi, functionName: 'resolver', data: output as Hex })
+  const resolverAddress = decodeFunctionResult({ abi: registryAbi, functionName: 'resolver', data: output as Hex })
   return resolverAddress as string
 }
 
