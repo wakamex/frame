@@ -1,5 +1,20 @@
 import { defineConfig } from 'electron-vite'
 import { resolve } from 'path'
+import { copyFileSync, mkdirSync, readdirSync } from 'fs'
+
+function copyIcons() {
+  return {
+    name: 'copy-icons',
+    buildStart() {
+      const src = resolve(__dirname, 'main/windows')
+      const dest = resolve(__dirname, 'compiled/main')
+      mkdirSync(dest, { recursive: true })
+      for (const f of readdirSync(src)) {
+        if (f.endsWith('.png')) copyFileSync(resolve(src, f), resolve(dest, f))
+      }
+    }
+  }
+}
 
 const mainExternals = [
   'electron',
@@ -19,6 +34,7 @@ const mainExternals = [
 
 export default defineConfig({
   main: {
+    plugins: [copyIcons()],
     resolve: {
       extensions: ['.ts', '.js', '.mjs', '.mts', '.json']
     },

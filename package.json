@@ -30,7 +30,7 @@
     "compile": "npm run copy-assets && tsc --project tsconfig.build.json",
     "compile:watch": "npm run copy-assets && tsc --project tsconfig.build.json -w",
     "build": "npm run compile && sleep 4 && npm run bundle && sleep 4 && electron-builder --config=build/electron-builder-standard.js",
-    "copy-assets": "shx mkdir -p ./compiled/main/windows && shx cp ./main/windows/*.png ./compiled/main/windows",
+    "copy-assets": "shx mkdir -p ./compiled/main && shx cp ./main/windows/*.png ./compiled/main",
     "publish": "electron-builder -c.snap.publish=github --config=build/electron-builder-standard.js",
     "publish:linux:arm64": "electron-builder -c.snap.publish=github --config=build/electron-builder-linux-arm64.js",
     "release": "npm run compile && sleep 4 && npm run bundle && sleep 4 && npm run publish",
