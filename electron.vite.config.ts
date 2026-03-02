@@ -16,7 +16,6 @@ export default defineConfig({
           'electron-updater',
           'node-hid',
           'usb',
-          'react-restore',
           'ethereum-provider',
           'eth-provider',
           'content-hash',

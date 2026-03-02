@@ -15,7 +15,3 @@ interface Store extends CallableStore {
     feed: (handler: (state: any, actionBatch: Action[]) => any) => void
   }
 }
-
-declare module 'react-restore' {
-  export function create(state: any, actions: any): Store
-}
