@@ -28,7 +28,25 @@ import {
   updateAccount as updateAccountAction,
   navClearReq as clearNavRequestAction,
   navClearSigner as clearNavSignerAction,
-  updateTypedDataRequest as updateTypedDataAction
+  updateTypedDataRequest as updateTypedDataAction,
+  selectPrimary as selectPrimaryAction,
+  setPrimaryCustom as setPrimaryCustomAction,
+  toggleConnection as toggleConnectionAction,
+  setGasFees as setGasFeesAction,
+  setGasDefault as setGasDefaultAction,
+  setPermission as setPermissionAction,
+  clearPermissions as clearPermissionsAction,
+  toggleAccess as toggleAccessAction,
+  syncPath as syncPathAction,
+  setGasAlert as setGasAlertAction,
+  removeGasAlert as removeGasAlertAction,
+  toggleGasAlert as toggleGasAlertAction,
+  addContact as addContactAction,
+  updateContact as updateContactAction,
+  removeContact as removeContactAction,
+  addTxRecord as addTxRecordAction,
+  updateTxStatus as updateTxStatusAction,
+  clearTxHistory as clearTxHistoryAction
 } from '../../../../main/store/actions'
 import { toTokenId } from '../../../../resources/domain/balance'
 
@@ -1179,5 +1197,421 @@ describe('#updateTypedDataRequest', () => {
     })
 
     expect(state.main.accounts[owner].requests[request].typedMessage.data.oldAttribute).toBeTruthy()
+  })
+})
+
+// ---- Network/Connection action tests ----
+
+describe('#selectPrimary', () => {
+  beforeEach(() => {
+    state.main.networks = {
+      ethereum: {
+        1: { connection: { primary: { current: 'infura' }, secondary: { current: 'custom' } } }
+      }
+    }
+  })
+
+  it('sets the primary connection preset', () => {
+    selectPrimaryAction('ethereum', '1', 'custom')
+    expect(state.main.networks.ethereum['1'].connection.primary.current).toBe('custom')
+  })
+})
+
+describe('#setPrimaryCustom', () => {
+  beforeEach(() => {
+    state.main.networks = {
+      ethereum: {
+        1: { connection: { primary: { custom: '' }, secondary: { custom: '' } } }
+      }
+    }
+  })
+
+  it('sets the custom primary RPC URL', () => {
+    setPrimaryCustomAction('ethereum', '1', 'https://my-rpc.example.com')
+    expect(state.main.networks.ethereum['1'].connection.primary.custom).toBe('https://my-rpc.example.com')
+  })
+
+  it('does nothing when netType is empty', () => {
+    setPrimaryCustomAction('', '1', 'https://my-rpc.example.com')
+    expect(state.main.networks.ethereum['1'].connection.primary.custom).toBe('')
+  })
+
+  it('does nothing when netId is empty', () => {
+    setPrimaryCustomAction('ethereum', '', 'https://my-rpc.example.com')
+    expect(state.main.networks.ethereum['1'].connection.primary.custom).toBe('')
+  })
+})
+
+describe('#toggleConnection', () => {
+  beforeEach(() => {
+    state.main.networks = {
+      ethereum: {
+        1: { connection: { primary: { on: true }, secondary: { on: false } } }
+      }
+    }
+  })
+
+  it('toggles primary connection off when currently on', () => {
+    toggleConnectionAction('ethereum', '1', 'primary')
+    expect(state.main.networks.ethereum['1'].connection.primary.on).toBe(false)
+  })
+
+  it('toggles secondary connection on when currently off', () => {
+    toggleConnectionAction('ethereum', '1', 'secondary')
+    expect(state.main.networks.ethereum['1'].connection.secondary.on).toBe(true)
+  })
+
+  it('sets connection to a specific value when provided', () => {
+    toggleConnectionAction('ethereum', '1', 'primary', false)
+    expect(state.main.networks.ethereum['1'].connection.primary.on).toBe(false)
+  })
+})
+
+// ---- Gas action tests ----
+
+describe('#setGasFees', () => {
+  beforeEach(() => {
+    state.main.networksMeta = {
+      ethereum: {
+        1: { gas: { price: { levels: {}, fees: {} } } }
+      }
+    }
+  })
+
+  it('sets EIP-1559 gas fees', () => {
+    const fees = { maxFeePerGas: '0x1234', maxPriorityFeePerGas: '0x100' }
+    setGasFeesAction('ethereum', '1', fees)
+    expect(state.main.networksMeta.ethereum['1'].gas.price.fees).toEqual(fees)
+  })
+})
+
+describe('#setGasDefault', () => {
+  beforeEach(() => {
+    state.main.networksMeta = {
+      ethereum: {
+        1: {
+          gas: {
+            price: {
+              selected: 'standard',
+              levels: { slow: '', standard: '', fast: '', asap: '', custom: '' }
+            }
+          }
+        }
+      }
+    }
+  })
+
+  it('sets the selected gas level', () => {
+    setGasDefaultAction('ethereum', '1', 'fast')
+    expect(state.main.networksMeta.ethereum['1'].gas.price.selected).toBe('fast')
+  })
+
+  it('sets lastLevel when level is not custom', () => {
+    setGasDefaultAction('ethereum', '1', 'fast')
+    expect(state.main.networksMeta.ethereum['1'].gas.price.lastLevel).toBe('fast')
+  })
+
+  it('sets custom price when level is custom', () => {
+    setGasDefaultAction('ethereum', '1', 'custom', '0x5AF3107A4000')
+    expect(state.main.networksMeta.ethereum['1'].gas.price.levels.custom).toBe('0x5AF3107A4000')
+  })
+
+  it('does not set lastLevel when level is custom', () => {
+    setGasDefaultAction('ethereum', '1', 'custom', '0x5AF3107A4000')
+    expect(state.main.networksMeta.ethereum['1'].gas.price.lastLevel).toBeUndefined()
+  })
+})
+
+// ---- Permission action tests ----
+
+describe('#setPermission', () => {
+  beforeEach(() => {
+    state.main.permissions = {}
+  })
+
+  it('adds permission for address and origin', () => {
+    const permission = { handlerId: 'frame.test', origin: 'frame.test', provider: true }
+    setPermissionAction(owner, permission)
+    expect(state.main.permissions[owner]['frame.test']).toEqual(permission)
+  })
+
+  it('creates the address entry if it does not exist', () => {
+    const permission = { handlerId: 'frame.test', provider: false }
+    setPermissionAction(owner, permission)
+    expect(state.main.permissions[owner]).toBeDefined()
+  })
+})
+
+describe('#clearPermissions', () => {
+  beforeEach(() => {
+    state.main.permissions = {
+      [owner]: {
+        'frame.test': { handlerId: 'frame.test', provider: true },
+        'other.test': { handlerId: 'other.test', provider: false }
+      }
+    }
+  })
+
+  it('removes all permissions for the address', () => {
+    clearPermissionsAction(owner)
+    expect(state.main.permissions[owner]).toEqual({})
+  })
+})
+
+describe('#toggleAccess', () => {
+  beforeEach(() => {
+    state.main.permissions = {
+      [owner]: {
+        'frame.test': { handlerId: 'frame.test', provider: false }
+      }
+    }
+  })
+
+  it('toggles provider access from false to true', () => {
+    toggleAccessAction(owner, 'frame.test')
+    expect(state.main.permissions[owner]['frame.test'].provider).toBe(true)
+  })
+
+  it('toggles provider access from true to false', () => {
+    state.main.permissions[owner]['frame.test'].provider = true
+    toggleAccessAction(owner, 'frame.test')
+    expect(state.main.permissions[owner]['frame.test'].provider).toBe(false)
+  })
+
+  it('does nothing if the permission does not exist', () => {
+    expect(() => toggleAccessAction(owner, 'nonexistent')).not.toThrow()
+  })
+})
+
+// ---- Settings action tests ----
+
+describe('#syncPath', () => {
+  it('sets a value at an arbitrary shallow path', () => {
+    syncPathAction('panel.accountFilter', 'searchQuery')
+    expect(state.panel.accountFilter).toBe('searchQuery')
+  })
+
+  it('creates intermediate objects for deeply nested paths', () => {
+    syncPathAction('someNewKey.deeply.nested.value', 42)
+    expect(state.someNewKey.deeply.nested.value).toBe(42)
+  })
+
+  it('does not write if path starts with "main"', () => {
+    syncPathAction('main.launch', true)
+    expect(state.main.launch).toBe(false)
+  })
+
+  it('does not write if path is "*"', () => {
+    syncPathAction('*', 'anything')
+    expect(state['*']).toBeUndefined()
+  })
+
+  it('does not write if path is empty', () => {
+    syncPathAction('', 'anything')
+    expect(state['']).toBeUndefined()
+  })
+})
+
+// ---- Gas alert action tests ----
+
+describe('#setGasAlert', () => {
+  beforeEach(() => {
+    state.main.gasAlerts = {}
+  })
+
+  it('creates an alert with threshold and enabled flag', () => {
+    setGasAlertAction('1', 50, true)
+    expect(state.main.gasAlerts['1']).toEqual({ threshold: 50, enabled: true, unit: 'gwei' })
+  })
+
+  it('creates an alert with enabled=false', () => {
+    setGasAlertAction('1', 100, false)
+    expect(state.main.gasAlerts['1'].enabled).toBe(false)
+  })
+})
+
+describe('#toggleGasAlert', () => {
+  beforeEach(() => {
+    state.main.gasAlerts = {
+      '1': { threshold: 50, enabled: true, unit: 'gwei' }
+    }
+  })
+
+  it('flips enabled from true to false', () => {
+    toggleGasAlertAction('1')
+    expect(state.main.gasAlerts['1'].enabled).toBe(false)
+  })
+
+  it('flips enabled from false to true', () => {
+    state.main.gasAlerts['1'].enabled = false
+    toggleGasAlertAction('1')
+    expect(state.main.gasAlerts['1'].enabled).toBe(true)
+  })
+
+  it('does nothing if the alert does not exist', () => {
+    expect(() => toggleGasAlertAction('nonexistent')).not.toThrow()
+  })
+})
+
+describe('#removeGasAlert', () => {
+  beforeEach(() => {
+    state.main.gasAlerts = {
+      '1': { threshold: 50, enabled: true, unit: 'gwei' }
+    }
+  })
+
+  it('deletes the alert for the chain', () => {
+    removeGasAlertAction('1')
+    expect(state.main.gasAlerts['1']).toBeUndefined()
+  })
+})
+
+// ---- Contact action tests ----
+
+describe('#addContact', () => {
+  beforeEach(() => {
+    state.main.addressBook = {}
+  })
+
+  it('adds entry with address, name, and notes', () => {
+    addContactAction({ address: owner, name: 'Alice', notes: 'Main wallet' })
+    const entries = Object.values(state.main.addressBook)
+    expect(entries).toHaveLength(1)
+    expect(entries[0]).toMatchObject({ address: owner, name: 'Alice', notes: 'Main wallet' })
+  })
+
+  it('adds entry with empty notes when not provided', () => {
+    addContactAction({ address: owner, name: 'Alice' })
+    const entries = Object.values(state.main.addressBook)
+    expect(entries[0].notes).toBe('')
+  })
+
+  it('sets a createdAt timestamp', () => {
+    const beforeTime = Date.now()
+    addContactAction({ address: owner, name: 'Alice' })
+    const entries = Object.values(state.main.addressBook)
+    expect(entries[0].createdAt).toBeGreaterThanOrEqual(beforeTime)
+  })
+})
+
+describe('#updateContact', () => {
+  const contactId = 'test-contact-id'
+
+  beforeEach(() => {
+    state.main.addressBook = {
+      [contactId]: { address: owner, name: 'Alice', notes: 'original note', createdAt: 1000 }
+    }
+  })
+
+  it('updates only the specified fields', () => {
+    updateContactAction(contactId, { name: 'Bob' })
+    expect(state.main.addressBook[contactId].name).toBe('Bob')
+    expect(state.main.addressBook[contactId].address).toBe(owner)
+    expect(state.main.addressBook[contactId].notes).toBe('original note')
+  })
+
+  it('updates the notes field', () => {
+    updateContactAction(contactId, { notes: 'updated note' })
+    expect(state.main.addressBook[contactId].notes).toBe('updated note')
+  })
+
+  it('does nothing if the contact does not exist', () => {
+    expect(() => updateContactAction('nonexistent-id', { name: 'Bob' })).not.toThrow()
+  })
+})
+
+describe('#removeContact', () => {
+  const contactId = 'test-contact-id'
+
+  beforeEach(() => {
+    state.main.addressBook = {
+      [contactId]: { address: owner, name: 'Alice', notes: '', createdAt: 1000 }
+    }
+  })
+
+  it('deletes the contact by id', () => {
+    removeContactAction(contactId)
+    expect(state.main.addressBook[contactId]).toBeUndefined()
+  })
+})
+
+// ---- Transaction history action tests ----
+
+describe('#addTxRecord', () => {
+  beforeEach(() => {
+    state.main.txHistory = {}
+  })
+
+  it('adds a tx record to the history array', () => {
+    const record = { hash: '0xabc', status: 'pending', value: '0x0' }
+    addTxRecordAction(owner, record)
+    expect(state.main.txHistory[owner.toLowerCase()]).toHaveLength(1)
+    expect(state.main.txHistory[owner.toLowerCase()][0]).toEqual(record)
+  })
+
+  it('prepends new records so the most recent is first', () => {
+    addTxRecordAction(owner, { hash: '0xabc' })
+    addTxRecordAction(owner, { hash: '0xdef' })
+    expect(state.main.txHistory[owner.toLowerCase()][0].hash).toBe('0xdef')
+    expect(state.main.txHistory[owner.toLowerCase()][1].hash).toBe('0xabc')
+  })
+
+  it('normalizes the address to lowercase', () => {
+    addTxRecordAction('0xABCDEF', { hash: '0x123' })
+    expect(state.main.txHistory['0xabcdef']).toHaveLength(1)
+  })
+
+  it('limits history to 200 entries', () => {
+    for (let i = 0; i < 201; i++) {
+      addTxRecordAction(owner, { hash: `0x${i}` })
+    }
+    expect(state.main.txHistory[owner.toLowerCase()]).toHaveLength(200)
+  })
+})
+
+describe('#updateTxStatus', () => {
+  const txHash = '0xabc123'
+
+  beforeEach(() => {
+    state.main.txHistory = {
+      [owner.toLowerCase()]: [{ hash: txHash, status: 'pending' }]
+    }
+  })
+
+  it('updates the status for the matching hash', () => {
+    updateTxStatusAction(owner, txHash, 'confirmed')
+    expect(state.main.txHistory[owner.toLowerCase()][0].status).toBe('confirmed')
+  })
+
+  it('sets receipt data when provided', () => {
+    updateTxStatusAction(owner, txHash, 'confirmed', { gasUsed: '0x5208', blockNumber: 12345 })
+    const record = state.main.txHistory[owner.toLowerCase()][0]
+    expect(record.gasUsed).toBe('0x5208')
+    expect(record.blockNumber).toBe(12345)
+  })
+
+  it('does nothing if the address has no history', () => {
+    expect(() => updateTxStatusAction('0xunknownaddress', txHash, 'confirmed')).not.toThrow()
+  })
+
+  it('does nothing if the hash is not found', () => {
+    updateTxStatusAction(owner, '0xunknownhash', 'confirmed')
+    expect(state.main.txHistory[owner.toLowerCase()][0].status).toBe('pending')
+  })
+})
+
+describe('#clearTxHistory', () => {
+  beforeEach(() => {
+    state.main.txHistory = {
+      [owner.toLowerCase()]: [
+        { hash: '0xabc', status: 'pending' },
+        { hash: '0xdef', status: 'confirmed' }
+      ]
+    }
+  })
+
+  it('empties the history for the address', () => {
+    clearTxHistoryAction(owner)
+    expect(state.main.txHistory[owner.toLowerCase()]).toEqual([])
   })
 })
