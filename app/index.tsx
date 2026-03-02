@@ -3,7 +3,13 @@ import { createRoot } from 'react-dom/client'
 import { useEffect } from 'react'
 
 import { initializeApp, sendEvent } from './ipc'
-import { useStore, useCurrentView } from './store'
+import { useStore, useCurrentView, usePendingRequests } from './store'
+import AccountsView from './views/Accounts'
+import SignersView from './views/Signers'
+import ChainsView from './views/Chains'
+import TokensView from './views/Tokens'
+import SettingsView from './views/Settings'
+import RequestOverlay from './views/Requests'
 
 function App() {
   const initialized = useStore((s) => s.initialized)
@@ -26,6 +32,8 @@ function App() {
     )
   }
 
+  const pendingRequests = usePendingRequests()
+
   return (
     <div className="flex h-screen">
       {/* Sidebar navigation */}
@@ -43,6 +51,9 @@ function App() {
       <main className="flex-1 overflow-y-auto p-6">
         <ViewContent view={currentView} />
       </main>
+
+      {/* Request overlay - shows when pending requests exist */}
+      {pendingRequests.length > 0 && <RequestOverlay requests={pendingRequests} />}
     </div>
   )
 }
@@ -76,30 +87,18 @@ function NavItem({
 function ViewContent({ view }: { view: string }) {
   switch (view) {
     case 'accounts':
-      return <PlaceholderView title="Accounts" description="Manage your accounts and view balances" />
+      return <AccountsView />
     case 'signers':
-      return <PlaceholderView title="Signers" description="Connect and manage hardware wallets" />
+      return <SignersView />
     case 'chains':
-      return <PlaceholderView title="Chains" description="Configure networks and RPC endpoints" />
+      return <ChainsView />
     case 'tokens':
-      return <PlaceholderView title="Tokens" description="Manage custom tokens" />
+      return <TokensView />
     case 'settings':
-      return <PlaceholderView title="Settings" description="Application preferences" />
+      return <SettingsView />
     default:
-      return <PlaceholderView title="Accounts" description="Manage your accounts and view balances" />
+      return <AccountsView />
   }
-}
-
-function PlaceholderView({ title, description }: { title: string; description: string }) {
-  return (
-    <div>
-      <h1 className="text-xl font-semibold text-gray-100 mb-1">{title}</h1>
-      <p className="text-sm text-gray-400">{description}</p>
-      <div className="mt-8 border border-dashed border-gray-700 rounded-lg p-12 text-center text-gray-500 text-sm">
-        View under construction
-      </div>
-    </div>
-  )
 }
 
 // Prevent drag-and-drop navigation
