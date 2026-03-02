@@ -10,7 +10,7 @@ export type KeyboardLayout = {
 const isUSLayout = () => keyboardLayout?.get('Backslash') === '\\'
 let keyboardLayout: KeyboardLayout | undefined
 
-if (global?.navigator) {
+if (typeof navigator !== 'undefined' && navigator.keyboard) {
   navigator.keyboard.getLayoutMap().then((layout) => {
     keyboardLayout = layout
     ;(link as any).send('tray:action', 'setKeyboardLayout', {
