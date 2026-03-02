@@ -375,12 +375,12 @@ class ChainConnection extends EventEmitter {
     if (priority === 'primary') {
       const { status, connected, type, network } = this.primary
       const details = { status, connected, type, network }
-      log.info(`Updating primary connection for chain ${this.chainId}`, details)
+      log.verbose(`Updating primary connection for chain ${this.chainId}`, details)
       setPrimary(this.type, this.chainId, details)
     } else if (priority === 'secondary') {
       const { status, connected, type, network } = this.secondary
       const details = { status, connected, type, network }
-      log.info(`Updating secondary connection for chain ${this.chainId}`, details)
+      log.verbose(`Updating secondary connection for chain ${this.chainId}`, details)
       setSecondary(this.type, this.chainId, details)
     }
   }
@@ -483,10 +483,10 @@ class ChainConnection extends EventEmitter {
       secondary.current === 'custom' ? secondary.custom : currentPresets[secondary.current]
 
     if (chain.on && connection.secondary.on) {
-      log.info('Secondary connection: ON')
+      log.verbose('Secondary connection: ON')
 
       if (connection.primary.on && connection.primary.status === 'connected') {
-        log.info('Secondary connection on STANDBY', connection.secondary.status === 'standby')
+        log.verbose('Secondary connection on STANDBY', connection.secondary.status === 'standby')
         this.resetConnection('secondary', 'standby')
       } else if (!secondaryTarget) {
         this.resetConnection('secondary', 'disconnected')
@@ -544,14 +544,14 @@ class ChainConnection extends EventEmitter {
         this.secondary.provider.on('error', (err: Error) => this.emit('error', err))
       }
     } else {
-      log.info('Secondary connection: OFF')
+      log.verbose('Secondary connection: OFF')
       this.resetConnection('secondary', 'off')
     }
 
     const primaryTarget = primary.current === 'custom' ? primary.custom : currentPresets[primary.current]
 
     if (chain.on && connection.primary.on) {
-      log.info('Primary connection: ON')
+      log.verbose('Primary connection: ON')
 
       if (!primaryTarget) {
         this.resetConnection('primary', 'disconnected')
@@ -609,7 +609,7 @@ class ChainConnection extends EventEmitter {
         this.primary.provider.on('error', (err: Error) => this.emit('error', err))
       }
     } else {
-      log.info('Primary connection: OFF')
+      log.verbose('Primary connection: OFF')
       this.resetConnection('primary', 'off')
     }
   }

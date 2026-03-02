@@ -32,7 +32,7 @@ app.commandLine.appendSwitch('ignore-gpu-blocklist', 'true')
 app.commandLine.appendSwitch('force-color-profile', 'srgb')
 
 const isDev = process.env.NODE_ENV === 'development'
-log.transports.console.level = process.env.LOG_LEVEL || (isDev ? 'verbose' : 'info')
+log.transports.console.level = process.env.LOG_LEVEL || 'info'
 
 if (process.env.LOG_LEVEL === 'debug') {
   log.transports.file.level = 'debug'
