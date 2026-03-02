@@ -19,7 +19,7 @@ const PRIMITIVE_TYPES = [
   /^string$/
 ]
 
-function isPrimitiveType(type: string) {
+export function isPrimitiveType(type: string) {
   return PRIMITIVE_TYPES.some((regex) => regex.test(type))
 }
 
@@ -45,7 +45,7 @@ function dependencies(primaryType: string, types: TypeDefinitions, found: string
   return found
 }
 
-function encodeType(primaryType: string, types: TypeDefinitions) {
+export function encodeType(primaryType: string, types: TypeDefinitions) {
   // Get dependencies primary first, then alphabetical
   let deps = dependencies(primaryType, types)
   deps = deps.filter((t) => t !== primaryType)
@@ -64,11 +64,11 @@ function keccak256Buffer(input: Buffer): Buffer {
   return Buffer.from(toBytes(keccak256(input)))
 }
 
-function typeHash(primaryType: string, types: TypeDefinitions) {
+export function typeHash(primaryType: string, types: TypeDefinitions) {
   return keccak256Buffer(encodeType(primaryType, types))
 }
 
-function encodeData(primaryType: string, types: TypeDefinitions, data: Record<string, any>): Buffer {
+export function encodeData(primaryType: string, types: TypeDefinitions, data: Record<string, any>): Buffer {
   const encTypes: string[] = []
   const encValues: any[] = []
 
@@ -106,7 +106,7 @@ function encodeData(primaryType: string, types: TypeDefinitions, data: Record<st
   return abi.rawEncode(encTypes, encValues)
 }
 
-function structHash(primaryType: string, types: TypeDefinitions, data: Record<string, any>) {
+export function structHash(primaryType: string, types: TypeDefinitions, data: Record<string, any>) {
   return keccak256Buffer(encodeData(primaryType, types, data))
 }
 
