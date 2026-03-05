@@ -619,6 +619,22 @@ const interactions = {
         if (latticeBtn) { latticeBtn.click(); return 'clicked disconnected signer: ' + latticeBtn.textContent.substring(0, 60); }
         return 'no lattice signer button found, main buttons: ' + mainBtns.map(b => b.textContent.trim().substring(0, 30)).join(', ');
       })()`
+    },
+    {
+      name: 'signer-remove-modal',
+      js: `(() => {
+        // First click a signer to open detail panel (if not already open)
+        const mainBtns = Array.from(document.querySelectorAll('main button'));
+        const signerBtn = mainBtns.find(b => b.textContent.match(/hot signer$/i));
+        if (signerBtn) signerBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          // Find and click the Remove button in the detail panel
+          const btns = Array.from(document.querySelectorAll('button'));
+          const removeBtn = btns.find(b => b.textContent.trim() === 'Remove');
+          if (removeBtn) { removeBtn.click(); resolve('clicked Remove button on signer'); }
+          else resolve('no Remove button found, buttons: ' + btns.map(b => b.textContent.trim().substring(0, 20)).join(', '));
+        }, 300));
+      })()`
     }
   ],
   chains: [
