@@ -892,6 +892,7 @@ app.whenReady().then(async () => {
     { name: 'accounts', navIndex: 0 },
     { name: 'portfolio', navIndex: 1 },
     { name: 'send', navIndex: 2 },
+    { name: 'contacts', navIndex: 3 },
     { name: 'history', navIndex: 5 },
     { name: 'chains', navIndex: 6 },
     { name: 'tokens', navIndex: 7 },
@@ -964,6 +965,54 @@ app.whenReady().then(async () => {
 
   // Reset window size back to original
   console.log('[Compact Mode] Resetting window to 1200x800...')
+  win.setContentSize(1200, 800)
+  await new Promise(r => setTimeout(r, 500))
+
+  // Light + Compact mode combined screenshots
+  console.log('\n[Light Compact] Light mode + narrow window...')
+  win.webContents.send(
+    'main:action',
+    'stateSync',
+    JSON.stringify([{ updates: [{ path: 'main.colorway', value: 'light' }] }])
+  )
+  win.setContentSize(400, 800)
+  await new Promise(r => setTimeout(r, 800))
+
+  const lightCompactViews = [
+    { name: 'accounts', navIndex: 0 },
+    { name: 'portfolio', navIndex: 1 },
+    { name: 'settings', navIndex: 8 }
+  ]
+
+  for (const { name: lightCompactViewName, navIndex } of lightCompactViews) {
+    try {
+      const result = await win.webContents.executeJavaScript(`
+        (() => {
+          const buttons = document.querySelectorAll('nav button');
+          if (buttons[${navIndex}]) {
+            buttons[${navIndex}].click();
+            return 'clicked nav ${navIndex}: ' + buttons[${navIndex}].textContent;
+          }
+          return 'no nav button at index ${navIndex}, total: ' + buttons.length;
+        })()
+      `)
+      console.log('[Light Compact Nav]', result)
+    } catch (err) {
+      console.log('[Light Compact Nav Error]', err.message)
+    }
+
+    const lightCompactName = String(step++).padStart(2, '0') + '-light-compact-' + lightCompactViewName
+    const lightCompactPng = await captureScreenshot(win, lightCompactName)
+    if (!validateScreenshot(lightCompactPng, lightCompactName)) failures++
+  }
+
+  // Reset window size and colorway back to original
+  console.log('[Light Compact] Resetting window to 1200x800 and colorway to dark...')
+  win.webContents.send(
+    'main:action',
+    'stateSync',
+    JSON.stringify([{ updates: [{ path: 'main.colorway', value: 'dark' }] }])
+  )
   win.setContentSize(1200, 800)
   await new Promise(r => setTimeout(r, 500))
 
