@@ -370,6 +370,40 @@ const interactions = {
         if (addBtn) { addBtn.click(); return 'clicked: ' + addBtn.textContent.trim(); }
         return 'no Add Contact button found, buttons: ' + buttons.length;
       })()`
+    },
+    {
+      name: 'contact-detail-with-notes',
+      js: `(() => {
+        // Close any open modal (Escape key dismisses the Modal component)
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        return new Promise(resolve => setTimeout(() => {
+          // Find the contact row for Alice or Treasury (both have notes) and click Edit
+          const contactDivs = Array.from(document.querySelectorAll('main .space-y-2 > div'));
+          const notesDiv = contactDivs.find(d => d.textContent.includes('Alice') || d.textContent.includes('Treasury'));
+          if (notesDiv) {
+            const editBtn = Array.from(notesDiv.querySelectorAll('button')).find(b => b.textContent.trim() === 'Edit');
+            if (editBtn) { editBtn.click(); resolve('clicked Edit for: ' + notesDiv.textContent.substring(0, 50)); return; }
+          }
+          resolve('no contact row with notes found, rows: ' + contactDivs.length);
+        }, 300));
+      })()`
+    },
+    {
+      name: 'contact-delete-confirmation',
+      js: `(() => {
+        // Close the edit modal
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        return new Promise(resolve => setTimeout(() => {
+          // Find Treasury DAO row (has notes) and click Delete
+          const contactDivs = Array.from(document.querySelectorAll('main .space-y-2 > div'));
+          const targetDiv = contactDivs.find(d => d.textContent.includes('Treasury') || d.textContent.includes('Alice'));
+          if (targetDiv) {
+            const deleteBtn = Array.from(targetDiv.querySelectorAll('button')).find(b => b.textContent.trim() === 'Delete');
+            if (deleteBtn) { deleteBtn.click(); resolve('clicked Delete for: ' + targetDiv.textContent.substring(0, 50)); return; }
+          }
+          resolve('no contact row found for deletion, rows: ' + contactDivs.length);
+        }, 300));
+      })()`
     }
   ],
   signers: [
