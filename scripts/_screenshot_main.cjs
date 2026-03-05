@@ -861,6 +861,31 @@ const interactions = {
       })()`
     },
     {
+      name: 'chain-toggle-on',
+      js: `(() => {
+        // Find the Arbitrum chain entry and its toggle button
+        // The chain list shows toggle buttons (on/off switches) for each chain
+        const btns = Array.from(document.querySelectorAll('main button'));
+        // Look for a toggle/switch near Arbitrum text
+        const arbitrumArea = Array.from(document.querySelectorAll('*')).find(el => el.textContent.includes('Arbitrum') && el.querySelector('button'));
+        if (arbitrumArea) {
+          // Find toggle-like buttons (small, switch-shaped)
+          const toggles = Array.from(arbitrumArea.querySelectorAll('button'));
+          const toggle = toggles.find(b => b.getAttribute('role') === 'switch' || b.className.includes('toggle'));
+          if (toggle) { toggle.click(); return 'toggled Arbitrum'; }
+        }
+        // Fallback: look for any toggle/switch buttons
+        const switches = btns.filter(b => b.getAttribute('role') === 'switch' || b.className.includes('toggle'));
+        if (switches.length > 0) {
+          // The last switch should be Arbitrum (4th chain)
+          const lastSwitch = switches[switches.length - 1];
+          lastSwitch.click();
+          return 'clicked last toggle switch (likely Arbitrum), total switches: ' + switches.length;
+        }
+        return 'no toggle switches found';
+      })()`
+    },
+    {
       name: 'chain-health-variants',
       stateUpdates: [
         { path: 'main.networks.ethereum.10.connection.primary.status', value: 'loading' },
