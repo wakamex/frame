@@ -373,6 +373,59 @@ app.whenReady().then(async () => {
     }
   }
 
+  // --- Onboarding flow screenshots ---
+  // Switch to empty-accounts state so the app shows OnboardView
+  mockState.main.accounts = {}
+  mockState.main.mute.onboardingWindow = false
+
+  console.log('\n[Onboarding] Reloading with empty accounts...')
+  await win.loadURL(url)
+  const onboardReady = await waitForApp(win)
+  if (onboardReady) {
+    // Welcome step
+    const onboardPng = await captureScreenshot(win, String(step++).padStart(2, '0') + '-onboard-welcome')
+    if (!validateScreenshot(onboardPng, 'onboard-welcome')) failures++
+
+    // Click "Get Started" → create step
+    try {
+      const clickResult = await win.webContents.executeJavaScript(`
+        (() => {
+          const btns = Array.from(document.querySelectorAll('button'));
+          const btn = btns.find(b => b.textContent.trim() === 'Get Started');
+          if (btn) { btn.click(); return 'clicked Get Started'; }
+          return 'Get Started not found, buttons: ' + btns.map(b => b.textContent.trim()).join(', ');
+        })()
+      `)
+      console.log('[Onboarding]', clickResult)
+    } catch (err) {
+      console.log('[Onboarding] click error:', err.message)
+    }
+    await new Promise(r => setTimeout(r, 500))
+    const createPng = await captureScreenshot(win, String(step++).padStart(2, '0') + '-onboard-create')
+    if (!validateScreenshot(createPng, 'onboard-create')) failures++
+
+    // Click "Cancel" in AddAccount → done step
+    try {
+      const cancelResult = await win.webContents.executeJavaScript(`
+        (() => {
+          const btns = Array.from(document.querySelectorAll('button'));
+          const btn = btns.find(b => b.textContent.trim() === 'Cancel');
+          if (btn) { btn.click(); return 'clicked Cancel'; }
+          return 'Cancel not found, buttons: ' + btns.map(b => b.textContent.trim()).join(', ');
+        })()
+      `)
+      console.log('[Onboarding]', cancelResult)
+    } catch (err) {
+      console.log('[Onboarding] cancel error:', err.message)
+    }
+    await new Promise(r => setTimeout(r, 500))
+    const donePng = await captureScreenshot(win, String(step++).padStart(2, '0') + '-onboard-done')
+    if (!validateScreenshot(donePng, 'onboard-done')) failures++
+  } else {
+    console.error('[Onboarding] App did not render for onboarding pass')
+    failures++
+  }
+
   // Summary
   console.log('\n' + '='.repeat(60))
   console.log(`Screenshots: ${step - 1} captured, ${failures} failures`)
