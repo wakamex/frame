@@ -408,6 +408,20 @@ const interactions = {
         if (discoverBtn) { discoverBtn.click(); return 'clicked: ' + discoverBtn.textContent.trim(); }
         return 'no discover button found, buttons: ' + btns.map(b => b.textContent.trim().substring(0, 20)).join(', ');
       })()`
+    },
+    {
+      name: 'chain-health-variants',
+      stateUpdates: [
+        { path: 'main.networks.ethereum.10.connection.primary.status', value: 'loading' },
+        { path: 'main.networks.ethereum.137.connection.primary.status', value: 'error' },
+        { path: 'main.networks.ethereum.137.connection.primary.connected', value: false }
+      ],
+      js: `(() => {
+        // The health indicators should already be visible in the chain list
+        // Just report what we see
+        const badges = document.querySelectorAll('[class*="status"], [class*="health"], [class*="badge"]');
+        return 'status indicators found: ' + badges.length;
+      })()`
     }
   ],
   tokens: [
@@ -588,6 +602,16 @@ app.whenReady().then(async () => {
     // Run any post-navigation interactions for this view
     const viewInteractions = interactions[view] || []
     for (const interaction of viewInteractions) {
+      // Send stateSync updates if the interaction specifies them
+      if (interaction.stateUpdates) {
+        win.webContents.send(
+          'main:action',
+          'stateSync',
+          JSON.stringify([{ updates: interaction.stateUpdates }])
+        )
+        await new Promise(r => setTimeout(r, 500)) // wait for React to re-render
+      }
+
       try {
         const result = await win.webContents.executeJavaScript(interaction.js)
         console.log(`[Interact:${interaction.name}]`, result)
