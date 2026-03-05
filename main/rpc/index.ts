@@ -216,7 +216,8 @@ const rpc: Record<string, (...args: any[]) => void> = {
       const dataLines = hasHeader ? lines.slice(1) : lines
 
       const results: Array<{ name: string; address: string; error?: string }> = []
-      const added = new Set<string>()
+      const toAdd: Array<{ address: string; name: string }> = []
+      const seen = new Set<string>()
 
       for (const line of dataLines) {
         const parts = line.split(',').map((p) => p.trim())
@@ -233,23 +234,33 @@ const rpc: Record<string, (...args: any[]) => void> = {
         }
 
         const normalized = address.toLowerCase()
-        if (added.has(normalized)) {
+        if (seen.has(normalized)) {
           results.push({ name, address })
           continue
         }
-        added.add(normalized)
+        seen.add(normalized)
 
-        accounts.add(address, name, { type: 'Address' })
+        toAdd.push({ address, name })
         results.push({ name, address })
       }
 
-      log.info(`Watch list: ${added.size} accounts added, ${results.length} rows processed`)
-      try {
-        cb(null, results)
-        log.info('Watch list: cb fired successfully')
-      } catch (cbErr) {
-        log.error('Watch list: cb threw', cbErr)
+      // Return results to renderer immediately
+      cb(null, results)
+
+      // Create accounts in batches so state sync doesn't overwhelm the renderer
+      const BATCH_SIZE = 5
+      const createBatch = (start: number) => {
+        const end = Math.min(start + BATCH_SIZE, toAdd.length)
+        for (let i = start; i < end; i++) {
+          accounts.add(toAdd[i].address, toAdd[i].name, { type: 'Address' })
+        }
+        if (end < toAdd.length) {
+          setTimeout(() => createBatch(end), 100)
+        } else {
+          log.info(`Watch list: finished creating ${toAdd.length} accounts`)
+        }
       }
+      if (toAdd.length > 0) setTimeout(() => createBatch(0), 100)
     } catch (err) {
       log.error('Watch list: error', err)
       cb(err)
