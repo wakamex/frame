@@ -339,8 +339,12 @@ const mockState = {
     },
     tokens: {
       custom: [
-        { address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', chainId: 1, symbol: 'USDC', name: 'USD Coin', decimals: 6, logoURI: '' },
-        { address: '0x6b175474e89094c44da98b954eedeac495271d0f', chainId: 1, symbol: 'DAI', name: 'Dai Stablecoin', decimals: 18, logoURI: '' }
+        { name: 'USD Coin', symbol: 'USDC', address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', decimals: 6, chainId: 1, logoURI: '' },
+        { name: 'Dai Stablecoin', symbol: 'DAI', address: '0x6b175474e89094c44da98b954eedeac495271d0f', decimals: 18, chainId: 1, logoURI: '' },
+        { name: 'Wrapped Bitcoin', symbol: 'WBTC', address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', decimals: 8, chainId: 1, logoURI: '' },
+        { name: 'Chainlink', symbol: 'LINK', address: '0x514910771af9ca656af840dff83e8264ecf986ca', decimals: 18, chainId: 1, logoURI: '' },
+        { name: 'Uniswap', symbol: 'UNI', address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', decimals: 18, chainId: 1, logoURI: '' },
+        { name: 'Aave Token', symbol: 'AAVE', address: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9', decimals: 18, chainId: 1, logoURI: '' }
       ],
       known: {}
     },
@@ -872,6 +876,21 @@ const interactions = {
     }
   ],
   tokens: [
+    {
+      name: 'tokens-search-filter',
+      js: `(() => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        const inputs = Array.from(document.querySelectorAll('input'));
+        const searchInput = inputs.find(i => i.placeholder?.toLowerCase().includes('search') || i.placeholder?.toLowerCase().includes('filter'));
+        if (searchInput) {
+          nativeSetter.call(searchInput, 'USD');
+          searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+          searchInput.dispatchEvent(new Event('change', { bubbles: true }));
+          return 'typed USD in search, filtering tokens';
+        }
+        return 'no search input found, inputs: ' + inputs.length;
+      })()`
+    },
     {
       name: 'remove-token-modal',
       js: `(() => {
