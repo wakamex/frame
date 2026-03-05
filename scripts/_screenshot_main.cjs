@@ -163,6 +163,44 @@ const mockState = {
               gasLimit: '0x5208',
               gasPrice: '0x5d21dba00'
             }
+          },
+          'req-2': {
+            handlerId: 'req-2',
+            type: 'transaction',
+            status: 'pending',
+            origin: 'app.aave.com',
+            account: '0x1234567890abcdef1234567890abcdef12345678',
+            created: Date.now() - 60000,
+            payload: {
+              jsonrpc: '2.0',
+              id: 3,
+              method: 'eth_sendTransaction',
+              params: [{ from: '0x1234567890abcdef1234567890abcdef12345678', to: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', value: '0x0', chainId: '0x1', gas: '0xc350' }]
+            },
+            data: {
+              from: '0x1234567890abcdef1234567890abcdef12345678',
+              to: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+              value: '0x0',
+              chainId: '0x1',
+              gasLimit: '0xc350',
+              type: '0x2',
+              maxFeePerGas: '0x2540be400',
+              maxPriorityFeePerGas: '0x3b9aca00'
+            }
+          },
+          'req-3': {
+            handlerId: 'req-3',
+            type: 'sign',
+            status: 'pending',
+            origin: 'opensea.io',
+            account: '0x1234567890abcdef1234567890abcdef12345678',
+            created: Date.now() - 30000,
+            payload: {
+              jsonrpc: '2.0',
+              id: 4,
+              method: 'personal_sign',
+              params: ['0x48656c6c6f20576f726c64', '0x1234567890abcdef1234567890abcdef12345678']
+            }
           }
         },
         ensName: 'alice.eth',
@@ -244,6 +282,17 @@ const interactions = {
         const overlay = document.querySelector('.fixed.inset-0');
         if (overlay) return 'request overlay visible: ' + overlay.textContent.substring(0, 80);
         return 'request overlay not found';
+      })()`
+    },
+    {
+      name: 'request-queue-nav',
+      js: `(() => {
+        // Click the 'Next' navigation button to advance to the second request in the queue.
+        // The queue indicator shows '1 of 3' / '2 of 3' etc. when multiple requests are pending.
+        const btns = Array.from(document.querySelectorAll('.fixed.inset-0 button'));
+        const nextBtn = btns.find(b => b.textContent.includes('Next'));
+        if (nextBtn) { nextBtn.click(); return 'clicked Next button, queue nav visible'; }
+        return 'no Next button found, buttons: ' + btns.map(b => b.textContent.trim()).join(', ');
       })()`
     },
     {
