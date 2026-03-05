@@ -62,8 +62,11 @@ async function getResolverAddress(name: string): Promise<string | null> {
 }
 
 function makeCall(method: string, params: { to: string; data: string }): Promise<string> {
-  return new Promise((resolve) => {
-    const payload = { jsonrpc: '2.0' as const, id: 1, method, params: [params, 'latest'] } as any
-    provider.send(payload, (({ result }: { result: string }) => resolve(result)) as any)
+  return new Promise((resolve, reject) => {
+    const payload = { jsonrpc: '2.0' as const, id: 1, method, params: [params, 'latest'], chainId: '0x1' } as any
+    provider.send(payload, ((response: { result?: string; error?: { message: string } }) => {
+      if (response.error) return reject(new Error(response.error.message))
+      resolve(response.result || '0x')
+    }) as any)
   })
 }
