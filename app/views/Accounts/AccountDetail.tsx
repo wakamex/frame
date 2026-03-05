@@ -33,20 +33,8 @@ export default function AccountDetail() {
   const [newName, setNewName] = useState('')
   const [confirmRemove, setConfirmRemove] = useState(false)
 
-  if (!account) {
-    return (
-      <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-        Select an account to view details
-      </div>
-    )
-  }
-
-  const signer = account.signer ? signers[account.signer] : null
-  const signerType = signer ? getSignerDisplayType(signer.type) : 'watch'
-  const signerStatus = signer?.status ?? 'disconnected'
-  const isHardware = signer ? isHardwareSigner(signer.type) : false
-
   // Build displayed balances with USD values
+  // NOTE: useMemo must be called before any conditional return to satisfy Rules of Hooks
   const displayedBalances = useMemo(() => {
     if (!balances || !Array.isArray(balances)) return []
     return balances
@@ -63,6 +51,19 @@ export default function AccountDetail() {
   const totalUsd = useMemo(() => {
     return displayedBalances.reduce((sum, b) => sum + (b.totalValue?.toNumber?.() ?? 0), 0)
   }, [displayedBalances])
+
+  if (!account) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+        Select an account to view details
+      </div>
+    )
+  }
+
+  const signer = account.signer ? signers[account.signer] : null
+  const signerType = signer ? getSignerDisplayType(signer.type) : 'watch'
+  const signerStatus = signer?.status ?? 'disconnected'
+  const isHardware = signer ? isHardwareSigner(signer.type) : false
 
   const handleRename = () => {
     if (newName.trim()) {

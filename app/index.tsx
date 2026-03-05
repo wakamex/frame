@@ -21,13 +21,9 @@ import HistoryView from './views/History'
 function App() {
   const snap = useSnapshot(state)
   const initialized = snap.initialized
-  const currentView = useCurrentView()
   const colorway = snap.main?.colorway
   const accounts = useAccounts()
   const onboardingComplete = snap.main?.mute?.onboardingWindow
-  const pendingRequests = usePendingRequests()
-  const compact = useCompact()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (colorway) {
@@ -53,6 +49,18 @@ function App() {
       </div>
     )
   }
+
+  return <AppShell />
+}
+
+// Inner component — only mounts after initialization and accounts exist.
+// Separated from App to avoid hooks violations from early returns above.
+function AppShell() {
+  const snap = useSnapshot(state)
+  const currentView = useCurrentView()
+  const pendingRequests = usePendingRequests()
+  const compact = useCompact()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const updateBadge = snap.main?.updater?.badge
 
