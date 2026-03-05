@@ -471,6 +471,31 @@ const interactions = {
       })()`
     },
     {
+      name: 'add-account-phrase-form',
+      js: `(() => {
+        // Click the 'Seed Phrase' option in the add-account type grid
+        const btns = Array.from(document.querySelectorAll('button'));
+        const phraseBtn = btns.find(b => b.textContent.includes('Seed Phrase'));
+        if (phraseBtn) { phraseBtn.click(); return 'clicked Seed Phrase'; }
+        return 'no Seed Phrase button found';
+      })()`
+    },
+    {
+      name: 'add-account-phrase-with-password',
+      js: `(() => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        const inputs = Array.from(document.querySelectorAll('input[type="password"]'));
+        if (inputs.length >= 2) {
+          nativeSetter.call(inputs[0], 'testpassword');
+          inputs[0].dispatchEvent(new Event('input', { bubbles: true }));
+          nativeSetter.call(inputs[1], 'differentpassword');
+          inputs[1].dispatchEvent(new Event('input', { bubbles: true }));
+          return 'filled passwords with mismatch for validation error';
+        }
+        return 'password inputs found: ' + inputs.length;
+      })()`
+    },
+    {
       name: 'add-account-watch-form',
       js: `(() => {
         // First ensure we're on the add-account panel
