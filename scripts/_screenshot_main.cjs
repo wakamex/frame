@@ -163,6 +163,15 @@ const mockState = {
               gasLimit: '0x5208',
               gasPrice: '0x5d21dba00'
             }
+          },
+          'req-switchchain-1': {
+            handlerId: 'req-switchchain-1',
+            type: 'switchChain',
+            status: 'pending',
+            origin: 'app.uniswap.org',
+            account: '0x1234567890abcdef1234567890abcdef12345678',
+            created: Date.now(),
+            payload: { jsonrpc: '2.0', id: 6, method: 'wallet_switchEthereumChain', params: [{ chainId: '0x89' }] }
           }
         },
         ensName: 'alice.eth',
@@ -420,6 +429,28 @@ const interactions = {
             else resolve('No next button available, overlay text: ' + text.substring(0, 100));
           };
           setTimeout(findEIP1559, 300);
+        });
+      })()`
+    },
+    {
+      name: 'switchchain-request',
+      js: `(() => {
+        // Navigate through the request queue to find the switchChain request (shows Switch Chain heading and Switch/Decline buttons)
+        return new Promise(resolve => {
+          let attempts = 0;
+          const findSwitchChain = () => {
+            if (attempts++ > 8) { resolve('switchChain request not found after 8 attempts'); return; }
+            const text = document.body.innerText;
+            if (text.includes('Switch Chain') && text.includes('wants to switch network')) {
+              resolve('switchChain overlay visible with Switch Chain heading and network info');
+              return;
+            }
+            const btns = Array.from(document.querySelectorAll('button'));
+            const nextBtn = btns.find(b => b.textContent.trim().includes('Next') && !b.disabled);
+            if (nextBtn) { nextBtn.click(); setTimeout(findSwitchChain, 300); }
+            else resolve('No next button available, overlay text: ' + text.substring(0, 100));
+          };
+          setTimeout(findSwitchChain, 300);
         });
       })()`
     },
