@@ -75,7 +75,15 @@
 {"created_at":"2026-03-05T00:53:46Z","created_by":"Swarm-2","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.36","type":"parent-child"}
 {"created_at":"2026-03-05T00:53:55Z","created_by":"Swarm-2","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.37","type":"parent-child"}
 {"created_at":"2026-03-05T00:54:05Z","created_by":"Swarm-2","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.38","type":"parent-child"}
+{"created_at":"2026-03-05T01:17:40Z","created_by":"Swarm-1","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.39","type":"parent-child"}
 {"created_at":"2026-03-05T00:27:04Z","created_by":"wakamex","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.4","type":"parent-child"}
+{"created_at":"2026-03-05T01:17:52Z","created_by":"Swarm-1","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.40","type":"parent-child"}
+{"created_at":"2026-03-05T01:18:03Z","created_by":"Swarm-1","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.41","type":"parent-child"}
+{"created_at":"2026-03-05T01:18:13Z","created_by":"Swarm-1","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.42","type":"parent-child"}
+{"created_at":"2026-03-05T01:18:26Z","created_by":"Swarm-1","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.43","type":"parent-child"}
+{"created_at":"2026-03-05T01:18:38Z","created_by":"Swarm-1","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.44","type":"parent-child"}
+{"created_at":"2026-03-05T01:18:51Z","created_by":"Swarm-1","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.45","type":"parent-child"}
+{"created_at":"2026-03-05T01:19:05Z","created_by":"Swarm-1","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.46","type":"parent-child"}
 {"created_at":"2026-03-05T00:27:11Z","created_by":"wakamex","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.5","type":"parent-child"}
 {"created_at":"2026-03-05T00:27:19Z","created_by":"wakamex","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.6","type":"parent-child"}
 {"created_at":"2026-03-05T00:27:24Z","created_by":"wakamex","depends_on_id":"frame-modernized-89p","issue_id":"frame-modernized-89p.7","type":"parent-child"}
