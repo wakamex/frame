@@ -127,7 +127,7 @@ describe('start()', () => {
     service.stop()
   })
 
-  it('eagerly fetches rates using all configured chains before updateSubscription', async () => {
+  it('uses all configured chains on first poll when updateSubscription has not been called', async () => {
     const state = {
       main: {
         tokens: { known: {}, custom: [] },
@@ -157,65 +157,23 @@ describe('start()', () => {
         json: () => Promise.resolve({ coins: {} })
       })
 
-    // start() without calling updateSubscription first
     service.start()
 
+    // No eager fetch on start — wait for the 30s poll
+    expect(mockFetch).not.toHaveBeenCalled()
+
+    jest.advanceTimersByTime(30_000)
+
     await Promise.resolve()
     await Promise.resolve()
     await Promise.resolve()
     await Promise.resolve()
 
-    // Should have fetched rates for both configured chains
+    // Poll should use all configured chains as fallback
     expect(mockFetch).toHaveBeenCalled()
     const url = mockFetch.mock.calls[0]?.[0] || ''
     expect(url).toContain(`ethereum:${NATIVE_CURRENCY}`)
     expect(url).toContain(`optimism:${NATIVE_CURRENCY}`)
-
-    expect(setNativeCurrencyData).toHaveBeenCalledWith('ethereum', 1, expect.objectContaining({ usd: expect.objectContaining({ price: 3000 }) }))
-    expect(setNativeCurrencyData).toHaveBeenCalledWith('ethereum', 10, expect.objectContaining({ usd: expect.objectContaining({ price: 3001 }) }))
-
-    service.stop()
-  })
-
-  it('eagerly fetches cached balance token rates on startup', async () => {
-    const eulAddress = '0xd9fcd98c322942075a5c3860693e9f4f03aae07b'
-    const state = {
-      main: {
-        tokens: { known: {}, custom: [] },
-        balances: {
-          '0xowner': [
-            { address: eulAddress, chainId: 1, symbol: 'EUL', name: 'Euler', displayBalance: '100' }
-          ]
-        },
-        networks: { ethereum: { 1: { id: 1 } } }
-      }
-    }
-    const service = rates(state)
-
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({
-          coins: { [`ethereum:${eulAddress}`]: { price: 5.0 } }
-        })
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ coins: { [`ethereum:${eulAddress}`]: 2.0 } })
-      })
-
-    service.start()
-
-    await Promise.resolve()
-    await Promise.resolve()
-    await Promise.resolve()
-    await Promise.resolve()
-
-    expect(setRates).toHaveBeenCalledWith(
-      expect.objectContaining({
-        [eulAddress]: expect.objectContaining({ usd: expect.objectContaining({ price: 5.0 }) })
-      })
-    )
 
     service.stop()
   })

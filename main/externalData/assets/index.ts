@@ -161,10 +161,6 @@ export default function rates(state: any) {
   function start() {
     log.verbose('starting DefiLlama rate polling')
 
-    // Eagerly fetch rates using any cached balance/token data so the UI
-    // can show prices before networks finish connecting
-    fetchRates()
-
     pollTimer = setInterval(fetchRates, POLL_INTERVAL)
   }
 

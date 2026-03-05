@@ -37,16 +37,33 @@ export default function () {
   rates.start()
   balances.start()
 
+  let backgroundScanTimers: NodeJS.Timeout[] = []
+
   const handleNetworkUpdate = debounce((newlyConnected: number[]) => {
     log.verbose('updating external data due to network update(s)', { connectedChains, newlyConnected })
 
     rates.updateSubscription(connectedChains, activeAccount)
 
     if (newlyConnected.length > 0) {
-      // Scan all accounts on newly connected networks, not just the active one
+      // Scan all accounts on newly connected networks.
+      // Active account scans immediately; others are staggered to avoid
+      // overwhelming the RPC with thousands of concurrent multicalls.
       const addresses = storeApi.getAllAddresses()
+
+      // Clear any pending background scans from a previous network event
+      for (const t of backgroundScanTimers) clearTimeout(t)
+      backgroundScanTimers = []
+
+      let delay = 0
       for (const address of addresses) {
-        balances.addNetworks(address, newlyConnected)
+        if (address === activeAccount) {
+          balances.addNetworks(address, newlyConnected)
+        } else {
+          delay += 5_000 // 5s between each background account
+          backgroundScanTimers.push(
+            setTimeout(() => balances.addNetworks(address, newlyConnected), delay)
+          )
+        }
       }
     }
   }, 500)
@@ -157,6 +174,9 @@ export default function () {
       unsubCustomTokens()
       unsubBalances()
       unsubTray()
+
+      for (const t of backgroundScanTimers) clearTimeout(t)
+      backgroundScanTimers = []
 
       rates.stop()
       balances.stop()

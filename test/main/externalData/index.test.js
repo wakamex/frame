@@ -10,7 +10,7 @@ jest.mock('../../../main/store')
 jest.mock('../../../main/externalData/assets', () => jest.fn(() => ({ start: jest.fn(), stop: jest.fn(), updateSubscription: jest.fn() })))
 jest.mock('../../../main/externalData/balances', () => jest.fn(() => mockBalances))
 
-let dataManager, mockBalances, trayCallback, networkCallback
+let dataManager, mockBalances, trayCallback, networkCallback, addressCallback
 
 beforeEach(() => {
   subscribe.mockClear()
@@ -22,6 +22,7 @@ beforeEach(() => {
 
   // Subscription order: networks, activeAddress, customTokens, balances, tray
   networkCallback = subscribe.mock.calls[0][1]
+  addressCallback = subscribe.mock.calls[1][1]
   trayCallback = subscribe.mock.calls[4][1]
 })
 
@@ -58,16 +59,20 @@ describe('hiding and showing the tray', () => {
 })
 
 describe('background balance scanning', () => {
-  it('scans all accounts when a network connects, not just the active one', () => {
-    // Set up two accounts
+  it('scans active account immediately and staggers others on network connect', () => {
     store.main.accounts = {
       '0xAccount1': { id: '0xAccount1', name: 'Account 1' },
-      '0xAccount2': { id: '0xAccount2', name: 'Account 2' }
+      '0xAccount2': { id: '0xAccount2', name: 'Account 2' },
+      '0xAccount3': { id: '0xAccount3', name: 'Account 3' }
     }
-    // Active account is Account1
     store.selected = { current: '0xAccount1' }
 
-    // Simulate a network becoming connected
+    // Let the orchestrator know about the active account first
+    addressCallback()
+    jest.advanceTimersByTime(800) // address debounce
+
+    mockBalances.addNetworks.mockClear()
+
     store.main.networks = {
       ethereum: {
         1: {
@@ -83,9 +88,18 @@ describe('background balance scanning', () => {
     networkCallback()
     jest.advanceTimersByTime(500) // debounce
 
-    // Both accounts should have their balances scanned
+    // Active account scans immediately
     expect(mockBalances.addNetworks).toHaveBeenCalledWith('0xAccount1', [1])
-    expect(mockBalances.addNetworks).toHaveBeenCalledWith('0xAccount2', [1])
+    // Background accounts not yet scanned
+    expect(mockBalances.addNetworks).toHaveBeenCalledTimes(1)
+
+    // After 5s, first background account scans
+    jest.advanceTimersByTime(5_000)
+    expect(mockBalances.addNetworks).toHaveBeenCalledTimes(2)
+
+    // After another 5s, second background account scans
+    jest.advanceTimersByTime(5_000)
+    expect(mockBalances.addNetworks).toHaveBeenCalledTimes(3)
   })
 
   it('scans all accounts even when no account is selected', () => {
@@ -107,8 +121,11 @@ describe('background balance scanning', () => {
     }
 
     networkCallback()
-    jest.advanceTimersByTime(500)
+    jest.advanceTimersByTime(500) // debounce
 
+    // No active account, so it goes through the staggered path
+    // First background account after 5s
+    jest.advanceTimersByTime(5_000)
     expect(mockBalances.addNetworks).toHaveBeenCalledWith('0xAccount1', [1])
   })
 })
