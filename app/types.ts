@@ -74,6 +74,26 @@ export interface GasLevels {
   custom: string
 }
 
+export interface GasFees {
+  nextBaseFee?: string
+  maxBaseFeePerGas?: string
+  maxPriorityFeePerGas?: string
+  maxFeePerGas?: string
+}
+
+export interface GasEstimate {
+  gasEstimate: string
+  cost: { usd: number | null }
+}
+
+export interface GasSample {
+  label: string
+  estimates: {
+    low?: GasEstimate
+    high?: GasEstimate
+  }
+}
+
 export interface ChainMetadata {
   blockHeight?: number
   icon?: string
@@ -89,9 +109,11 @@ export interface ChainMetadata {
     }
   }
   gas: {
+    samples?: GasSample[]
     price: {
       selected: string
       levels: GasLevels
+      fees?: GasFees
     }
   }
   rpcHealth?: RpcHealth

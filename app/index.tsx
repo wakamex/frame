@@ -17,6 +17,7 @@ import SendView from './views/Send'
 import PortfolioView from './views/Portfolio'
 import AddressBookView from './views/AddressBook'
 import HistoryView from './views/History'
+import GasView from './views/Gas'
 
 function App() {
   const snap = useSnapshot(state)
@@ -105,6 +106,7 @@ function AppShell() {
           <NavItem label="Signers" view="signers" current={currentView} onClick={handleViewChange} />
           <NavItem label="History" view="history" current={currentView} onClick={handleViewChange} />
           <NavItem label="Chains" view="chains" current={currentView} onClick={handleViewChange} />
+          <NavItem label="Gas" view="gas" current={currentView} onClick={handleViewChange} />
           <NavItem label="Tokens" view="tokens" current={currentView} onClick={handleViewChange} />
           <div className="flex-1" />
           <NavItem label="Settings" view="settings" current={currentView} onClick={handleViewChange} />
@@ -179,6 +181,8 @@ function ViewContent({ view }: { view: string }) {
       return <SignersView />
     case 'chains':
       return <ChainsView />
+    case 'gas':
+      return <GasView />
     case 'tokens':
       return <TokensView />
     case 'history':

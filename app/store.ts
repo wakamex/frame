@@ -82,6 +82,7 @@ export interface AppState {
     | 'portfolio'
     | 'signers'
     | 'chains'
+    | 'gas'
     | 'settings'
     | 'send'
     | 'tokens'
