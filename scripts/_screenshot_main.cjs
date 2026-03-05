@@ -273,6 +273,18 @@ const interactions = {
         return 'no Add Contact button found, buttons: ' + buttons.length;
       })()`
     }
+  ],
+  chains: [
+    {
+      name: 'chain-detail',
+      js: `(() => {
+        // Click the Ethereum chain entry to reveal its detail panel
+        const buttons = Array.from(document.querySelectorAll('main button'));
+        const ethereumBtn = buttons.find(b => b.textContent.includes('Ethereum'));
+        if (ethereumBtn) { ethereumBtn.click(); return 'clicked chain: ' + ethereumBtn.textContent.substring(0, 60); }
+        return 'no Ethereum button found, main buttons: ' + buttons.length;
+      })()`
+    }
   ]
 }
 
