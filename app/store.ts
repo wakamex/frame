@@ -128,6 +128,11 @@ export function setView(view: AppState['currentView']) {
 
 export function setSelectedAccount(id: string | null) {
   state.selectedAccount = id
+
+  // Notify main process so it can start balance scanning for this account
+  if (id) {
+    import('./ipc').then(({ actions }) => actions.setSigner(id))
+  }
 }
 
 // Typed selector hooks (use useSnapshot for automatic fine-grained reactivity)
