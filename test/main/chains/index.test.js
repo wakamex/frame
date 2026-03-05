@@ -274,9 +274,8 @@ Object.values(mockConnections).forEach((chain) => {
       baseFeePerGas: gweiToHex(9)
     }
 
-    const expectedMaxBaseFee = 7e9 * 1.125 * 1.125
+    const expectedBaseFee = 7e9 * 1.125 * 1.125
     const expectedPriorityFee = 32e9
-    const nextBaseFee = 7e9
 
     // Poll for gas fee update
     const interval = setInterval(() => {
@@ -284,16 +283,12 @@ Object.values(mockConnections).forEach((chain) => {
 
       if (gas.fees && gas.fees.maxBaseFeePerGas) {
         clearInterval(interval)
-        expect(gas.fees.maxBaseFeePerGas).toBe(intToHex(expectedMaxBaseFee))
+        expect(gas.fees.maxBaseFeePerGas).toBe(intToHex(expectedBaseFee))
         expect(gas.fees.maxPriorityFeePerGas).toBe(intToHex(expectedPriorityFee))
-        expect(gas.fees.maxFeePerGas).toBe(intToHex(expectedMaxBaseFee + expectedPriorityFee))
+        expect(gas.fees.maxFeePerGas).toBe(intToHex(expectedBaseFee + expectedPriorityFee))
 
         expect(gas.selected).toBe('fast')
-        // Gas levels are derived from nextBaseFee + multiples of priorityFee
-        expect(gas.levels.slow).toBe(intToHex(Math.ceil(nextBaseFee + expectedPriorityFee * 0.5)))
-        expect(gas.levels.standard).toBe(intToHex(Math.ceil(nextBaseFee + expectedPriorityFee)))
-        expect(gas.levels.fast).toBe(intToHex(Math.ceil(nextBaseFee + expectedPriorityFee * 1.5)))
-        expect(gas.levels.asap).toBe(intToHex(Math.ceil(nextBaseFee + expectedPriorityFee * 2.5)))
+        expect(gas.levels.fast).toBe(intToHex(expectedBaseFee + expectedPriorityFee))
 
         done()
       }

@@ -324,16 +324,9 @@ class ChainConnection extends EventEmitter {
 
       try {
         if (feeMarket) {
-          const baseFee = parseInt(feeMarket.nextBaseFee!)
-          const priorityFee = parseInt(feeMarket.maxPriorityFeePerGas!)
-          const toHex = (n: number) => addHexPrefix(Math.ceil(n).toString(16))
+          const gasPrice = parseInt(feeMarket.maxBaseFeePerGas!) + parseInt(feeMarket.maxPriorityFeePerGas!)
 
-          setGasPrices(this.type, this.chainId, {
-            slow: toHex(baseFee + priorityFee * 0.5),
-            standard: toHex(baseFee + priorityFee),
-            fast: toHex(baseFee + priorityFee * 1.5),
-            asap: toHex(baseFee + priorityFee * 2.5)
-          })
+          setGasPrices(this.type, this.chainId, { fast: addHexPrefix(gasPrice.toString(16)) })
           setGasDefault(this.type, this.chainId, 'fast')
         } else {
           const gas = await gasMonitor.getGasPrices()

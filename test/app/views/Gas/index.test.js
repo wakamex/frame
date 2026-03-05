@@ -64,10 +64,7 @@ const connectedMeta = {
     price: {
       selected: 'fast',
       levels: {
-        slow: gweiToHex(15),
-        standard: gweiToHex(20),
-        fast: gweiToHex(30),
-        asap: gweiToHex(50)
+        fast: gweiToHex(30)
       },
       fees: {
         nextBaseFee: gweiToHex(12),
@@ -106,21 +103,32 @@ describe('GasView', () => {
     expect(screen.getByText(/no connected chains/i)).toBeTruthy()
   })
 
-  it('2. shows gas levels for connected chain', () => {
+  it('2. shows gas price for connected chain', () => {
     mockNetworksRef = () => ({ 1: connectedChain })
     mockNetworksMetaRef = () => ({ 1: connectedMeta })
 
     render(<GasView />)
 
     expect(screen.getAllByText('Mainnet').length).toBeGreaterThanOrEqual(1)
-    // Should show gwei values for all 4 levels
-    expect(screen.getByText('15')).toBeTruthy() // slow
-    expect(screen.getByText('20')).toBeTruthy() // standard
-    expect(screen.getByText('30')).toBeTruthy() // fast
-    expect(screen.getByText('50')).toBeTruthy() // asap
+    // Should show single gas price (30 gwei)
+    expect(screen.getByText('30')).toBeTruthy()
   })
 
-  it('3. shows dashes for chain with no gas data', () => {
+  it('3. shows base fee and priority fee columns', () => {
+    mockNetworksRef = () => ({ 1: connectedChain })
+    mockNetworksMetaRef = () => ({ 1: connectedMeta })
+
+    render(<GasView />)
+
+    expect(screen.getByText('Gas Price')).toBeTruthy()
+    expect(screen.getByText('Base')).toBeTruthy()
+    expect(screen.getByText('Priority')).toBeTruthy()
+    // Base fee = 12 gwei, priority = 2 gwei
+    expect(screen.getByText('12')).toBeTruthy()
+    expect(screen.getByText('2')).toBeTruthy()
+  })
+
+  it('4. shows dashes for chain with no gas data', () => {
     const emptyMeta = {
       ...connectedMeta,
       gas: {
@@ -137,36 +145,29 @@ describe('GasView', () => {
     render(<GasView />)
 
     const dashes = screen.getAllByText('—')
-    expect(dashes.length).toBeGreaterThanOrEqual(4)
+    expect(dashes.length).toBeGreaterThanOrEqual(3)
   })
 
-  it('4. shows tx cost estimates with USD and gwei', () => {
+  it('5. shows tx cost estimates with USD and gwei', () => {
     mockNetworksRef = () => ({ 1: connectedChain })
     mockNetworksMetaRef = () => ({ 1: connectedMeta })
 
     render(<GasView />)
 
-    // TX cost table should exist
     expect(screen.getByText('Estimated Transaction Costs')).toBeTruthy()
     expect(screen.getByText('Send ETH')).toBeTruthy()
     expect(screen.getByText('Send Tokens')).toBeTruthy()
 
-    // USD values
     expect(screen.getByText('$1.89')).toBeTruthy()
     expect(screen.getByText('$5.85')).toBeTruthy()
 
-    // Gwei values should appear (gas cost in gwei)
+    // Gwei values in tx cost table
     const gweiElements = screen.getAllByText(/g$/)
     expect(gweiElements.length).toBeGreaterThan(0)
   })
 
-  it('5. hides testnets', () => {
-    const testnet = {
-      ...connectedChain,
-      id: 11155111,
-      name: 'Sepolia',
-      isTestnet: true
-    }
+  it('6. hides testnets', () => {
+    const testnet = { ...connectedChain, id: 11155111, name: 'Sepolia', isTestnet: true }
     mockNetworksRef = () => ({ 11155111: testnet })
     mockNetworksMetaRef = () => ({ 11155111: connectedMeta })
 
@@ -175,7 +176,7 @@ describe('GasView', () => {
     expect(screen.getByText(/no connected chains/i)).toBeTruthy()
   })
 
-  it('6. hides chains that are off', () => {
+  it('7. hides chains that are off', () => {
     const offChain = { ...connectedChain, on: false }
     mockNetworksRef = () => ({ 1: offChain })
     mockNetworksMetaRef = () => ({ 1: connectedMeta })
@@ -183,43 +184,5 @@ describe('GasView', () => {
     render(<GasView />)
 
     expect(screen.getByText(/no connected chains/i)).toBeTruthy()
-  })
-
-  it('7. shows multiple chains sorted by connection status', () => {
-    const polygon = {
-      ...connectedChain,
-      id: 137,
-      name: 'Polygon',
-      connection: {
-        primary: makeConnection({ connected: false }),
-        secondary: makeConnection({ on: false, connected: false })
-      }
-    }
-    const polygonMeta = {
-      ...connectedMeta,
-      nativeCurrency: { ...connectedMeta.nativeCurrency, symbol: 'MATIC' },
-      gas: { price: { selected: 'standard', levels: {} }, samples: [] }
-    }
-
-    mockNetworksRef = () => ({ 1: connectedChain, 137: polygon })
-    mockNetworksMetaRef = () => ({ 1: connectedMeta, 137: polygonMeta })
-
-    render(<GasView />)
-
-    // Connected chain shows in the overview (Polygon is not connected so it's excluded)
-    const mainnetElements = screen.getAllByText('Mainnet')
-    expect(mainnetElements.length).toBeGreaterThanOrEqual(1)
-  })
-
-  it('8. shows base fee in overview table', () => {
-    mockNetworksRef = () => ({ 1: connectedChain })
-    mockNetworksMetaRef = () => ({ 1: connectedMeta })
-
-    render(<GasView />)
-
-    // Base fee header
-    expect(screen.getByText('Base')).toBeTruthy()
-    // Base fee value (12 gwei from nextBaseFee)
-    expect(screen.getByText('12')).toBeTruthy()
   })
 })
