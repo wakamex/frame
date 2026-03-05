@@ -84,6 +84,7 @@ class FrameAccount {
     this.accountObserver = subscribe(state, () => {
       // When signer data changes in any way this will rerun to make sure we're matched correctly
       const updatedSigner = this.findSigner(this.address)
+      let changed = false
 
       if (updatedSigner) {
         if (this.signer !== updatedSigner.id || this.signerStatus !== updatedSigner.status) {
@@ -92,6 +93,7 @@ class FrameAccount {
 
           this.lastSignerType = signerType || this.lastSignerType
           this.signerStatus = updatedSigner.status
+          changed = true
 
           if (updatedSigner.status === 'ok' && this.id === this.accounts._current) {
             this.verifyAddress(false, (err, verified) => {
@@ -99,11 +101,12 @@ class FrameAccount {
             })
           }
         }
-      } else {
+      } else if (this.signer !== '') {
         this.signer = ''
+        changed = true
       }
 
-      this.update()
+      if (changed) this.update()
     })
 
     if (this.created.split(':')[0] === 'new') {
