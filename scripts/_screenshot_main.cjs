@@ -277,6 +277,25 @@ const interactions = {
       })()`
     },
     {
+      name: 'remove-account-modal',
+      js: `(() => {
+        // First ensure we're in account detail view (click first account if needed)
+        const candidates = Array.from(document.querySelectorAll('main button')).filter(b =>
+          b.textContent.includes('Main Account') || b.textContent.match(/0x[0-9a-f]/i)
+        );
+        if (candidates[0]) candidates[0].click();
+        // Wait a tick, then find and click the Remove button
+        return new Promise(resolve => {
+          setTimeout(() => {
+            const btns = Array.from(document.querySelectorAll('button'));
+            const removeBtn = btns.find(b => b.textContent.includes('Remove'));
+            if (removeBtn) { removeBtn.click(); resolve('clicked Remove button'); }
+            else resolve('no Remove button found');
+          }, 300);
+        });
+      })()`
+    },
+    {
       name: 'add-account',
       js: `(() => {
         // Click the '+ Add' button to reveal the account type selector panel
