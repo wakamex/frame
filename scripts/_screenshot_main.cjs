@@ -218,6 +218,17 @@ const interactions = {
         return 'no account button found, buttons: ' + document.querySelectorAll('main button').length;
       })()`
     }
+  ],
+  tokens: [
+    {
+      name: 'add-token-modal',
+      js: `(() => {
+        // Click the '+ Add Token' button to reveal the add-token modal
+        const candidates = Array.from(document.querySelectorAll('button')).filter(b => b.textContent.includes('Add Token'));
+        if (candidates[0]) { candidates[0].click(); return 'clicked: ' + candidates[0].textContent.trim(); }
+        return 'no Add Token button found, buttons: ' + document.querySelectorAll('button').length;
+      })()`
+    }
   ]
 }
 
