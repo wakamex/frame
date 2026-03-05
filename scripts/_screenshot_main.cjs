@@ -209,6 +209,7 @@ const mockState = {
     },
     signers: {
       'hot-signer-1': { id: 'hot-signer-1', type: 'ring', name: 'Hot Signer', status: 'ok', addresses: ['0x1234567890abcdef1234567890abcdef12345678'], createdAt: Date.now() },
+      'hot-signer-2': { id: 'hot-signer-2', type: 'ring', name: 'Locked Signer', status: 'locked', addresses: ['0x9999999999999999999999999999999999999999'], createdAt: Date.now() },
       'ledger-1': { id: 'ledger-1', type: 'ledger', name: 'Ledger Nano S', status: 'ok', addresses: ['0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'], model: 'Nano S', createdAt: Date.now() }
     },
     txHistory: {
@@ -290,6 +291,19 @@ const interactions = {
         const signerBtn = mainBtns.find(b => b.textContent.match(/hot|ledger|trezor|lattice|seed/i));
         if (signerBtn) { signerBtn.click(); return 'clicked signer: ' + signerBtn.textContent.substring(0, 60); }
         return 'no signer button found, main buttons: ' + mainBtns.map(b => b.textContent.trim()).join(', ');
+      })()`
+    },
+    {
+      name: 'signer-locked',
+      js: `(() => {
+        // Click the locked signer button to show its detail panel with the password prompt
+        const mainBtns = Array.from(document.querySelectorAll('main button'));
+        const lockedBtn = mainBtns.find(b => b.textContent.includes('Locked Signer'));
+        if (lockedBtn) { lockedBtn.click(); return 'clicked locked signer: ' + lockedBtn.textContent.substring(0, 60); }
+        // Fallback: find any button indicating locked status
+        const anyLocked = mainBtns.find(b => b.textContent.toLowerCase().includes('locked'));
+        if (anyLocked) { anyLocked.click(); return 'clicked (fallback) locked: ' + anyLocked.textContent.substring(0, 60); }
+        return 'no locked signer button found, main buttons: ' + mainBtns.map(b => b.textContent.trim().substring(0, 20)).join(', ');
       })()`
     }
   ],
