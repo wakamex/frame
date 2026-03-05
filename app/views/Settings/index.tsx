@@ -69,6 +69,12 @@ export default function SettingsView() {
           value={main.showLocalNameWithENS}
           onChange={() => toggle('main.showLocalNameWithENS', main.showLocalNameWithENS)}
         />
+        <ToggleRow
+          label="Buy Button"
+          description="Show fiat on-ramp button on account pages"
+          value={main.showBuyButton ?? false}
+          onChange={() => toggle('main.showBuyButton', main.showBuyButton ?? false)}
+        />
       </Section>
 
       {/* Hardware */}

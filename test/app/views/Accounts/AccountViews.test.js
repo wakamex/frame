@@ -68,7 +68,8 @@ jest.mock('../../../../app/store', () => ({
   useSelectedAccount: (...args) => mockUseSelectedAccount(...args),
   useBalances: (...args) => mockUseBalances(...args),
   usePermissions: (...args) => mockUsePermissions(...args),
-  useOrigins: (...args) => mockUseOrigins(...args)
+  useOrigins: (...args) => mockUseOrigins(...args),
+  useMainState: () => ({ showBuyButton: false })
 }))
 
 jest.mock('../../../../app/ipc', () => ({

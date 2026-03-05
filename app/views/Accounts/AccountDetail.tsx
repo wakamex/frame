@@ -8,7 +8,8 @@ import {
   useBalances,
   usePermissions,
   useOrigins,
-  useNetworksMeta
+  useNetworksMeta,
+  useMainState
 } from '../../store'
 import { actions } from '../../ipc'
 import { createBalance, sortByTotalValue, isNativeCurrency } from '../../../resources/domain/balance'
@@ -29,6 +30,7 @@ export default function AccountDetail() {
   const balances = useBalances(selectedId ?? '')
   const permissions = usePermissions(selectedId ?? '')
   const origins = useOrigins()
+  const main = useMainState()
   const [renaming, setRenaming] = useState(false)
   const [newName, setNewName] = useState('')
   const [confirmRemove, setConfirmRemove] = useState(false)
@@ -120,7 +122,7 @@ export default function AccountDetail() {
         </div>
         <div className="flex items-center justify-between">
           <Address address={account.id} full className="text-gray-400" />
-          <BuyButton address={account.id} chainId={displayedBalances[0]?.chainId ?? 1} />
+          {main?.showBuyButton && <BuyButton address={account.id} chainId={displayedBalances[0]?.chainId ?? 1} />}
         </div>
       </div>
 

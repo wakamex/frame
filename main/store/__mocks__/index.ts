@@ -51,6 +51,7 @@ function createDefaultState(): any {
       latticeSettings: { accountLimit: 5, derivation: 'standard', endpointMode: 'default', endpointCustom: '' },
       ledger: { derivation: 'live', liveAccountLimit: 5 },
       trezor: { derivation: 'standard' },
+      showBuyButton: false,
       privacy: {},
       knownExtensions: {},
       updater: { dontRemind: [], badge: null },

@@ -132,6 +132,7 @@ const mainState: M = {
   // showUSDValue: main('showUSDValue', true),
   launch: main('launch', false),
   reveal: main('reveal', false),
+  showBuyButton: main('showBuyButton', false),
   showLocalNameWithENS: main('showLocalNameWithENS', false),
   autohide: main('autohide', false),
   accountCloseLock: main('accountCloseLock', false),

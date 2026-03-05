@@ -60,6 +60,7 @@ export interface MainState {
   trezor: {
     derivation: string
   }
+  showBuyButton: boolean
   privacy: {}
   updater: {
     dontRemind: string[]

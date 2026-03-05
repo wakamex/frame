@@ -30,6 +30,7 @@ const mockMainState = {
   autohide: false,
   menubarGasPrice: false,
   showLocalNameWithENS: false,
+  showBuyButton: false,
   privacy: {},
   ledger: { derivation: 'live', liveAccountLimit: 5 },
   trezor: { derivation: 'standard' },
