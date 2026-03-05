@@ -24,7 +24,7 @@ describe('#showUnhandledExceptionDialog', () => {
     )
   })
 
-  it('gives the user an option to accept the error or quit Frame', () => {
+  it('gives the user an option to accept the error or quit Framed', () => {
     showUnhandledExceptionDialog('something bad happened')
 
     expect(dialog.showMessageBoxSync).toHaveBeenCalledWith(
@@ -53,7 +53,7 @@ describe('#showUnhandledExceptionDialog', () => {
   })
 
   it('shows a simple error box and quits for an EADDRINUSE error', () => {
-    showUnhandledExceptionDialog('Frame is already running', 'EADDRINUSE')
+    showUnhandledExceptionDialog('Framed is already running', 'EADDRINUSE')
 
     expect(dialog.showErrorBox).toHaveBeenCalled()
     expect(dialog.showMessageBoxSync).not.toHaveBeenCalled()

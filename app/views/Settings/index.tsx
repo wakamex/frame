@@ -33,7 +33,7 @@ export default function SettingsView() {
         <ShortcutConfigurator
           shortcut={main.shortcuts?.summon}
           platform={platform}
-          label="Summon Frame"
+          label="Summon Framed"
         />
       </Section>
 
@@ -41,13 +41,13 @@ export default function SettingsView() {
       <Section title="Behavior">
         <ToggleRow
           label="Run on Startup"
-          description="Start Frame when you log in"
+          description="Start Framed when you log in"
           value={main.launch}
           onChange={() => toggle('main.launch', main.launch)}
         />
         <ToggleRow
           label="Auto-hide"
-          description="Hide Frame when it loses focus"
+          description="Hide Framed when it loses focus"
           value={main.autohide}
           onChange={() => toggle('main.autohide', main.autohide)}
         />
@@ -141,7 +141,7 @@ export default function SettingsView() {
 
       <Modal open={confirmReset} onClose={() => setConfirmReset(false)} title="Reset All Settings">
         <p className="text-sm text-gray-300 mb-4">
-          This will reset all settings to defaults and restart Frame. Are you sure?
+          This will reset all settings to defaults and restart Framed. Are you sure?
         </p>
         <div className="flex justify-end gap-3">
           <button onClick={() => setConfirmReset(false)} className="px-3 py-1.5 text-sm text-gray-400 hover:text-gray-200 rounded">Cancel</button>
@@ -346,7 +346,7 @@ function ShortcutConfigurator({ shortcut, platform, label }: {
       <div className="flex items-center justify-between py-2">
         <div>
           <div className="text-sm text-gray-200">{label}</div>
-          <div className="text-xs text-gray-500">Global hotkey to show/hide Frame</div>
+          <div className="text-xs text-gray-500">Global hotkey to show/hide Framed</div>
         </div>
         <button
           onClick={toggleEnabled}

@@ -101,7 +101,7 @@ describe('SettingsView', () => {
   it('renders the Keyboard Shortcut section', () => {
     render(<SettingsView />)
     expect(screen.getByText('Keyboard Shortcut')).toBeDefined()
-    expect(screen.getByText('Summon Frame')).toBeDefined()
+    expect(screen.getByText('Summon Framed')).toBeDefined()
   })
 
   it('Dark Mode toggle calls syncPath with correct colorway', async () => {

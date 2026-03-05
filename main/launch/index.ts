@@ -1,6 +1,6 @@
 import AutoLaunch from 'auto-launch'
 
-const launch = new AutoLaunch({ name: 'Frame' })
+const launch = new AutoLaunch({ name: 'Framed' })
 
 export const enable = launch.enable.bind(launch)
 export const disable = launch.disable.bind(launch)

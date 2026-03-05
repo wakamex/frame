@@ -102,7 +102,7 @@ class HotSignerWorker {
       const signature = Buffer.from(signedMessage!.replace('0x', ''), 'hex')
       // Ensure correct length
       if (signature.length !== 65)
-        return pseudoCallback('Frame verifyAddress signature has incorrect length')
+        return pseudoCallback('Framed verifyAddress signature has incorrect length')
       // Verify address
       let v = signature[64]
       const vBig = BigInt(v === 0 || v === 1 ? v + 27 : v)

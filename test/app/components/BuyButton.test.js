@@ -45,7 +45,7 @@ describe('BuyButton', () => {
     await user.click(screen.getByRole('button', { name: 'Buy' }))
     await user.click(screen.getByText('Ramp Network'))
     expect(mockOpenExternal).toHaveBeenCalledWith(
-      `https://app.ramp.network/?userAddress=${TEST_ADDRESS}&hostAppName=Frame`
+      `https://app.ramp.network/?userAddress=${TEST_ADDRESS}&hostAppName=Framed`
     )
   })
 
@@ -72,7 +72,7 @@ describe('BuyButton', () => {
     await user.click(screen.getByRole('button', { name: 'Buy' }))
     await user.click(screen.getByText('Ramp Network'))
     expect(mockOpenExternal).toHaveBeenCalledWith(
-      `https://app.ramp.network/?userAddress=${TEST_ADDRESS}&hostAppName=Frame&defaultAsset=MATIC_MATIC`
+      `https://app.ramp.network/?userAddress=${TEST_ADDRESS}&hostAppName=Framed&defaultAsset=MATIC_MATIC`
     )
   })
 
@@ -81,7 +81,7 @@ describe('BuyButton', () => {
     await user.click(screen.getByRole('button', { name: 'Buy' }))
     await user.click(screen.getByText('Ramp Network'))
     expect(mockOpenExternal).toHaveBeenCalledWith(
-      `https://app.ramp.network/?userAddress=${TEST_ADDRESS}&hostAppName=Frame&defaultAsset=BASE_ETH`
+      `https://app.ramp.network/?userAddress=${TEST_ADDRESS}&hostAppName=Framed&defaultAsset=BASE_ETH`
     )
   })
 
@@ -92,7 +92,7 @@ describe('BuyButton', () => {
     const url = mockOpenExternal.mock.calls[0][0]
     expect(url).not.toContain('defaultAsset')
     expect(url).toBe(
-      `https://app.ramp.network/?userAddress=${TEST_ADDRESS}&hostAppName=Frame`
+      `https://app.ramp.network/?userAddress=${TEST_ADDRESS}&hostAppName=Framed`
     )
   })
 

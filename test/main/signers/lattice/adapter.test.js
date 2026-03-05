@@ -35,7 +35,7 @@ beforeEach(() => {
   removeLattice.mockClear()
 
   store.set('main.lattice', 'NBaJ8e', {
-    deviceName: 'Frame-testlattice',
+    deviceName: 'Framed-testlattice',
     privKey: 'supersecretkey',
     paired: true
   })
@@ -277,7 +277,7 @@ describe('signer device changes', () => {
           expect(Object.keys(adapter.knownSigners)).toHaveLength(1)
           expect(adapter.knownSigners['NBaJ8e']).toBeTruthy()
           expect(lattice.deviceId).toBe('NBaJ8e')
-          expect(lattice.deviceName).toBe('Frame-testlattice')
+          expect(lattice.deviceName).toBe('Framed-testlattice')
           done()
         } catch (e) {
           done(e)
@@ -355,7 +355,7 @@ describe('signer device changes', () => {
       latticeSigner.emit('update')
 
       expect(updateHandler).toHaveBeenCalledWith(
-        expect.objectContaining({ deviceId: 'NBaJ8e', deviceName: 'Frame-testlattice' })
+        expect.objectContaining({ deviceId: 'NBaJ8e', deviceName: 'Framed-testlattice' })
       )
     })
 
@@ -415,7 +415,7 @@ describe('signer device changes', () => {
       latticeSigner.emit('error')
 
       expect(updateHandler).toHaveBeenCalledWith(
-        expect.objectContaining({ deviceId: 'NBaJ8e', deviceName: 'Frame-testlattice' })
+        expect.objectContaining({ deviceId: 'NBaJ8e', deviceName: 'Framed-testlattice' })
       )
     })
 

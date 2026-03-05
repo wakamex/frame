@@ -469,7 +469,7 @@ function HardwareInfo({ type, onBack }: { type: string; onBack: () => void }) {
       <FormHeader title={`Connect ${labels[type]}`} onBack={onBack} />
       <div className="text-sm text-gray-400 space-y-2">
         <p>Connect your {labels[type]} device to your computer.</p>
-        <p>Frame will automatically detect connected hardware wallets and display them in the Signers view.</p>
+        <p>Framed will automatically detect connected hardware wallets and display them in the Signers view.</p>
         <p className="text-gray-500 text-xs mt-4">
           Hardware wallet accounts will appear once the device is connected and unlocked.
         </p>

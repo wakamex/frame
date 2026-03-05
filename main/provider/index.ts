@@ -230,7 +230,7 @@ export class Provider extends EventEmitter {
     getSignedAddress(signed, message, (err, verifiedAddress) => {
       if (err) return cb(err)
       if ((verifiedAddress || '').toLowerCase() !== address.toLowerCase())
-        return cb(new Error('Frame verifySignature: Failed ecRecover check'))
+        return cb(new Error('Framed verifySignature: Failed ecRecover check'))
       cb(null, true)
     })
   }
@@ -816,7 +816,7 @@ export class Provider extends EventEmitter {
   }
 
   clientVersion(payload: RPCRequestPayload, res: RPCSuccessCallback) {
-    res({ id: payload.id, jsonrpc: '2.0', result: `Frame/v${packageFile.version}` })
+    res({ id: payload.id, jsonrpc: '2.0', result: `Framed/v${packageFile.version}` })
   }
 
   private switchEthereumChain(payload: RPCRequestPayload, res: RPCRequestCallback) {

@@ -29,7 +29,7 @@ const providers: Provider[] = [
   {
     name: 'Ramp Network',
     buildUrl(address, chainId) {
-      let url = `https://app.ramp.network/?userAddress=${address}&hostAppName=Frame`
+      let url = `https://app.ramp.network/?userAddress=${address}&hostAppName=Framed`
       if (chainId && CHAIN_ASSETS_RAMP[chainId]) {
         url += `&defaultAsset=${CHAIN_ASSETS_RAMP[chainId]}`
       }

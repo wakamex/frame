@@ -46,7 +46,7 @@ describe('#connect', () => {
     connectFn = jest.fn()
 
     Client.mockImplementation((opts) => {
-      expect(opts.name).toBe('Frame-ABCXYZ')
+      expect(opts.name).toBe('Framed-ABCXYZ')
       expect(opts.baseUrl).toBe('https://gridplus.io')
       expect(opts.privKey).toBe('supersecretkey')
 

@@ -73,7 +73,7 @@ const handler = (socket: FrameWebSocket, req: IncomingMessage) => {
     if (socket.frameExtension) {
       if (!(await isKnownExtension(socket.frameExtension))) {
         const error = {
-          message: `Permission denied, approve connection from Frame Companion with id ${socket.frameExtension.id} in Frame to continue`,
+          message: `Permission denied, approve connection from Frame Companion with id ${socket.frameExtension.id} in Framed to continue`,
           code: 4001
         }
 
@@ -113,7 +113,7 @@ const handler = (socket: FrameWebSocket, req: IncomingMessage) => {
     }
 
     if (origin === 'frame-extension') {
-      // custom extension action for summoning Frame
+      // custom extension action for summoning Framed
       if (rawPayload.method === 'frame_summon') return windows.showWindow()
 
       const { id, jsonrpc } = rawPayload
@@ -122,9 +122,9 @@ const handler = (socket: FrameWebSocket, req: IncomingMessage) => {
     }
 
     if (protectedMethods.indexOf(payload.method) > -1 && !(await isTrusted(payload))) {
-      let error = { message: 'Permission denied, approve ' + origin + ' in Frame to continue', code: 4001 }
+      let error = { message: 'Permission denied, approve ' + origin + ' in Framed to continue', code: 4001 }
       // review
-      if (!accounts.getSelectedAddresses()[0]) error = { message: 'No Frame account selected', code: 4001 }
+      if (!accounts.getSelectedAddresses()[0]) error = { message: 'No Framed account selected', code: 4001 }
       res({ id: payload.id, jsonrpc: payload.jsonrpc, error })
     } else {
       provider.send(payload, (response) => {

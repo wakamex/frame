@@ -98,10 +98,10 @@ const handler = (req: IncomingMessage, res: ServerResponse) => {
         }
 
         if (protectedMethods.indexOf(payload.method) > -1 && !(await isTrusted(payload))) {
-          let error = { message: `Permission denied, approve ${origin} in Frame to continue`, code: 4001 }
+          let error = { message: `Permission denied, approve ${origin} in Framed to continue`, code: 4001 }
           // Review
           if (!accounts.getSelectedAddresses()[0])
-            error = { message: 'No Frame account selected', code: 4001 }
+            error = { message: 'No Framed account selected', code: 4001 }
           res.writeHead(401, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({ id: payload.id, jsonrpc: payload.jsonrpc, error }))
         } else {

@@ -136,7 +136,7 @@ export function resError(errorData: string | EVMError, request: RPCId, res: RPCE
 
 export function getSignedAddress(signed: string, message: string, cb: Callback<string>) {
   const signature = Buffer.from((signed || '').replace('0x', ''), 'hex')
-  if (signature.length !== 65) return cb(new Error('Frame verifySignature: Signature has incorrect length'))
+  if (signature.length !== 65) return cb(new Error('Framed verifySignature: Signature has incorrect length'))
   let v = signature[64]
   v = v === 0 || v === 1 ? v + 27 : v
   const r = toBuffer(signature.slice(0, 32))

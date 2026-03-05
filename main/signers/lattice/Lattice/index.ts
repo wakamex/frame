@@ -50,7 +50,7 @@ export const Status = {
 }
 
 function devicePermission(tag: string) {
-  return tag ? `Frame-${tag}` : 'Frame'
+  return tag ? `Framed-${tag}` : 'Framed'
 }
 
 function parseError(err: Error) {

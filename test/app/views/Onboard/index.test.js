@@ -20,7 +20,7 @@ jest.mock('../../../../app/views/Accounts/AddAccount', () => {
 describe('OnboardView', () => {
   it('renders welcome/intro screen on first load', () => {
     render(<OnboardView onComplete={jest.fn()} />)
-    expect(screen.getByText('Welcome to Frame')).toBeDefined()
+    expect(screen.getByText('Welcome to Framed')).toBeDefined()
     expect(screen.getByText(/privacy-focused Ethereum wallet/)).toBeDefined()
   })
 
@@ -48,15 +48,15 @@ describe('OnboardView', () => {
     await user.click(screen.getByText('Get Started'))
     await user.click(screen.getByText('Complete Account Creation'))
     expect(screen.getByText("You're all set")).toBeDefined()
-    expect(screen.getByText('Open Frame')).toBeDefined()
+    expect(screen.getByText('Open Framed')).toBeDefined()
   })
 
-  it('Open Frame button on done screen triggers onComplete', async () => {
+  it('Open Framed button on done screen triggers onComplete', async () => {
     const onComplete = jest.fn()
     const { user } = render(<OnboardView onComplete={onComplete} />)
     await user.click(screen.getByText('Get Started'))
     await user.click(screen.getByText('Complete Account Creation'))
-    await user.click(screen.getByText('Open Frame'))
+    await user.click(screen.getByText('Open Framed'))
     expect(onComplete).toHaveBeenCalledTimes(1)
   })
 })

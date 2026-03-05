@@ -93,7 +93,8 @@ jest.mock('../../../../resources/domain/signer', () => ({
 
 jest.mock('../../../../resources/domain/balance', () => ({
   createBalance: (...args) => mockCreateBalance(...args),
-  sortByTotalValue: (...args) => mockSortByTotalValue(...args)
+  sortByTotalValue: (...args) => mockSortByTotalValue(...args),
+  isNativeCurrency: (address) => address === '0x0000000000000000000000000000000000000000'
 }))
 
 jest.mock('../../../../app/components/Address', () => {

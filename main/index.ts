@@ -43,7 +43,7 @@ if (process.env.LOG_LEVEL === 'debug') {
 const hasInstanceLock = app.requestSingleInstanceLock()
 
 if (!hasInstanceLock) {
-  log.info('another instance of Frame is running - exiting...')
+  log.info('another instance of Framed is running - exiting...')
   app.exit(1)
 }
 log.info(`Chrome: v${process.versions.chrome}`)
