@@ -791,6 +791,33 @@ const interactions = {
         if (byAccountBtn) { byAccountBtn.click(); return 'expanded By Account section'; }
         return 'By Account section button not found';
       })()`
+    },
+    {
+      name: 'update-available-banner',
+      stateUpdates: [
+        { path: 'main.updater.badge', value: { type: 'updateAvailable', version: '0.8.0' } }
+      ],
+      js: `(() => {
+        const banner = document.querySelector('[class*="bg-gray-800"]');
+        if (banner && banner.textContent.includes('Update')) return 'update available banner visible: ' + banner.textContent.substring(0, 80);
+        return 'banner not found yet';
+      })()`
+    },
+    {
+      name: 'update-ready-banner',
+      stateUpdates: [
+        { path: 'main.updater.badge', value: { type: 'updateReady', version: '0.8.0' } }
+      ],
+      js: `(() => {
+        const banner = document.querySelector('[class*="bg-gray-800"]');
+        if (banner && banner.textContent.includes('ready')) return 'update ready banner visible: ' + banner.textContent.substring(0, 80);
+        return 'banner not found yet';
+      })()`
+    },
+    {
+      name: 'clear-update-banner',
+      stateUpdates: [{ path: 'main.updater.badge', value: null }],
+      js: `(() => 'cleared update banner')()`
     }
   ],
   send: [
