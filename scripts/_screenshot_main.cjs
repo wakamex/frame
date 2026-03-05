@@ -951,6 +951,50 @@ app.whenReady().then(async () => {
   win.setContentSize(1200, 800)
   await new Promise(r => setTimeout(r, 500))
 
+  // Empty-state screenshots: clear balances/txHistory/tokens/contacts to capture empty UI
+  console.log('\n[Empty State] Clearing data for empty-state screenshots...')
+  win.webContents.send(
+    'main:action',
+    'stateSync',
+    JSON.stringify([{ updates: [
+      { path: 'main.balances', value: {} },
+      { path: 'main.txHistory', value: {} },
+      { path: 'main.tokens.custom', value: [] },
+      { path: 'main.addressBook', value: {} }
+    ] }])
+  )
+  // Wait for React to re-render with cleared data
+  await new Promise(r => setTimeout(r, 800))
+
+  const emptyViews = [
+    { name: 'portfolio', navIndex: 1 },
+    { name: 'history', navIndex: 5 },
+    { name: 'tokens', navIndex: 7 },
+    { name: 'contacts', navIndex: 3 }
+  ]
+
+  for (const { name: emptyViewName, navIndex } of emptyViews) {
+    try {
+      const result = await win.webContents.executeJavaScript(`
+        (() => {
+          const buttons = document.querySelectorAll('nav button');
+          if (buttons[${navIndex}]) {
+            buttons[${navIndex}].click();
+            return 'clicked nav ${navIndex}: ' + buttons[${navIndex}].textContent;
+          }
+          return 'no nav button at index ${navIndex}, total: ' + buttons.length;
+        })()
+      `)
+      console.log('[Empty Nav]', result)
+    } catch (err) {
+      console.log('[Empty Nav Error]', err.message)
+    }
+
+    const emptyName = String(step++).padStart(2, '0') + '-empty-' + emptyViewName
+    const emptyPng = await captureScreenshot(win, emptyName)
+    if (!validateScreenshot(emptyPng, emptyName)) failures++
+  }
+
   // Summary
   console.log('\n' + '='.repeat(60))
   console.log(`Screenshots: ${step - 1} captured, ${failures} failures`)
