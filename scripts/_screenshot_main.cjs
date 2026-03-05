@@ -385,6 +385,44 @@ app.whenReady().then(async () => {
     }
   }
 
+  // Light-mode screenshots: toggle colorway to 'light' and capture key views
+  console.log('\n[Light Mode] Switching colorway to light...')
+  win.webContents.send(
+    'main:action',
+    'stateSync',
+    JSON.stringify([{ updates: [{ path: 'main.colorway', value: 'light' }] }])
+  )
+  // Wait for React to re-render with the new colorway
+  await new Promise(r => setTimeout(r, 800))
+
+  const lightViews = [
+    { name: 'accounts', navIndex: 0 },
+    { name: 'portfolio', navIndex: 1 },
+    { name: 'settings', navIndex: 8 }
+  ]
+
+  for (const { name: lightViewName, navIndex } of lightViews) {
+    try {
+      const result = await win.webContents.executeJavaScript(`
+        (() => {
+          const buttons = document.querySelectorAll('nav button');
+          if (buttons[${navIndex}]) {
+            buttons[${navIndex}].click();
+            return 'clicked nav ${navIndex}: ' + buttons[${navIndex}].textContent;
+          }
+          return 'no nav button at index ${navIndex}, total: ' + buttons.length;
+        })()
+      `)
+      console.log('[Light Nav]', result)
+    } catch (err) {
+      console.log('[Light Nav Error]', err.message)
+    }
+
+    const lightName = String(step++).padStart(2, '0') + '-light-' + lightViewName
+    const lightPng = await captureScreenshot(win, lightName)
+    if (!validateScreenshot(lightPng, lightName)) failures++
+  }
+
   // Summary
   console.log('\n' + '='.repeat(60))
   console.log(`Screenshots: ${step - 1} captured, ${failures} failures`)
