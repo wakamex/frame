@@ -1,6 +1,6 @@
 const config = {
-  appId: 'sh.frame.app',
-  productName: 'Frame',
+  appId: 'sh.framed.app',
+  productName: 'Framed',
   files: ['compiled', 'bundle', '!compiled/main/dev'],
   npmRebuild: false
 }
