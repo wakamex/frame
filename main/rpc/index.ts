@@ -239,11 +239,11 @@ const rpc: Record<string, (...args: any[]) => void> = {
         }
         added.add(normalized)
 
-        // Yield to event loop between account creations to avoid blocking
-        await new Promise<void>((resolve) => {
-          accounts.add(address, name, { type: 'Address' }, () => resolve())
-        })
+        accounts.add(address, name, { type: 'Address' })
         results.push({ name, address })
+
+        // Yield to event loop between account creations to avoid blocking
+        await new Promise((resolve) => setTimeout(resolve, 0))
       }
 
       cb(null, results)
