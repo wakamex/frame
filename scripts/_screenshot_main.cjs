@@ -262,10 +262,13 @@ const mockState = {
       '0x1234567890abcdef1234567890abcdef12345678': [
         { address: '0x0000000000000000000000000000000000000000', chainId: 1, symbol: 'ETH', name: 'Ether', decimals: 18, balance: '2500000000000000000', displayBalance: '2.5' },
         { address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', chainId: 1, symbol: 'USDC', name: 'USD Coin', decimals: 6, balance: '5000000000', displayBalance: '5000' },
-        { address: '0x6b175474e89094c44da98b954eedeac495271d0f', chainId: 1, symbol: 'DAI', name: 'Dai Stablecoin', decimals: 18, balance: '1200000000000000000000', displayBalance: '1200' }
+        { address: '0x6b175474e89094c44da98b954eedeac495271d0f', chainId: 1, symbol: 'DAI', name: 'Dai Stablecoin', decimals: 18, balance: '1200000000000000000000', displayBalance: '1200' },
+        { address: '0x0000000000000000000000000000000000000000', chainId: 10, symbol: 'ETH', name: 'Ether', decimals: 18, balance: '800000000000000000', displayBalance: '0.8' },
+        { address: '0x0000000000000000000000000000000000000000', chainId: 137, symbol: 'MATIC', name: 'Polygon', decimals: 18, balance: '5000000000000000000000', displayBalance: '5000' }
       ],
       '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd': [
-        { address: '0x0000000000000000000000000000000000000000', chainId: 1, symbol: 'ETH', name: 'Ether', decimals: 18, balance: '15000000000000000000', displayBalance: '15.0' }
+        { address: '0x0000000000000000000000000000000000000000', chainId: 1, symbol: 'ETH', name: 'Ether', decimals: 18, balance: '15000000000000000000', displayBalance: '15.0' },
+        { address: '0x0000000000000000000000000000000000000000', chainId: 10, symbol: 'ETH', name: 'Ether', decimals: 18, balance: '3000000000000000000', displayBalance: '3.0' }
       ],
       '0x5555555555555555555555555555555555555555': [
         { address: '0x0000000000000000000000000000000000000000', chainId: 1, symbol: 'ETH', name: 'Ether', decimals: 18, balance: '500000000000000000', displayBalance: '0.5' },
@@ -439,6 +442,41 @@ const interactions = {
             else resolve('no Main Account button found, buttons: ' + document.querySelectorAll('main button').length);
           }, 300);
         }, 300));
+      })()`
+    }
+  ],
+  portfolio: [
+    {
+      name: 'portfolio-by-chain-collapsed',
+      js: `(() => {
+        // Collapse the 'By Chain' section by clicking its header button
+        const sectionBtns = Array.from(document.querySelectorAll('main button')).filter(b =>
+          b.textContent.includes('By Chain') || b.textContent.includes('BY CHAIN')
+        );
+        if (sectionBtns[0]) { sectionBtns[0].click(); return 'collapsed By Chain section'; }
+        return 'By Chain section button not found';
+      })()`
+    },
+    {
+      name: 'portfolio-by-account-collapsed',
+      js: `(() => {
+        // Re-expand 'By Chain', then collapse 'By Account' section
+        const allBtns = Array.from(document.querySelectorAll('main button'));
+        const byChainBtn = allBtns.find(b => b.textContent.includes('By Chain') || b.textContent.includes('BY CHAIN'));
+        if (byChainBtn) byChainBtn.click();
+        const byAccountBtn = allBtns.find(b => b.textContent.includes('By Account') || b.textContent.includes('BY ACCOUNT'));
+        if (byAccountBtn) { byAccountBtn.click(); return 'expanded By Chain, collapsed By Account'; }
+        return 'By Account section button not found';
+      })()`
+    },
+    {
+      name: 'portfolio-all-expanded',
+      js: `(() => {
+        // Expand all collapsed sections so both By Chain and By Account are visible
+        const allBtns = Array.from(document.querySelectorAll('main button'));
+        const byAccountBtn = allBtns.find(b => b.textContent.includes('By Account') || b.textContent.includes('BY ACCOUNT'));
+        if (byAccountBtn) { byAccountBtn.click(); return 'expanded By Account section'; }
+        return 'By Account section button not found';
       })()`
     }
   ],
