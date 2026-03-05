@@ -1,4 +1,5 @@
 import { proxy, useSnapshot } from 'valtio'
+import link from '../resources/link'
 import type {
   Account,
   AccountMetadata,
@@ -131,7 +132,7 @@ export function setSelectedAccount(id: string | null) {
 
   // Notify main process so it can start balance scanning for this account
   if (id) {
-    import('./ipc').then(({ actions }) => actions.setSigner(id))
+    link.rpc('setSigner', id, () => {})
   }
 }
 
