@@ -194,6 +194,41 @@ const mockState = {
           }
         },
         created: '2024-03-15'
+      },
+      '0x5555555555555555555555555555555555555555': {
+        id: '0x5555555555555555555555555555555555555555',
+        name: 'DeFi Wallet',
+        address: '0x5555555555555555555555555555555555555555',
+        status: 'ok',
+        signer: 'ring-2',
+        requests: {
+          'req-eip1559': {
+            handlerId: 'req-eip1559',
+            type: 'transaction',
+            status: 'pending',
+            origin: 'app.uniswap.org',
+            account: '0x5555555555555555555555555555555555555555',
+            created: Date.now(),
+            payload: {
+              jsonrpc: '2.0',
+              id: 3,
+              method: 'eth_sendTransaction',
+              params: [{ from: '0x5555555555555555555555555555555555555555', to: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', value: '0x0', chainId: '0x1', gas: '0x1e848' }]
+            },
+            data: {
+              from: '0x5555555555555555555555555555555555555555',
+              to: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+              value: '0x0',
+              chainId: '0x1',
+              gasLimit: '0x1e848',
+              type: '0x2',
+              maxFeePerGas: '0x2540be400',
+              maxPriorityFeePerGas: '0x3b9aca00',
+              data: '0xa9059cbb000000000000000000000000deadbeefdeadbeefdeadbeefdeadbeefdeadbeef0000000000000000000000000000000000000000000000000000000077359400'
+            }
+          }
+        },
+        created: '2024-06-01'
       }
     },
     accountsMeta: {},
@@ -216,6 +251,10 @@ const mockState = {
       ],
       '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd': [
         { address: '0x0000000000000000000000000000000000000000', chainId: 1, symbol: 'ETH', name: 'Ether', decimals: 18, balance: '15000000000000000000', displayBalance: '15.0' }
+      ],
+      '0x5555555555555555555555555555555555555555': [
+        { address: '0x0000000000000000000000000000000000000000', chainId: 1, symbol: 'ETH', name: 'Ether', decimals: 18, balance: '500000000000000000', displayBalance: '0.5' },
+        { address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', chainId: 1, symbol: 'USDC', name: 'USD Coin', decimals: 6, balance: '10000000000', displayBalance: '10000' }
       ]
     },
     tokens: {
@@ -227,7 +266,8 @@ const mockState = {
     },
     signers: {
       'hot-signer-1': { id: 'hot-signer-1', type: 'ring', name: 'Hot Signer', status: 'ok', addresses: ['0x1234567890abcdef1234567890abcdef12345678'], createdAt: Date.now() },
-      'ledger-1': { id: 'ledger-1', type: 'ledger', name: 'Ledger Nano S', status: 'ok', addresses: ['0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'], model: 'Nano S', createdAt: Date.now() }
+      'ledger-1': { id: 'ledger-1', type: 'ledger', name: 'Ledger Nano S', status: 'ok', addresses: ['0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'], model: 'Nano S', createdAt: Date.now() },
+      'ring-2': { id: 'ring-2', type: 'ring', name: 'Hot Signer 2', status: 'ok', addresses: ['0x5555555555555555555555555555555555555555'], createdAt: Date.now() }
     },
     txHistory: {
       '0x1234567890abcdef1234567890abcdef12345678': [
@@ -333,6 +373,28 @@ const interactions = {
           if (hwBtn) { hwBtn.click(); resolve('clicked: ' + hwBtn.textContent.substring(0, 40)); }
           else resolve('no Hardware Wallet button found, buttons: ' + btns.map(b => b.textContent.substring(0, 20)).join(' | '));
         }, 300));
+      })()`
+    },
+    {
+      name: 'eip1559-transaction',
+      js: `(() => {
+        // Navigate through the request queue to find the EIP-1559 transaction (shows Max Fee + Priority instead of Gas Price)
+        return new Promise(resolve => {
+          let attempts = 0;
+          const findEIP1559 = () => {
+            if (attempts++ > 8) { resolve('EIP-1559 request not found after 8 attempts'); return; }
+            const text = document.body.innerText;
+            if (text.includes('Max Fee') && text.includes('Priority')) {
+              resolve('EIP-1559 transaction overlay visible with max fee and priority fields');
+              return;
+            }
+            const btns = Array.from(document.querySelectorAll('button'));
+            const nextBtn = btns.find(b => b.textContent.trim().includes('Next') && !b.disabled);
+            if (nextBtn) { nextBtn.click(); setTimeout(findEIP1559, 300); }
+            else resolve('No next button available, overlay text: ' + text.substring(0, 100));
+          };
+          setTimeout(findEIP1559, 300);
+        });
       })()`
     }
   ],
