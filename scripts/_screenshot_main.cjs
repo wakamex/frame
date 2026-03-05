@@ -265,6 +265,10 @@ const mockState = {
             origin: 'app.uniswap.org',
             account: '0x5555555555555555555555555555555555555555',
             created: Date.now(),
+            recognizedActions: [
+              { type: 'Transfer 2,000 USDC to 0xdead...beef' },
+              { type: 'Approve Uniswap V3 Router' }
+            ],
             payload: {
               jsonrpc: '2.0',
               id: 3,
