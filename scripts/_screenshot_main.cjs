@@ -141,7 +141,30 @@ const mockState = {
         address: '0x1234567890abcdef1234567890abcdef12345678',
         status: 'ok',
         signer: 'hot-signer-1',
-        requests: {},
+        requests: {
+          'req-1': {
+            handlerId: 'req-1',
+            type: 'transaction',
+            status: 'pending',
+            origin: 'uniswap.org',
+            account: '0x1234567890abcdef1234567890abcdef12345678',
+            created: Date.now(),
+            payload: {
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'eth_sendTransaction',
+              params: [{ from: '0x1234567890abcdef1234567890abcdef12345678', to: '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef', value: '0x2386f26fc10000', chainId: '0x1', gas: '0x5208' }]
+            },
+            data: {
+              from: '0x1234567890abcdef1234567890abcdef12345678',
+              to: '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
+              value: '0x2386f26fc10000',
+              chainId: '0x1',
+              gasLimit: '0x5208',
+              gasPrice: '0x5d21dba00'
+            }
+          }
+        },
         ensName: 'alice.eth',
         created: '2024-01-01'
       },
@@ -206,6 +229,16 @@ const views = ['accounts', 'portfolio', 'send', 'contacts', 'signers', 'history'
 // Each returns a description of what was done, for logging.
 const interactions = {
   accounts: [
+    {
+      name: 'request-overlay',
+      js: `(() => {
+        // The request overlay renders when pendingRequests.length > 0.
+        // With a pending transaction in state it should be visible now.
+        const overlay = document.querySelector('.fixed.inset-0');
+        if (overlay) return 'request overlay visible: ' + overlay.textContent.substring(0, 80);
+        return 'request overlay not found';
+      })()`
+    },
     {
       name: 'account-detail',
       js: `(() => {
