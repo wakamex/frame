@@ -713,6 +713,35 @@ const interactions = {
         return 'no Change button found, buttons: ' + btns.map(b => b.textContent.trim().substring(0, 20)).join(', ');
       })()`
     }
+  ],
+  history: [
+    {
+      name: 'history-account-selector',
+      js: `(() => {
+        // Find the account selector dropdown (shows when > 1 account exists)
+        const selects = Array.from(document.querySelectorAll('select, [role="listbox"]'));
+        if (selects[0]) { selects[0].focus(); selects[0].click(); return 'opened account selector'; }
+        // Fallback: look for a dropdown-like button with account name
+        const btns = Array.from(document.querySelectorAll('main button'));
+        const selectorBtn = btns.find(b => b.textContent.includes('Main Account') || b.textContent.includes('0x'));
+        if (selectorBtn) { selectorBtn.click(); return 'clicked account selector: ' + selectorBtn.textContent.trim().substring(0, 30); }
+        return 'no account selector found';
+      })()`
+    },
+    {
+      name: 'history-clear-modal',
+      js: `(() => {
+        // Close any open dropdown first
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        return new Promise(resolve => setTimeout(() => {
+          // Find and click the Clear button
+          const btns = Array.from(document.querySelectorAll('button'));
+          const clearBtn = btns.find(b => b.textContent.trim() === 'Clear' || b.textContent.includes('Clear History'));
+          if (clearBtn) { clearBtn.click(); resolve('clicked Clear button'); }
+          else resolve('no Clear button found, buttons: ' + btns.map(b => b.textContent.trim().substring(0, 20)).join(', '));
+        }, 300));
+      })()`
+    }
   ]
 }
 
