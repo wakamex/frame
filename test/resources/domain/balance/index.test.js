@@ -29,6 +29,19 @@ describe('#createBalance', () => {
 
     expect(balance.displayValue).toBe('?')
   })
+
+  it('handles missing decimals without throwing', () => {
+    const balance = createBalance({ balance: '0x2ed3afa800', decimals: undefined }, undefined)
+
+    expect(balance.displayBalance).toBeDefined()
+    expect(balance.totalValue.toNumber()).toBe(0)
+  })
+
+  it('handles NaN decimals without throwing', () => {
+    const balance = createBalance({ balance: '0x2ed3afa800', decimals: NaN }, undefined)
+
+    expect(balance.displayBalance).toBeDefined()
+  })
 })
 
 describe('#sortByTotalValue', () => {

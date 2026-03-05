@@ -35,7 +35,8 @@ export function formatUsdRate(rate: BigNumber, decimals = 2) {
 }
 
 export function createBalance(rawBalance: Balance, quote?: Rate): DisplayedBalance {
-  const balance = BigNumber(rawBalance.balance || 0).shiftedBy(-rawBalance.decimals)
+  const decimals = Number.isFinite(rawBalance.decimals) ? rawBalance.decimals : 0
+  const balance = BigNumber(rawBalance.balance || 0).shiftedBy(-decimals)
   const usdRate = new BigNumber((quote && quote.price) || NaN)
   const change24hr = new BigNumber((quote && quote['change24hr']) || 0)
 
@@ -58,8 +59,8 @@ export const sortByTotalValue = (a: DisplayedBalance, b: DisplayedBalance) => {
   if (!difference.isZero()) {
     return difference
   }
-  const balanceA = BigNumber(a.balance || 0).shiftedBy(-a.decimals)
-  const balanceB = BigNumber(b.balance || 0).shiftedBy(-b.decimals)
+  const balanceA = BigNumber(a.balance || 0).shiftedBy(-(Number.isFinite(a.decimals) ? a.decimals : 0))
+  const balanceB = BigNumber(b.balance || 0).shiftedBy(-(Number.isFinite(b.decimals) ? b.decimals : 0))
 
   return balanceB.minus(balanceA)
 }
