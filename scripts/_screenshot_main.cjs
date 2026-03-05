@@ -195,6 +195,15 @@ const mockState = {
         },
         created: '2024-03-15'
       },
+      '0x9999888877776666555544443333222211110000': {
+        id: '0x9999888877776666555544443333222211110000',
+        name: 'Trezor Account',
+        address: '0x9999888877776666555544443333222211110000',
+        status: 'ok',
+        signer: 'trezor-1',
+        requests: {},
+        created: '2024-09-01'
+      },
       '0x5555555555555555555555555555555555555555': {
         id: '0x5555555555555555555555555555555555555555',
         name: 'DeFi Wallet',
@@ -267,7 +276,9 @@ const mockState = {
     signers: {
       'hot-signer-1': { id: 'hot-signer-1', type: 'ring', name: 'Hot Signer', status: 'ok', addresses: ['0x1234567890abcdef1234567890abcdef12345678'], createdAt: Date.now() },
       'ledger-1': { id: 'ledger-1', type: 'ledger', name: 'Ledger Nano S', status: 'ok', addresses: ['0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'], model: 'Nano S', createdAt: Date.now() },
-      'ring-2': { id: 'ring-2', type: 'ring', name: 'Hot Signer 2', status: 'ok', addresses: ['0x5555555555555555555555555555555555555555'], createdAt: Date.now() }
+      'ring-2': { id: 'ring-2', type: 'ring', name: 'Hot Signer 2', status: 'ok', addresses: ['0x5555555555555555555555555555555555555555'], createdAt: Date.now() },
+      'trezor-1': { id: 'trezor-1', type: 'trezor', name: 'Trezor Model T', status: 'error', addresses: ['0x9999888877776666555544443333222211110000'], model: 'Model T', createdAt: Date.now(), error: 'Device disconnected' },
+      'lattice-1': { id: 'lattice-1', type: 'lattice', name: 'GridPlus Lattice', status: 'off', addresses: [], createdAt: Date.now() }
     },
     txHistory: {
       '0x1234567890abcdef1234567890abcdef12345678': [
@@ -477,6 +488,29 @@ const interactions = {
         const signerBtn = mainBtns.find(b => b.textContent.match(/hot|ledger|trezor|lattice|seed/i));
         if (signerBtn) { signerBtn.click(); return 'clicked signer: ' + signerBtn.textContent.substring(0, 60); }
         return 'no signer button found, main buttons: ' + mainBtns.map(b => b.textContent.trim()).join(', ');
+      })()`
+    },
+    {
+      name: 'signer-error-detail',
+      js: `(() => {
+        // Click the Trezor signer which has error/disconnected status to show its detail panel
+        const mainBtns = Array.from(document.querySelectorAll('main button'));
+        const trezorBtn = mainBtns.find(b => b.textContent.match(/trezor/i));
+        if (trezorBtn) { trezorBtn.click(); return 'clicked error signer: ' + trezorBtn.textContent.substring(0, 60); }
+        // Fallback: look for a button with error status indicator
+        const errorBtn = mainBtns.find(b => b.querySelector('[title="error"]') || b.querySelector('[title="disconnected"]'));
+        if (errorBtn) { errorBtn.click(); return 'clicked error-status signer: ' + errorBtn.textContent.substring(0, 60); }
+        return 'no error signer button found, main buttons: ' + mainBtns.map(b => b.textContent.trim().substring(0, 30)).join(', ');
+      })()`
+    },
+    {
+      name: 'signer-disconnected',
+      js: `(() => {
+        // Click the Lattice signer which has off/disconnected status
+        const mainBtns = Array.from(document.querySelectorAll('main button'));
+        const latticeBtn = mainBtns.find(b => b.textContent.match(/lattice|gridplus/i));
+        if (latticeBtn) { latticeBtn.click(); return 'clicked disconnected signer: ' + latticeBtn.textContent.substring(0, 60); }
+        return 'no lattice signer button found, main buttons: ' + mainBtns.map(b => b.textContent.trim().substring(0, 30)).join(', ');
       })()`
     }
   ],
