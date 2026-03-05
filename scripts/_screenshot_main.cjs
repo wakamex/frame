@@ -245,11 +245,17 @@ const mockState = {
     dapps: {},
     colorwayPrimary: { light: {}, dark: {} },
     origins: {
-      'uniswap.org': { chain: { id: 1, type: 'ethereum' }, name: 'Uniswap', session: { requests: 5, startedAt: Date.now() - 3600000, lastUpdatedAt: Date.now() } }
+      'uniswap.org': { chain: { id: 1, type: 'ethereum' }, name: 'Uniswap', session: { requests: 5, startedAt: Date.now() - 3600000, lastUpdatedAt: Date.now() } },
+      'app.aave.com': { chain: { id: 1, type: 'ethereum' }, name: 'Aave', session: { requests: 3, startedAt: Date.now() - 7200000, lastUpdatedAt: Date.now() } },
+      'opensea.io': { chain: { id: 1, type: 'ethereum' }, name: 'OpenSea', session: { requests: 8, startedAt: Date.now() - 86400000, lastUpdatedAt: Date.now() } },
+      'lido.fi': { chain: { id: 1, type: 'ethereum' }, name: 'Lido', session: { requests: 2, startedAt: Date.now() - 43200000, lastUpdatedAt: Date.now() } }
     },
     permissions: {
       '0x1234567890abcdef1234567890abcdef12345678': {
-        'perm1': { origin: 'uniswap.org', provider: true, handlerId: 'perm1' }
+        'perm1': { origin: 'uniswap.org', provider: true, handlerId: 'perm1' },
+        'perm2': { origin: 'app.aave.com', provider: true, handlerId: 'perm2' },
+        'perm3': { origin: 'opensea.io', provider: true, handlerId: 'perm3' },
+        'perm4': { origin: 'lido.fi', provider: true, handlerId: 'perm4' }
       }
     },
     balances: {
@@ -406,6 +412,24 @@ const interactions = {
           };
           setTimeout(findEIP1559, 300);
         });
+      })()`
+    },
+    {
+      name: 'account-with-permissions',
+      js: `(() => {
+        // Dismiss any open modals/panels, navigate to accounts, click Main Account to show multiple dapp permissions
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        return new Promise(resolve => setTimeout(() => {
+          const navBtns = document.querySelectorAll('nav button');
+          if (navBtns[0]) navBtns[0].click();
+          setTimeout(() => {
+            const candidates = Array.from(document.querySelectorAll('main button')).filter(b =>
+              b.textContent.includes('Main Account') || b.textContent.match(/0x[0-9a-f]/i)
+            );
+            if (candidates[0]) { candidates[0].click(); resolve('clicked Main Account to show permissions list'); }
+            else resolve('no Main Account button found, buttons: ' + document.querySelectorAll('main button').length);
+          }, 300);
+        }, 300));
       })()`
     }
   ],
