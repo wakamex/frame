@@ -525,16 +525,63 @@ const interactions = {
       })()`
     },
     {
+      name: 'add-account-ledger-info',
+      js: `(() => {
+        // Navigate back to type selector first
+        const backBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Back') || b.textContent.includes('←'));
+        if (backBtn) backBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          const btns = Array.from(document.querySelectorAll('button'));
+          const ledgerBtn = btns.find(b => b.textContent.includes('Ledger'));
+          if (ledgerBtn) { ledgerBtn.click(); resolve('clicked Ledger'); }
+          else resolve('no Ledger button found');
+        }, 300));
+      })()`
+    },
+    {
+      name: 'add-account-trezor-info',
+      js: `(() => {
+        // Click Back to return to type selector
+        const backBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Back') || b.textContent.includes('←'));
+        if (backBtn) backBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          const btns = Array.from(document.querySelectorAll('button'));
+          const trezorBtn = btns.find(b => b.textContent.includes('Trezor'));
+          if (trezorBtn) { trezorBtn.click(); resolve('clicked Trezor'); }
+          else resolve('no Trezor button found');
+        }, 300));
+      })()`
+    },
+    {
+      name: 'add-account-lattice-info',
+      js: `(() => {
+        // Click Back to return to type selector
+        const backBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Back') || b.textContent.includes('←'));
+        if (backBtn) backBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          const btns = Array.from(document.querySelectorAll('button'));
+          const latticeBtn = btns.find(b => b.textContent.includes('Lattice'));
+          if (latticeBtn) { latticeBtn.click(); resolve('clicked Lattice'); }
+          else resolve('no Lattice button found');
+        }, 300));
+      })()`
+    },
+    {
       name: 'signature-request',
       js: `(() => {
+        // If on HardwareInfo screen, navigate back to type selector first
+        const backBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('← Back'));
+        if (backBtn) backBtn.click();
         // Close the add-account panel (Cancel) then click Hardware Wallet to show its signature request overlay
-        const cancelBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'Cancel');
-        if (cancelBtn) cancelBtn.click();
         return new Promise(resolve => setTimeout(() => {
-          const btns = Array.from(document.querySelectorAll('main button'));
-          const hwBtn = btns.find(b => b.textContent.includes('Hardware'));
-          if (hwBtn) { hwBtn.click(); resolve('clicked: ' + hwBtn.textContent.substring(0, 40)); }
-          else resolve('no Hardware Wallet button found, buttons: ' + btns.map(b => b.textContent.substring(0, 20)).join(' | '));
+          const cancelBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'Cancel');
+          if (cancelBtn) cancelBtn.click();
+          setTimeout(() => {
+            const btns = Array.from(document.querySelectorAll('main button'));
+            const hwBtn = btns.find(b => b.textContent.includes('Hardware'));
+            if (hwBtn) { hwBtn.click(); resolve('clicked: ' + hwBtn.textContent.substring(0, 40)); }
+            else resolve('no Hardware Wallet button found, buttons: ' + btns.map(b => b.textContent.substring(0, 20)).join(' | '));
+          }, 300);
         }, 300));
       })()`
     },
