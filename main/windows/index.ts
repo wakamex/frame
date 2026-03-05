@@ -139,25 +139,37 @@ const send = (channel: string, ...args: string[]) => {
 }
 
 // Sync state changes to renderer (only main state)
+// Debounce: collect mutations within a 16ms window and send as a single IPC message.
+// Without this, each FrameAccount's subscribe(state) observer fires this.update() on
+// every state change, causing O(n²) IPC messages when creating accounts in bulk.
+let _pendingUpdates: Array<{ path: string; value: unknown }> = []
+let _syncTimeout: ReturnType<typeof setTimeout> | null = null
 let _stateSyncCount = 0
 let _stateSyncTimer: ReturnType<typeof setInterval> | null = null
 subscribe(state, (ops: any[]) => {
   const mainOps = ops.filter(([_op, path]: any) => path[0] === 'main')
   if (mainOps.length === 0) return
   const updates = mainOps.map(([_op, path, value]: any) => ({ path: path.join('.'), value }))
-  _stateSyncCount++
-  if (!_stateSyncTimer) {
-    _stateSyncTimer = setInterval(() => {
-      if (_stateSyncCount > 0) {
-        log.debug(`[stateSync] sent ${_stateSyncCount} messages in last 1s`)
-        _stateSyncCount = 0
-      } else {
-        clearInterval(_stateSyncTimer!)
-        _stateSyncTimer = null
+  _pendingUpdates.push(...updates)
+  if (!_syncTimeout) {
+    _syncTimeout = setTimeout(() => {
+      _stateSyncCount++
+      if (!_stateSyncTimer) {
+        _stateSyncTimer = setInterval(() => {
+          if (_stateSyncCount > 0) {
+            log.debug(`[stateSync] sent ${_stateSyncCount} batched messages in last 1s`)
+            _stateSyncCount = 0
+          } else {
+            clearInterval(_stateSyncTimer!)
+            _stateSyncTimer = null
+          }
+        }, 1000)
       }
-    }, 1000)
+      send('main:action', 'stateSync', JSON.stringify([{ updates: _pendingUpdates }]))
+      _pendingUpdates = []
+      _syncTimeout = null
+    }, 16)
   }
-  send('main:action', 'stateSync', JSON.stringify([{ updates }]))
 })
 
 export default {
