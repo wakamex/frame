@@ -94,7 +94,8 @@ jest.mock('../../../main/windows/window', () => ({
 }))
 
 jest.mock('../../../main/windows/dialog', () => ({
-  openFileDialog: jest.fn()
+  openFileDialog: jest.fn(),
+  openCsvFileDialog: jest.fn()
 }))
 
 jest.mock('../../../main/launch', () => ({
@@ -129,6 +130,7 @@ jest.mock('viem', () => ({
 // Import modules after mocks are set up
 import { resolveName } from '../../../main/ens'
 import { openBlockExplorer } from '../../../main/windows/window'
+import { openCsvFileDialog } from '../../../main/windows/dialog'
 import { isAddress } from 'viem'
 import { snapshot } from 'valtio'
 
@@ -380,6 +382,134 @@ describe('main:rpc IPC handler', () => {
       const parsed = jsonParse(errArg)
       expect(typeof parsed).toBe('string')
       expect(parsed).toBe('Invalid Address')
+    })
+  })
+
+  describe('loadWatchList', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+      mockAccounts.add.mockClear()
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('parses CSV from file dialog and creates accounts for unique addresses', async () => {
+      const csv = 'name,address\nAlice,0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nBob,0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n'
+      openCsvFileDialog.mockResolvedValue({ canceled: false, filePaths: ['/tmp/test.csv'] })
+      jest.spyOn(require('fs'), 'readFileSync').mockReturnValue(csv)
+      isAddress.mockReturnValue(true)
+
+      const event = await callRpc('loadWatchList', 'file')
+
+      // Response returned immediately
+      expect(event._sent).toHaveLength(1)
+      const [, , errArg, resultArg] = event._sent[0]
+      expect(jsonParse(errArg)).toBeNull()
+      const results = jsonParse(resultArg)
+      expect(results).toHaveLength(2)
+      expect(results[0]).toEqual({ name: 'Alice', address: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' })
+
+      // Accounts created in batches after setTimeout
+      jest.advanceTimersByTime(200)
+      expect(mockAccounts.add).toHaveBeenCalledTimes(2)
+      expect(mockAccounts.add).toHaveBeenCalledWith('0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'Alice', { type: 'Address' })
+      expect(mockAccounts.add).toHaveBeenCalledWith('0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 'Bob', { type: 'Address' })
+
+      require('fs').readFileSync.mockRestore()
+    })
+
+    it('skips duplicate addresses', async () => {
+      const csv = 'name,address\nFirst,0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nDupe,0xAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n'
+      openCsvFileDialog.mockResolvedValue({ canceled: false, filePaths: ['/tmp/test.csv'] })
+      jest.spyOn(require('fs'), 'readFileSync').mockReturnValue(csv)
+      isAddress.mockReturnValue(true)
+
+      const event = await callRpc('loadWatchList', 'file')
+
+      const results = jsonParse(event._sent[0][3])
+      expect(results).toHaveLength(2)
+      expect(results[0].name).toBe('First')
+      expect(results[1].name).toBe('Dupe')
+
+      // Only one add call despite two rows (same address, different case)
+      jest.advanceTimersByTime(200)
+      expect(mockAccounts.add).toHaveBeenCalledTimes(1)
+
+      require('fs').readFileSync.mockRestore()
+    })
+
+    it('reports invalid addresses as errors', async () => {
+      const csv = 'name,address\nGood,0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nBad,notanaddress\n'
+      openCsvFileDialog.mockResolvedValue({ canceled: false, filePaths: ['/tmp/test.csv'] })
+      jest.spyOn(require('fs'), 'readFileSync').mockReturnValue(csv)
+      isAddress.mockImplementation((addr) => addr.startsWith('0x'))
+
+      const event = await callRpc('loadWatchList', 'file')
+
+      const results = jsonParse(event._sent[0][3])
+      expect(results).toHaveLength(2)
+      expect(results[1].error).toMatch(/Invalid address/)
+
+      jest.advanceTimersByTime(200)
+      expect(mockAccounts.add).toHaveBeenCalledTimes(1)
+
+      require('fs').readFileSync.mockRestore()
+    })
+
+    it('skips header row when detected', async () => {
+      const csv = 'name,address\nAlice,0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n'
+      openCsvFileDialog.mockResolvedValue({ canceled: false, filePaths: ['/tmp/test.csv'] })
+      jest.spyOn(require('fs'), 'readFileSync').mockReturnValue(csv)
+      isAddress.mockReturnValue(true)
+
+      const event = await callRpc('loadWatchList', 'file')
+
+      const results = jsonParse(event._sent[0][3])
+      expect(results).toHaveLength(1)
+      expect(results[0].name).toBe('Alice')
+
+      require('fs').readFileSync.mockRestore()
+    })
+
+    it('returns error when no file is selected', async () => {
+      openCsvFileDialog.mockResolvedValue({ canceled: true, filePaths: [] })
+
+      const event = await callRpc('loadWatchList', 'file')
+
+      expect(mockAccounts.add).not.toHaveBeenCalled()
+      const [, , errArg] = event._sent[0]
+      expect(jsonParse(errArg)).toMatch(/No file selected/)
+    })
+
+    it('fetches CSV from URL', async () => {
+      const csv = 'Alice,0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n'
+      global.fetch = jest.fn().mockResolvedValue({ ok: true, text: () => Promise.resolve(csv) })
+      isAddress.mockReturnValue(true)
+
+      const event = await callRpc('loadWatchList', 'https://example.com/list.csv')
+
+      expect(global.fetch).toHaveBeenCalledWith('https://example.com/list.csv')
+      const results = jsonParse(event._sent[0][3])
+      expect(results).toHaveLength(1)
+
+      jest.advanceTimersByTime(200)
+      expect(mockAccounts.add).toHaveBeenCalledTimes(1)
+
+      delete global.fetch
+    })
+
+    it('returns error on failed URL fetch', async () => {
+      global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 404, statusText: 'Not Found' })
+
+      const event = await callRpc('loadWatchList', 'https://example.com/missing.csv')
+
+      expect(mockAccounts.add).not.toHaveBeenCalled()
+      const [, , errArg] = event._sent[0]
+      expect(jsonParse(errArg)).toMatch(/404/)
+
+      delete global.fetch
     })
   })
 
