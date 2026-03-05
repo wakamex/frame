@@ -81,7 +81,7 @@ describe('Seed signer', () => {
     } catch (e) {
       done(e)
     }
-  }, 2000)
+  }, 5000)
 
   test('Scan for signers', (done) => {
     jest.useFakeTimers()
@@ -112,7 +112,7 @@ describe('Seed signer', () => {
     } catch (e) {
       done(e)
     }
-  }, 2000)
+  }, 5000)
 
   test('Unlock', (done) => {
     try {

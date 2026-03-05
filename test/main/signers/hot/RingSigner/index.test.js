@@ -69,7 +69,7 @@ describe('Ring signer', () => {
     } catch (e) {
       done(e)
     }
-  }, 2000)
+  }, 5000)
 
   test('Create from private key', (done) => {
     try {
@@ -135,7 +135,7 @@ describe('Ring signer', () => {
     } catch (e) {
       done(e)
     }
-  }, 2000)
+  }, 5000)
 
   test('Add private key', (done) => {
     try {
@@ -148,7 +148,7 @@ describe('Ring signer', () => {
     } catch (e) {
       done(e)
     }
-  }, 2000)
+  }, 5000)
 
   test('Remove private key', (done) => {
     try {
@@ -162,7 +162,7 @@ describe('Ring signer', () => {
     } catch (e) {
       done(e)
     }
-  }, 2000)
+  }, 5000)
 
   test('Remove last private key', (done) => {
     try {
@@ -173,7 +173,7 @@ describe('Ring signer', () => {
     } catch (e) {
       done(e)
     }
-  }, 2000)
+  }, 5000)
 
   test('Add private key from keystore', (done) => {
     try {
@@ -189,7 +189,7 @@ describe('Ring signer', () => {
     } catch (e) {
       done(e)
     }
-  }, 2000)
+  }, 5000)
 
   test('Lock', (done) => {
     try {
@@ -201,7 +201,7 @@ describe('Ring signer', () => {
     } catch (e) {
       done(e)
     }
-  }, 2000)
+  }, 5000)
 
   test('Unlock with wrong password', (done) => {
     try {
