@@ -80,6 +80,9 @@ export default function GasView() {
   const connectedChains = chains.filter((c) => c.connected)
   const hasData = connectedChains.some((c) => c.gasPrice !== null)
 
+  // Debug: log gas data to console
+  console.log('Gas data:', connectedChains.map(c => ({ name: c.name, historyLen: c.history.length, gasPrice: c.gasPrice })))
+
   return (
     <div className="space-y-6 max-w-4xl">
       <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide">Gas Tracker</h2>

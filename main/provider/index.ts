@@ -314,7 +314,7 @@ export class Provider extends EventEmitter {
       chainId: parseInt(chainId, 16)
     }
 
-    const connection = this.connection.connections['ethereum'][txRequest.chainId] as any
+    const connection = this.connection.connections['ethereum']?.[txRequest.chainId] as any
     const connectedProvider = connection?.primary?.connected
       ? connection.primary?.provider
       : connection.secondary?.provider
@@ -486,7 +486,7 @@ export class Provider extends EventEmitter {
       return cb(new Error('No transaction data'))
     }
 
-    const connection = this.connection.connections['ethereum'][parseInt(newTx.chainId, 16)]
+    const connection = this.connection.connections['ethereum']?.[parseInt(newTx.chainId, 16)]
     const chainConnected = connection && (connection.primary?.connected || connection.secondary?.connected)
 
     if (!chainConnected) {
@@ -956,7 +956,7 @@ export class Provider extends EventEmitter {
   private parseTargetChain(payload: RPCRequestPayload): Chain {
     if ('chainId' in payload) {
       const chainId = parseInt(payload.chainId || '', 16)
-      const chainConnection = this.connection.connections['ethereum'][chainId] || {}
+      const chainConnection = this.connection.connections['ethereum']?.[chainId] || {}
 
       return chainConnection.chainConfig && { type: 'ethereum', id: chainId }
     }
