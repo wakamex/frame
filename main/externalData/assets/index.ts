@@ -47,6 +47,9 @@ export default function rates(state: any) {
       }
       return tokens
     },
+    getAllChainIds: () => {
+      return Object.keys(state.main.networks?.ethereum || {}).map(Number).filter((id) => id > 0)
+    },
     setNativeCurrencyRate: (chainId: number, rate: Rate) =>
       setNativeCurrencyData('ethereum', chainId, { usd: rate } as any),
     setTokenRates: (rates: Record<Address, UsdRate>) => setRates(rates)
@@ -57,7 +60,11 @@ export default function rates(state: any) {
   let currentAddress: Address | undefined
 
   async function fetchRates() {
-    const knownTokens = storeApi.getKnownTokens(currentAddress).filter((t) => currentChains.includes(t.chainId))
+    // Use connected chains when available, otherwise fall back to all configured
+    // chains so we can refresh cached prices before networks finish connecting
+    const chains = currentChains.length > 0 ? currentChains : storeApi.getAllChainIds()
+
+    const knownTokens = storeApi.getKnownTokens(currentAddress).filter((t) => chains.includes(t.chainId))
     const customTokens = storeApi
       .getCustomTokens()
       .filter((t) => !knownTokens.some((kt) => kt.address === t.address && kt.chainId === t.chainId))
@@ -67,7 +74,7 @@ export default function rates(state: any) {
       .getBalanceTokens()
       .filter(
         (bt) =>
-          currentChains.includes(bt.chainId) &&
+          chains.includes(bt.chainId) &&
           !knownTokens.some((kt) => kt.address === bt.address && kt.chainId === bt.chainId) &&
           !customTokens.some((ct) => ct.address === bt.address && ct.chainId === bt.chainId)
       )
@@ -75,7 +82,7 @@ export default function rates(state: any) {
     const allTokens = [...knownTokens, ...customTokens, ...balanceTokens]
 
     // Build coin IDs for native currencies and tokens
-    const nativeCoinIds = currentChains
+    const nativeCoinIds = chains
       .map((chainId) => ({ chainId, coinId: buildCoinId(chainId) }))
       .filter((e): e is { chainId: number; coinId: string } => !!e.coinId)
 
@@ -153,6 +160,10 @@ export default function rates(state: any) {
 
   function start() {
     log.verbose('starting DefiLlama rate polling')
+
+    // Eagerly fetch rates using any cached balance/token data so the UI
+    // can show prices before networks finish connecting
+    fetchRates()
 
     pollTimer = setInterval(fetchRates, POLL_INTERVAL)
   }

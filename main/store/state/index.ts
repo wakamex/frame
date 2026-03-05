@@ -161,10 +161,10 @@ const mainState: M = {
   addressBook: main('addressBook', {}),
   permissions: main('permissions', {}),
   gasAlerts: main('gasAlerts', {}),
-  balances: {},
+  balances: main('balances', {}),
   txHistory: main('txHistory', {}),
   tokens: main('tokens', { custom: [], known: {} }),
-  rates: {}, // main('rates', {}),
+  rates: main('rates', {}),
   signers: {},
   savedSigners: {},
   updater: {
@@ -844,12 +844,8 @@ Object.values(initial.main.networks.ethereum as Record<string, Chain>).forEach((
   chain.connection.secondary = { ...chain.connection.secondary, connected: false }
 })
 
-Object.values(initial.main.networksMeta).forEach((chains) => {
-  Object.values(chains as Record<string, ChainMetadata>).forEach((chainMeta) => {
-    // remove stale price data
-    chainMeta.nativeCurrency = { ...chainMeta.nativeCurrency, usd: { price: 0, change24hr: 0 } }
-  })
-})
+// Native currency prices are kept across restarts so the UI can show cached values immediately.
+// They will be refreshed as soon as the rate poller connects to DefiLlama.
 
 initial.main.origins = Object.entries(initial.main.origins as Record<string, Origin>).reduce(
   (origins, [id, origin]) => {
