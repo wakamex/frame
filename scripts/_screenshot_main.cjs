@@ -174,7 +174,25 @@ const mockState = {
         address: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
         status: 'ok',
         signer: 'ledger-1',
-        requests: {},
+        requests: {
+          'req-sig-1': {
+            handlerId: 'req-sig-1',
+            type: 'signTypedData',
+            status: 'pending',
+            origin: 'app.aave.com',
+            account: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
+            created: Date.now(),
+            payload: {
+              jsonrpc: '2.0', id: 2, method: 'eth_signTypedData_v4',
+              params: ['0xabcdefabcdefabcdefabcdefabcdefabcdefabcd', JSON.stringify({
+                types: { EIP712Domain: [{ name: 'name', type: 'string' }], Permit: [{ name: 'owner', type: 'address' }, { name: 'spender', type: 'address' }, { name: 'value', type: 'uint256' }, { name: 'deadline', type: 'uint256' }] },
+                primaryType: 'Permit',
+                domain: { name: 'USD Coin' },
+                message: { owner: '0xabcdef...', spender: '0x1111...', value: '1000000000', deadline: String(Math.floor(Date.now()/1000) + 3600) }
+              })]
+            }
+          }
+        },
         created: '2024-03-15'
       }
     },
@@ -225,7 +243,13 @@ const mockState = {
     trezor: { derivation: 'standard' },
     privacy: { errorReporting: false },
     updater: { dontRemind: [], badge: null },
-    rates: {}
+    rates: {},
+    addressBook: {
+      'contact-1': { name: 'Alice Nakamoto', address: '0xaaaa111122223333444455556666777788889999', notes: 'Cold storage wallet' },
+      'contact-2': { name: 'Bob Vance', address: '0xbbbb111122223333444455556666777788889999', notes: '' },
+      'contact-3': { name: 'Treasury DAO', address: '0xcccc111122223333444455556666777788889999', notes: 'Multisig - 3 of 5 signers' },
+      'contact-4': { name: 'DEX Router', address: '0xdddd111122223333444455556666777788889999', notes: 'Uniswap V3 router' }
+    }
   },
   platform: process.platform
 }
@@ -259,6 +283,25 @@ const interactions = {
       })()`
     },
     {
+      name: 'remove-account-modal',
+      js: `(() => {
+        // First ensure we're in account detail view (click first account if needed)
+        const candidates = Array.from(document.querySelectorAll('main button')).filter(b =>
+          b.textContent.includes('Main Account') || b.textContent.match(/0x[0-9a-f]/i)
+        );
+        if (candidates[0]) candidates[0].click();
+        // Wait a tick, then find and click the Remove button
+        return new Promise(resolve => {
+          setTimeout(() => {
+            const btns = Array.from(document.querySelectorAll('button'));
+            const removeBtn = btns.find(b => b.textContent.includes('Remove'));
+            if (removeBtn) { removeBtn.click(); resolve('clicked Remove button'); }
+            else resolve('no Remove button found');
+          }, 300);
+        });
+      })()`
+    },
+    {
       name: 'add-account',
       js: `(() => {
         // Click the '+ Add' button to reveal the account type selector panel
@@ -266,6 +309,44 @@ const interactions = {
         const addBtn = buttons.find(b => b.textContent.trim() === '+ Add' || b.textContent.trim() === 'Add');
         if (addBtn) { addBtn.click(); return 'clicked: ' + addBtn.textContent.trim(); }
         return 'no + Add button found, buttons: ' + buttons.map(b => b.textContent.trim()).join(', ');
+      })()`
+    },
+    {
+      name: 'signature-request',
+      js: `(() => {
+        // Close the add-account panel (Cancel) then click Hardware Wallet to show its signature request overlay
+        const cancelBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'Cancel');
+        if (cancelBtn) cancelBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          const btns = Array.from(document.querySelectorAll('main button'));
+          const hwBtn = btns.find(b => b.textContent.includes('Hardware'));
+          if (hwBtn) { hwBtn.click(); resolve('clicked: ' + hwBtn.textContent.substring(0, 40)); }
+          else resolve('no Hardware Wallet button found, buttons: ' + btns.map(b => b.textContent.substring(0, 20)).join(' | '));
+        }, 300));
+      })()`
+    }
+  ],
+  send: [
+    {
+      name: 'send-filled-form',
+      js: `(() => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        // Find recipient input and fill it
+        const inputs = Array.from(document.querySelectorAll('input'));
+        const recipientInput = inputs.find(i => i.placeholder?.includes('0x') || i.name === 'recipient');
+        if (recipientInput) {
+          nativeSetter.call(recipientInput, '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef');
+          recipientInput.dispatchEvent(new Event('input', { bubbles: true }));
+          recipientInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        // Find amount input and set a large value to trigger insufficient balance
+        const amountInput = inputs.find(i => i.placeholder?.includes('0.0') || i.type === 'number' || i.name === 'amount');
+        if (amountInput) {
+          nativeSetter.call(amountInput, '999999');
+          amountInput.dispatchEvent(new Event('input', { bubbles: true }));
+          amountInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        return 'filled recipient and amount, inputs found: ' + inputs.length;
       })()`
     }
   ],
@@ -338,6 +419,21 @@ const interactions = {
         const iconBtns = btns.filter(b => b.textContent.trim().length < 3 && b.querySelector('svg'));
         if (iconBtns[0]) { iconBtns[0].click(); return 'clicked icon button (likely remove)'; }
         return 'no remove button found, main buttons: ' + btns.map(b => b.textContent.trim().substring(0, 20)).join(', ');
+      })()`
+    }
+  ],
+  settings: [
+    {
+      name: 'shortcut-configurator',
+      js: `(() => {
+        // Scroll to find the keyboard shortcut section
+        const main = document.querySelector('main');
+        if (main) main.scrollTop = 0;
+        // Find the 'Change' button near the shortcut display
+        const btns = Array.from(document.querySelectorAll('button'));
+        const changeBtn = btns.find(b => b.textContent.trim() === 'Change');
+        if (changeBtn) { changeBtn.click(); return 'clicked Change button'; }
+        return 'no Change button found, buttons: ' + btns.map(b => b.textContent.trim().substring(0, 20)).join(', ');
       })()`
     }
   ]
