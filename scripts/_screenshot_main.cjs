@@ -271,6 +271,16 @@ const interactions = {
       })()`
     },
     {
+      name: 'gas-adjuster',
+      js: `(() => {
+        // The request overlay should be showing. Find and click the 'Adjust' button.
+        const btns = Array.from(document.querySelectorAll('button'));
+        const adjustBtn = btns.find(b => b.textContent.trim() === 'Adjust');
+        if (adjustBtn) { adjustBtn.click(); return 'clicked Adjust button'; }
+        return 'no Adjust button found, buttons: ' + btns.map(b => b.textContent.trim().substring(0, 20)).join(', ');
+      })()`
+    },
+    {
       name: 'account-detail',
       js: `(() => {
         // Click the first account in the list to show detail
