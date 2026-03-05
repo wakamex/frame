@@ -629,6 +629,30 @@ const interactions = {
       })()`
     },
     {
+      name: 'add-account-keystore-form',
+      js: `(() => {
+        const backBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Back') || b.textContent.includes('←'));
+        if (backBtn) backBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          const btns = Array.from(document.querySelectorAll('button'));
+          const ksBtn = btns.find(b => b.textContent.includes('Keystore'));
+          if (ksBtn) { ksBtn.click(); resolve('clicked Keystore'); }
+          else resolve('no Keystore button found');
+        }, 300));
+      })()`
+    },
+    {
+      name: 'add-account-keystore-loaded',
+      js: `(() => {
+        return new Promise(resolve => setTimeout(() => {
+          const btns = Array.from(document.querySelectorAll('button'));
+          const selectBtn = btns.find(b => b.textContent.includes('Select Keystore File'));
+          if (selectBtn) { selectBtn.click(); resolve('clicked Select Keystore File'); }
+          else resolve('no Select Keystore File button found');
+        }, 300));
+      })()`
+    },
+    {
       name: 'signature-request',
       js: `(() => {
         // If on HardwareInfo screen, navigate back to type selector first
@@ -1312,6 +1336,9 @@ app.whenReady().then(async () => {
 
     if (method === 'getState') {
       event.reply('main:rpc', id, JSON.stringify(null), JSON.stringify(mockState))
+    } else if (method === 'locateKeystore') {
+      const mockKeystore = { version: 3, id: 'mock-keystore-id', address: '0xabcdef1234567890abcdef1234567890abcdef12', crypto: {} }
+      event.reply('main:rpc', id, JSON.stringify(null), JSON.stringify(mockKeystore))
     } else {
       event.reply('main:rpc', id, JSON.stringify(null), JSON.stringify(null))
     }
