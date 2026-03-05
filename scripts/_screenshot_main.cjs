@@ -269,6 +269,30 @@ const interactions = {
       })()`
     }
   ],
+  send: [
+    {
+      name: 'send-filled-form',
+      js: `(() => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        // Find recipient input and fill it
+        const inputs = Array.from(document.querySelectorAll('input'));
+        const recipientInput = inputs.find(i => i.placeholder?.includes('0x') || i.name === 'recipient');
+        if (recipientInput) {
+          nativeSetter.call(recipientInput, '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef');
+          recipientInput.dispatchEvent(new Event('input', { bubbles: true }));
+          recipientInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        // Find amount input and set a large value to trigger insufficient balance
+        const amountInput = inputs.find(i => i.placeholder?.includes('0.0') || i.type === 'number' || i.name === 'amount');
+        if (amountInput) {
+          nativeSetter.call(amountInput, '999999');
+          amountInput.dispatchEvent(new Event('input', { bubbles: true }));
+          amountInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        return 'filled recipient and amount, inputs found: ' + inputs.length;
+      })()`
+    }
+  ],
   contacts: [
     {
       name: 'add-contact-modal',
