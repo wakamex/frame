@@ -250,6 +250,16 @@ const interactions = {
         if (candidates[0]) { candidates[0].click(); return 'clicked account: ' + candidates[0].textContent.substring(0, 40); }
         return 'no account button found, buttons: ' + document.querySelectorAll('main button').length;
       })()`
+    },
+    {
+      name: 'add-account',
+      js: `(() => {
+        // Click the '+ Add' button to reveal the account type selector panel
+        const buttons = Array.from(document.querySelectorAll('button'));
+        const addBtn = buttons.find(b => b.textContent.trim() === '+ Add' || b.textContent.trim() === 'Add');
+        if (addBtn) { addBtn.click(); return 'clicked: ' + addBtn.textContent.trim(); }
+        return 'no + Add button found, buttons: ' + buttons.map(b => b.textContent.trim()).join(', ');
+      })()`
     }
   ],
   contacts: [
