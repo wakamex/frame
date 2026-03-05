@@ -1329,6 +1329,36 @@ app.whenReady().then(async () => {
     if (!validateScreenshot(compactPng, compactName)) failures++
   }
 
+  // Compact mode: request overlay
+  console.log('[Compact Mode] Capturing request overlay...')
+  try {
+    // Navigate to accounts view (navIndex 0)
+    await win.webContents.executeJavaScript(`
+      (() => {
+        const buttons = document.querySelectorAll('nav button');
+        if (buttons[0]) { buttons[0].click(); return 'clicked accounts nav'; }
+        return 'no nav button';
+      })()
+    `)
+
+    // Click Main Account to trigger request overlay
+    await new Promise(r => setTimeout(r, 500))
+    await win.webContents.executeJavaScript(`
+      (() => {
+        const btns = Array.from(document.querySelectorAll('main button'));
+        const mainBtn = btns.find(b => b.textContent.includes('Main Account'));
+        if (mainBtn) { mainBtn.click(); return 'clicked Main Account'; }
+        return 'no Main Account found';
+      })()
+    `)
+
+    const compactRequestName = String(step++).padStart(2, '0') + '-compact-request-overlay'
+    const compactRequestPng = await captureScreenshot(win, compactRequestName)
+    if (!validateScreenshot(compactRequestPng, compactRequestName)) failures++
+  } catch (err) {
+    console.log('[Compact Request Error]', err.message)
+  }
+
   // Reset window size back to original
   console.log('[Compact Mode] Resetting window to 1200x800...')
   win.setContentSize(1200, 800)
