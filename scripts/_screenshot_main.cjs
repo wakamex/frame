@@ -218,6 +218,18 @@ const interactions = {
         return 'no account button found, buttons: ' + document.querySelectorAll('main button').length;
       })()`
     }
+  ],
+  contacts: [
+    {
+      name: 'add-contact-modal',
+      js: `(() => {
+        // Click the '+ Add Contact' button to reveal the add-contact modal
+        const buttons = Array.from(document.querySelectorAll('button'));
+        const addBtn = buttons.find(b => b.textContent.includes('Add Contact'));
+        if (addBtn) { addBtn.click(); return 'clicked: ' + addBtn.textContent.trim(); }
+        return 'no Add Contact button found, buttons: ' + buttons.length;
+      })()`
+    }
   ]
 }
 
