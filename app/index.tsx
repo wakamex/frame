@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client'
 import { useEffect, useState } from 'react'
 
 import { initializeApp, sendEvent, sendAction, actions } from './ipc'
-import { useSnapshot, subscribe } from 'valtio'
-import { state, useCurrentView, useAccounts, usePendingRequests, setView as setViewAction } from './store'
+import { useSnapshot } from 'valtio'
+import { state, useCurrentView, useAccounts, usePendingRequests, setView as setViewAction, setAccountSelectedCallback } from './store'
 import { useCompact } from './hooks/useCompact'
 import AccountsView from './views/Accounts'
 import SignersView from './views/Signers'
@@ -228,21 +228,12 @@ document.addEventListener('contextmenu', (e) =>
   sendEvent('*:contextmenu', e.clientX, e.clientY)
 )
 
-// Notify main process when selected account changes (triggers balance scanning)
-let prevSelectedAccount: string | null = null
-subscribe(state, () => {
-  const id = state.selectedAccount
-  if (id !== prevSelectedAccount) {
-    prevSelectedAccount = id
-    if (id) {
-      actions.setSigner(id)
-    }
-  }
-})
-
 // Initialize app and render
 initializeApp()
   .then(() => {
+    // Wire up account selection → main process notification (triggers balance scanning)
+    setAccountSelectedCallback((id) => actions.setSigner(id))
+
     const root = createRoot(document.getElementById('root')!)
     root.render(<App />)
   })

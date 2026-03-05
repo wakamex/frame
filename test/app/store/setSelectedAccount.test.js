@@ -10,11 +10,12 @@ jest.mock('../../../resources/link', () => ({
   invoke: jest.fn()
 }))
 
-const { setSelectedAccount, state } = require('../../../app/store')
+const { setSelectedAccount, setAccountSelectedCallback, state } = require('../../../app/store')
 
 afterEach(() => {
   jest.clearAllMocks()
   state.selectedAccount = null
+  setAccountSelectedCallback(null)
 })
 
 describe('setSelectedAccount', () => {
@@ -34,10 +35,25 @@ describe('setSelectedAccount', () => {
   })
 
   it('store module imports without errors', () => {
-    // This test catches import-time crashes (circular deps, missing globals, etc.)
-    // If store.ts imports a module that references window/DOM at load time incorrectly,
-    // the require() above would have already thrown, failing this test file entirely.
     expect(state).toBeDefined()
     expect(typeof setSelectedAccount).toBe('function')
+  })
+
+  it('calls the registered callback when id is provided', () => {
+    const cb = jest.fn()
+    setAccountSelectedCallback(cb)
+    setSelectedAccount('0xabc')
+    expect(cb).toHaveBeenCalledWith('0xabc')
+  })
+
+  it('does not call callback when id is null', () => {
+    const cb = jest.fn()
+    setAccountSelectedCallback(cb)
+    setSelectedAccount(null)
+    expect(cb).not.toHaveBeenCalled()
+  })
+
+  it('works without a callback registered', () => {
+    expect(() => setSelectedAccount('0xabc')).not.toThrow()
   })
 })
