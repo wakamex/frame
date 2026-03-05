@@ -1807,6 +1807,8 @@ app.whenReady().then(async () => {
   let failures = 0
   let step = 1
 
+  const accountKeys = Object.keys(mockState.main.accounts)
+
   // Screenshot each view via nav buttons
   for (let i = 0; i < views.length; i++) {
     const view = views[i]
@@ -1854,6 +1856,20 @@ app.whenReady().then(async () => {
       const interName = String(step++).padStart(2, '0') + '-' + interaction.name
       const interPng = await captureScreenshot(win, interName)
       if (!validateScreenshot(interPng, interName)) failures++
+    }
+
+    // Clear pending requests after accounts interactions so they don't obscure other views
+    if (view === 'accounts') {
+      const clearRequestUpdates = accountKeys.map(addr => ({
+        path: `main.accounts.${addr}.requests`,
+        value: {}
+      }))
+      win.webContents.send(
+        'main:action',
+        'stateSync',
+        JSON.stringify([{ updates: clearRequestUpdates }])
+      )
+      await new Promise(r => setTimeout(r, 500))
     }
   }
 
