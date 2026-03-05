@@ -792,6 +792,24 @@ const interactions = {
       })()`
     },
     {
+      name: 'contact-edit-modal',
+      js: `(() => {
+        // Find and click the Edit button on a contact entry
+        const btns = Array.from(document.querySelectorAll('button'));
+        const editBtn = btns.find(b =>
+          b.textContent.trim() === 'Edit' ||
+          b.textContent.trim() === 'edit' ||
+          b.getAttribute('aria-label')?.includes('edit') ||
+          b.getAttribute('title')?.includes('Edit')
+        );
+        if (editBtn) { editBtn.click(); return 'clicked Edit button'; }
+        // Fallback: look for pencil/edit icon buttons
+        const iconBtns = btns.filter(b => b.querySelector('svg') && b.textContent.trim().length < 3);
+        if (iconBtns.length > 0) { iconBtns[0].click(); return 'clicked icon button (likely edit)'; }
+        return 'no Edit button found, buttons: ' + btns.map(b => b.textContent.trim().substring(0, 20)).join(', ');
+      })()`
+    },
+    {
       name: 'contact-delete-confirmation',
       js: `(() => {
         // Close the edit modal
