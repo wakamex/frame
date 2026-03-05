@@ -60,10 +60,9 @@ export default function ChainsView() {
           {chains.map(([id, chain]) => {
             const meta = networksMeta[id]
             const connected = isNetworkConnected(chain)
-            const gasLevel = meta?.gas?.price?.levels?.fast
-            const gasDisplay = gasLevel ? roundGwei(weiToGwei(hexToInt(gasLevel))) : null
             const isSelected = selectedChain === id
             const chainColor = meta?.primaryColor || null
+            const health = meta?.rpcHealth
 
             return (
               <button
@@ -87,8 +86,13 @@ export default function ChainsView() {
                       {chain.isTestnet && <span className="text-xs text-gray-600">test</span>}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {chain.on ? (connected ? 'Connected' : 'Connecting...') : 'Off'}
-                      {gasDisplay ? ` · ${gasDisplay} gwei` : ''}
+                      {chain.on
+                        ? connected
+                          ? health
+                            ? <><span className={healthColors[health.status]}>{health.status}</span> · {health.latencyMs}ms</>
+                            : 'Connected'
+                          : 'Connecting...'
+                        : 'Off'}
                     </div>
                   </div>
                   {/* Toggle */}
