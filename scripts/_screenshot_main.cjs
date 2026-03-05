@@ -191,6 +191,16 @@ const mockState = {
                 message: { owner: '0xabcdef...', spender: '0x1111...', value: '1000000000', deadline: String(Math.floor(Date.now()/1000) + 3600) }
               })]
             }
+          },
+          'req-addtoken-1': {
+            handlerId: 'req-addtoken-1',
+            type: 'addToken',
+            status: 'pending',
+            origin: 'app.aave.com',
+            account: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
+            created: Date.now(),
+            token: { address: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9', symbol: 'AAVE', name: 'Aave Token', decimals: 18, chainId: 1 },
+            payload: { jsonrpc: '2.0', id: 5, method: 'wallet_watchAsset', params: [{ type: 'ERC20', options: { address: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9' } }] }
           }
         },
         created: '2024-03-15'
@@ -423,6 +433,32 @@ const interactions = {
             else resolve('No next button available, overlay text: ' + text.substring(0, 100));
           };
           setTimeout(findEIP1559, 300);
+        });
+      })()`
+    },
+    {
+      name: 'addtoken-request',
+      js: `(() => {
+        // Navigate the request overlay queue to find the addToken request
+        return new Promise(resolve => {
+          let attempts = 0;
+          const findAddToken = () => {
+            if (attempts++ > 8) { resolve('addToken request not found after 8 attempts'); return; }
+            const text = document.body.innerText;
+            if (text.includes('Add Token') && (text.includes('AAVE') || text.includes('Aave'))) {
+              resolve('addToken overlay visible with AAVE token details');
+              return;
+            }
+            const btns = Array.from(document.querySelectorAll('button'));
+            // Try Prev first (likely we are at or past the addToken position)
+            const prevBtn = btns.find(b => b.textContent.includes('Prev') && !b.disabled);
+            if (prevBtn) { prevBtn.click(); setTimeout(findAddToken, 300); return; }
+            // Fall back to Next
+            const nextBtn = btns.find(b => b.textContent.includes('Next') && !b.disabled);
+            if (nextBtn) { nextBtn.click(); setTimeout(findAddToken, 300); return; }
+            resolve('addToken overlay not found, no navigation available, text: ' + text.substring(0, 100));
+          };
+          setTimeout(findAddToken, 300);
         });
       })()`
     },
