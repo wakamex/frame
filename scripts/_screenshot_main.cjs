@@ -1603,6 +1603,21 @@ const interactions = {
         return 'no Add Token button found, buttons: ' + document.querySelectorAll('button').length;
       })()`
     }
+  ],
+  settings: [
+    {
+      name: 'settings-reset-modal',
+      js: `(() => {
+        // Scroll to bottom first to find the Reset button, then click it
+        const main = document.querySelector('main');
+        if (main) main.scrollTop = main.scrollHeight;
+        // Find the 'Reset All Settings' button in the danger zone section
+        const buttons = Array.from(document.querySelectorAll('button'));
+        const resetBtn = buttons.find(b => b.textContent.includes('Reset All Settings'));
+        if (resetBtn) { resetBtn.click(); return 'clicked: ' + resetBtn.textContent.trim(); }
+        return 'no Reset All Settings button found, buttons: ' + buttons.map(b => b.textContent.trim().substring(0, 30)).join(', ');
+      })()`
+    }
   ]
 }
 
