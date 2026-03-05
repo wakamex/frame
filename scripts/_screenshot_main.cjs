@@ -653,6 +653,36 @@ const interactions = {
       })()`
     },
     {
+      name: 'add-account-watchlist-form',
+      js: `(() => {
+        // Navigate back to type selector from keystore form, then click Watch List
+        const backBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Back') || b.textContent.includes('←'));
+        if (backBtn) backBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          const btns = Array.from(document.querySelectorAll('button'));
+          const watchListBtn = btns.find(b => b.textContent.includes('Watch List'));
+          if (watchListBtn) { watchListBtn.click(); resolve('clicked Watch List'); }
+          else resolve('no Watch List button found, buttons: ' + btns.map(b => b.textContent.trim()).join(', '));
+        }, 300));
+      })()`
+    },
+    {
+      name: 'add-account-watchlist-results',
+      js: `(() => {
+        // Submit the WatchList import form and wait for mock results to render
+        return new Promise(resolve => setTimeout(() => {
+          const btns = Array.from(document.querySelectorAll('button'));
+          const submitBtn = btns.find(b => b.textContent.includes('Select CSV File') || b.textContent.includes('Load from URL'));
+          if (submitBtn) {
+            submitBtn.click();
+            setTimeout(() => resolve('submitted WatchList form, waiting for results'), 800);
+          } else {
+            resolve('no submit button found, buttons: ' + btns.map(b => b.textContent.trim()).join(', '));
+          }
+        }, 300));
+      })()`
+    },
+    {
       name: 'signature-request',
       js: `(() => {
         // If on HardwareInfo screen, navigate back to type selector first
@@ -1464,6 +1494,19 @@ app.whenReady().then(async () => {
     } else if (method === 'locateKeystore') {
       const mockKeystore = { version: 3, id: 'mock-keystore-id', address: '0xabcdef1234567890abcdef1234567890abcdef12', crypto: {} }
       event.reply('main:rpc', id, JSON.stringify(null), JSON.stringify(mockKeystore))
+    } else if (method === 'loadWatchList') {
+      const mockWatchListResults = [
+        { name: 'Vitalik Buterin', address: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045' },
+        { name: 'Uniswap Treasury', address: '0x1a9C8182C09F50C8318d769245beA52c32BE35BC' },
+        { name: 'DeFi Whale', address: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D' },
+        { name: 'ENS DAO', address: '0xFe89cc7aBB2C4183683ab71653C4cdc9B02D44b7' },
+        { name: 'Compound Finance', address: '0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3b' },
+        { name: 'Yearn.Finance', address: '0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52' },
+        { name: 'OpenSea Wallet', address: '0x5b3256965e7C3cF26E11FCAf296DfC8807C01073' },
+        { name: 'invalid-address', address: '', error: 'invalid address format' },
+        { name: '', address: 'not-a-hex-address', error: 'invalid checksum' }
+      ]
+      event.reply('main:rpc', id, JSON.stringify(null), JSON.stringify(mockWatchListResults))
     } else {
       event.reply('main:rpc', id, JSON.stringify(null), JSON.stringify(null))
     }
