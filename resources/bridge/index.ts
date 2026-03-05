@@ -31,8 +31,22 @@ window.addEventListener(
   false
 )
 
+let _bridgeActionCount = 0
+let _bridgeTimer: ReturnType<typeof setInterval> | null = null
 ipcRenderer.on('main:action', (...args: any[]) => {
   args.shift()
+  _bridgeActionCount++
+  if (!_bridgeTimer) {
+    _bridgeTimer = setInterval(() => {
+      if (_bridgeActionCount > 0) {
+        console.log(`[bridge] forwarded ${_bridgeActionCount} main:action events in last 1s`)
+        _bridgeActionCount = 0
+      } else {
+        clearInterval(_bridgeTimer!)
+        _bridgeTimer = null
+      }
+    }, 1000)
+  }
   window.postMessage(wrap({ method: 'event', channel: 'action', args, source }), '*')
 })
 

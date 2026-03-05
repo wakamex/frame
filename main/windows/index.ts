@@ -139,10 +139,24 @@ const send = (channel: string, ...args: string[]) => {
 }
 
 // Sync state changes to renderer (only main state)
+let _stateSyncCount = 0
+let _stateSyncTimer: ReturnType<typeof setInterval> | null = null
 subscribe(state, (ops: any[]) => {
   const mainOps = ops.filter(([_op, path]: any) => path[0] === 'main')
   if (mainOps.length === 0) return
   const updates = mainOps.map(([_op, path, value]: any) => ({ path: path.join('.'), value }))
+  _stateSyncCount++
+  if (!_stateSyncTimer) {
+    _stateSyncTimer = setInterval(() => {
+      if (_stateSyncCount > 0) {
+        log.debug(`[stateSync] sent ${_stateSyncCount} messages in last 1s`)
+        _stateSyncCount = 0
+      } else {
+        clearInterval(_stateSyncTimer!)
+        _stateSyncTimer = null
+      }
+    }, 1000)
+  }
   send('main:action', 'stateSync', JSON.stringify([{ updates }]))
 })
 

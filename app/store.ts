@@ -116,9 +116,29 @@ function setByPath(obj: any, keys: string[], value: unknown) {
   obj[keys[keys.length - 1]] = value
 }
 
+let _applyCount = 0
+let _applyTotalMs = 0
+let _applyTimer: ReturnType<typeof setInterval> | null = null
+
 export function applyUpdates(updates: Array<{ path: string; value: unknown }>) {
+  const t0 = performance.now()
   for (const { path, value } of updates) {
     setByPath(state, path.split('.'), value)
+  }
+  const elapsed = performance.now() - t0
+  _applyCount++
+  _applyTotalMs += elapsed
+  if (!_applyTimer) {
+    _applyTimer = setInterval(() => {
+      if (_applyCount > 0) {
+        console.log(`[applyUpdates] ${_applyCount} calls, ${_applyTotalMs.toFixed(1)}ms total in last 1s`)
+        _applyCount = 0
+        _applyTotalMs = 0
+      } else {
+        clearInterval(_applyTimer!)
+        _applyTimer = null
+      }
+    }, 1000)
   }
 }
 

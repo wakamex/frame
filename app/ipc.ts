@@ -15,6 +15,9 @@ export function initializeApp(): Promise<void> {
       initializeState(state as Parameters<typeof initializeState>[0])
 
       // Listen for incremental state updates from main process
+      let _syncMsgCount = 0
+      let _syncUpdateCount = 0
+      let _syncTimer: ReturnType<typeof setInterval> | null = null
       link.on('action', (action: string, ...args: unknown[]) => {
         if (action === 'stateSync') {
           try {
@@ -24,6 +27,20 @@ export function initializeApp(): Promise<void> {
               for (const update of actionItem.updates) {
                 updates.push({ path: update.path, value: update.value })
               }
+            }
+            _syncMsgCount++
+            _syncUpdateCount += updates.length
+            if (!_syncTimer) {
+              _syncTimer = setInterval(() => {
+                if (_syncMsgCount > 0) {
+                  console.log(`[stateSync:renderer] ${_syncMsgCount} msgs, ${_syncUpdateCount} updates in last 1s`)
+                  _syncMsgCount = 0
+                  _syncUpdateCount = 0
+                } else {
+                  clearInterval(_syncTimer!)
+                  _syncTimer = null
+                }
+              }, 1000)
             }
             applyUpdates(updates)
           } catch (e) {
