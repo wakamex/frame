@@ -379,7 +379,8 @@ const mockState = {
       'ledger-1': { id: 'ledger-1', type: 'ledger', name: 'Ledger Nano S', status: 'ok', addresses: ['0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'], model: 'Nano S', createdAt: Date.now() },
       'ring-2': { id: 'ring-2', type: 'ring', name: 'Hot Signer 2', status: 'ok', addresses: ['0x5555555555555555555555555555555555555555'], createdAt: Date.now() },
       'trezor-1': { id: 'trezor-1', type: 'trezor', name: 'Trezor Model T', status: 'error', addresses: ['0x9999888877776666555544443333222211110000'], model: 'Model T', createdAt: Date.now(), error: 'Device disconnected' },
-      'lattice-1': { id: 'lattice-1', type: 'lattice', name: 'GridPlus Lattice', status: 'off', addresses: [], createdAt: Date.now() }
+      'lattice-1': { id: 'lattice-1', type: 'lattice', name: 'GridPlus Lattice', status: 'off', addresses: [], createdAt: Date.now() },
+      'ring-locked': { id: 'ring-locked', type: 'ring', name: 'Locked Signer', status: 'locked', addresses: ['0xAAAABBBBCCCCDDDDEEEEFFFF1111222233334444'], createdAt: Date.now() }
     },
     txHistory: {
       '0x1234567890abcdef1234567890abcdef12345678': [
@@ -1163,6 +1164,64 @@ const interactions = {
           const removeBtn = btns.find(b => b.textContent.trim() === 'Remove');
           if (removeBtn) { removeBtn.click(); resolve('clicked Remove button on signer'); }
           else resolve('no Remove button found, buttons: ' + btns.map(b => b.textContent.trim().substring(0, 20)).join(', '));
+        }, 300));
+      })()`
+    },
+    {
+      name: 'signer-unlock-password-form',
+      js: `(() => {
+        // Click the locked hot signer to reveal the unlock password form
+        const mainBtns = Array.from(document.querySelectorAll('main button'));
+        const lockedBtn = mainBtns.find(b => b.textContent.match(/locked signer/i));
+        if (lockedBtn) { lockedBtn.click(); }
+        return new Promise(resolve => setTimeout(() => {
+          // Fill in the password input to show a form with value
+          const passwordInput = document.querySelector('input[type="password"]');
+          if (passwordInput) {
+            const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+            nativeSetter.call(passwordInput, 'mypassword123');
+            passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+            resolve('filled password field in unlock form');
+          } else {
+            resolve('no password input found, buttons: ' + mainBtns.map(b => b.textContent.trim().substring(0, 30)).join(', '));
+          }
+        }, 300));
+      })()`
+    },
+    {
+      name: 'signer-unlock-error',
+      js: `(() => {
+        // Click the locked hot signer to ensure unlock form is visible
+        const mainBtns = Array.from(document.querySelectorAll('main button'));
+        const lockedBtn = mainBtns.find(b => b.textContent.match(/locked signer/i));
+        if (lockedBtn) lockedBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          // Fill in a wrong password value
+          const passwordInput = document.querySelector('input[type="password"]');
+          if (passwordInput) {
+            const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+            nativeSetter.call(passwordInput, 'wrongpassword');
+            passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          // Inject the error message directly into the DOM to simulate the error state
+          const form = document.querySelector('form');
+          if (form) {
+            const section = form.closest('section');
+            if (section) {
+              let errorP = section.querySelector('p');
+              if (!errorP) {
+                errorP = document.createElement('p');
+                errorP.className = 'text-red-400 text-xs mt-1';
+                section.appendChild(errorP);
+              }
+              errorP.textContent = 'Invalid password';
+              resolve('injected Invalid password error in unlock form');
+            } else {
+              resolve('form found but no parent section');
+            }
+          } else {
+            resolve('no unlock form found for error injection');
+          }
         }, 300));
       })()`
     }
