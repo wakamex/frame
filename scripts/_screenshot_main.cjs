@@ -751,6 +751,60 @@ const interactions = {
       })()`
     },
     {
+      name: 'transaction-declined-state',
+      stateUpdates: [
+        {
+          path: 'main.accounts.0x1234567890abcdef1234567890abcdef12345678.requests.req-1.status',
+          value: 'declined'
+        },
+        {
+          path: 'main.accounts.0x1234567890abcdef1234567890abcdef12345678.requests.req-1.notice',
+          value: 'Transaction declined by user'
+        }
+      ],
+      js: `(() => {
+        // Navigate to Main Account's transaction request to see declined state
+        const btns = Array.from(document.querySelectorAll('main button'));
+        const mainBtn = btns.find(b => b.textContent.includes('Main Account'));
+        if (mainBtn) mainBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          const text = document.body.innerText;
+          if (text.toLowerCase().includes('declined') || text.includes('Transaction declined')) {
+            resolve('declined state visible');
+          } else {
+            resolve('state: ' + text.substring(0, 100));
+          }
+        }, 800));
+      })()`
+    },
+    {
+      name: 'transaction-error-state',
+      stateUpdates: [
+        {
+          path: 'main.accounts.0x1234567890abcdef1234567890abcdef12345678.requests.req-1.status',
+          value: 'error'
+        },
+        {
+          path: 'main.accounts.0x1234567890abcdef1234567890abcdef12345678.requests.req-1.notice',
+          value: 'Transaction was rejected by the network: insufficient funds for gas * price + value'
+        }
+      ],
+      js: `(() => {
+        // Navigate to Main Account's transaction request to see error state
+        const btns = Array.from(document.querySelectorAll('main button'));
+        const mainBtn = btns.find(b => b.textContent.includes('Main Account'));
+        if (mainBtn) mainBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          const text = document.body.innerText;
+          if (text.toLowerCase().includes('error') || text.includes('insufficient funds')) {
+            resolve('error state visible');
+          } else {
+            resolve('state: ' + text.substring(0, 100));
+          }
+        }, 800));
+      })()`
+    },
+    {
       name: 'transaction-sending-state',
       stateUpdates: [
         {
