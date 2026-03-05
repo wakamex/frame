@@ -243,7 +243,13 @@ const mockState = {
     trezor: { derivation: 'standard' },
     privacy: { errorReporting: false },
     updater: { dontRemind: [], badge: null },
-    rates: {}
+    rates: {},
+    addressBook: {
+      'contact-1': { name: 'Alice Nakamoto', address: '0xaaaa111122223333444455556666777788889999', notes: 'Cold storage wallet' },
+      'contact-2': { name: 'Bob Vance', address: '0xbbbb111122223333444455556666777788889999', notes: '' },
+      'contact-3': { name: 'Treasury DAO', address: '0xcccc111122223333444455556666777788889999', notes: 'Multisig - 3 of 5 signers' },
+      'contact-4': { name: 'DEX Router', address: '0xdddd111122223333444455556666777788889999', notes: 'Uniswap V3 router' }
+    }
   },
   platform: process.platform
 }
