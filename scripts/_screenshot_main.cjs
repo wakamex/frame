@@ -1256,6 +1256,61 @@ app.whenReady().then(async () => {
     if (!validateScreenshot(emptyPng, emptyName)) failures++
   }
 
+  // --- Onboarding flow screenshots ---
+  // Switch to empty-accounts state so the app shows OnboardView
+  mockState.main.accounts = {}
+  mockState.main.mute.onboardingWindow = false
+
+  console.log('\n[Onboarding] Reloading with empty accounts...')
+  await win.loadURL(url)
+  const onboardReady = await waitForApp(win)
+  if (onboardReady) {
+    // Welcome step
+    const welcomePng = await captureScreenshot(win, String(step++).padStart(2, '0') + '-onboard-welcome')
+    if (!validateScreenshot(welcomePng, 'onboard-welcome')) failures++
+
+    // Click "Get Started" → create step
+    try {
+      const startResult = await win.webContents.executeJavaScript(`
+        (() => {
+          const btns = Array.from(document.querySelectorAll('button'));
+          const startBtn = btns.find(b => b.textContent.includes('Get Started'));
+          if (startBtn) { startBtn.click(); return 'clicked Get Started'; }
+          return 'no Get Started button found';
+        })()
+      `)
+      console.log('[Onboarding]', startResult)
+    } catch (err) {
+      console.log('[Onboarding] click error:', err.message)
+    }
+    await new Promise(r => setTimeout(r, 500))
+    const createPng = await captureScreenshot(win, String(step++).padStart(2, '0') + '-onboard-create')
+    if (!validateScreenshot(createPng, 'onboard-create')) failures++
+
+    // Click "Skip" (or "Cancel" in AddAccount) → done step
+    try {
+      const skipResult = await win.webContents.executeJavaScript(`
+        (() => {
+          const btns = Array.from(document.querySelectorAll('button'));
+          const skipBtn = btns.find(b => b.textContent.includes('Skip'));
+          if (skipBtn) { skipBtn.click(); return 'clicked Skip'; }
+          const cancelBtn = btns.find(b => b.textContent.includes('Cancel'));
+          if (cancelBtn) { cancelBtn.click(); return 'clicked Cancel'; }
+          return 'no Skip or Cancel button found';
+        })()
+      `)
+      console.log('[Onboarding]', skipResult)
+    } catch (err) {
+      console.log('[Onboarding] skip error:', err.message)
+    }
+    await new Promise(r => setTimeout(r, 500))
+    const donePng = await captureScreenshot(win, String(step++).padStart(2, '0') + '-onboard-done')
+    if (!validateScreenshot(donePng, 'onboard-done')) failures++
+  } else {
+    console.error('[Onboarding] App did not render for onboarding pass')
+    failures++
+  }
+
   // Summary
   console.log('\n' + '='.repeat(60))
   console.log(`Screenshots: ${step - 1} captured, ${failures} failures`)
