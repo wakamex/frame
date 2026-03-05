@@ -518,6 +518,36 @@ const interactions = {
   ],
   send: [
     {
+      name: 'send-network-dropdown',
+      js: `(() => {
+        // Find and click the network/chain selector dropdown trigger
+        const selects = Array.from(document.querySelectorAll('select, [role="listbox"], [role="combobox"]'));
+        if (selects[0]) { selects[0].focus(); selects[0].click(); return 'clicked network selector'; }
+        // Fallback: look for a button with chain name
+        const btns = Array.from(document.querySelectorAll('main button'));
+        const chainBtn = btns.find(b => b.textContent.match(/ethereum|mainnet|chain/i));
+        if (chainBtn) { chainBtn.click(); return 'clicked chain button: ' + chainBtn.textContent.trim().substring(0, 30); }
+        return 'no network selector found';
+      })()`
+    },
+    {
+      name: 'send-token-dropdown',
+      js: `(() => {
+        // Close any open dropdown first
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        return new Promise(resolve => setTimeout(() => {
+          // Find the token selector (usually the second select/dropdown)
+          const selects = Array.from(document.querySelectorAll('select, [role="listbox"]'));
+          if (selects[1]) { selects[1].focus(); selects[1].click(); resolve('clicked token selector'); return; }
+          // Fallback: look for a button with token name like ETH/USDC
+          const btns = Array.from(document.querySelectorAll('main button'));
+          const tokenBtn = btns.find(b => b.textContent.match(/^(ETH|USDC|DAI|MATIC)$/));
+          if (tokenBtn) { tokenBtn.click(); resolve('clicked token button: ' + tokenBtn.textContent.trim()); return; }
+          resolve('no token selector found, main buttons: ' + btns.map(b => b.textContent.trim().substring(0, 15)).join(', '));
+        }, 300));
+      })()`
+    },
+    {
       name: 'send-filled-form',
       js: `(() => {
         const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
