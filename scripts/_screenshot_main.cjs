@@ -721,6 +721,75 @@ const interactions = {
       })()`
     },
     {
+      name: 'transaction-sending-state',
+      stateUpdates: [
+        {
+          path: 'main.accounts.0x1234567890abcdef1234567890abcdef12345678.requests.req-1.status',
+          value: 'sending'
+        }
+      ],
+      js: `(() => {
+        // Navigate to Main Account's transaction request to see sending/in-progress state
+        const btns = Array.from(document.querySelectorAll('main button'));
+        const mainBtn = btns.find(b => b.textContent.includes('Main Account'));
+        if (mainBtn) mainBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          const text = document.body.innerText;
+          if (text.toLowerCase().includes('sending')) {
+            resolve('sending state visible');
+          } else {
+            resolve('state: ' + text.substring(0, 100));
+          }
+        }, 800));
+      })()`
+    },
+    {
+      name: 'transaction-confirming-state',
+      stateUpdates: [
+        {
+          path: 'main.accounts.0x1234567890abcdef1234567890abcdef12345678.requests.req-1.status',
+          value: 'confirming'
+        }
+      ],
+      js: `(() => {
+        // Navigate to Main Account's transaction request to see confirming state (broadcast, waiting for block)
+        const btns = Array.from(document.querySelectorAll('main button'));
+        const mainBtn = btns.find(b => b.textContent.includes('Main Account'));
+        if (mainBtn) mainBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          const text = document.body.innerText;
+          if (text.toLowerCase().includes('confirming')) {
+            resolve('confirming state visible');
+          } else {
+            resolve('state: ' + text.substring(0, 100));
+          }
+        }, 800));
+      })()`
+    },
+    {
+      name: 'transaction-verifying-state',
+      stateUpdates: [
+        {
+          path: 'main.accounts.0x1234567890abcdef1234567890abcdef12345678.requests.req-1.status',
+          value: 'verifying'
+        }
+      ],
+      js: `(() => {
+        // Navigate to Main Account's transaction request to see verifying state
+        const btns = Array.from(document.querySelectorAll('main button'));
+        const mainBtn = btns.find(b => b.textContent.includes('Main Account'));
+        if (mainBtn) mainBtn.click();
+        return new Promise(resolve => setTimeout(() => {
+          const text = document.body.innerText;
+          if (text.toLowerCase().includes('verifying')) {
+            resolve('verifying state visible');
+          } else {
+            resolve('state: ' + text.substring(0, 100));
+          }
+        }, 800));
+      })()`
+    },
+    {
       name: 'restore-pending-state',
       stateUpdates: [
         {
