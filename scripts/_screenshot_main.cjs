@@ -388,6 +388,20 @@ const interactions = {
       })()`
     },
     {
+      name: 'account-revoke-permission',
+      js: `(() => {
+        // Find all Revoke buttons in the Connected Origins section
+        const btns = Array.from(document.querySelectorAll('button'));
+        const revokeBtns = btns.filter(b => b.textContent.trim() === 'Revoke');
+        if (revokeBtns.length > 0) {
+          // Click the first Revoke button (Uniswap)
+          revokeBtns[0].click();
+          return 'clicked Revoke on first origin, total revoke buttons: ' + revokeBtns.length;
+        }
+        return 'no Revoke buttons found, buttons: ' + btns.map(b => b.textContent.trim().substring(0, 20)).join(', ');
+      })()`
+    },
+    {
       name: 'account-rename-form',
       js: `(() => {
         const btns = Array.from(document.querySelectorAll('button'));
