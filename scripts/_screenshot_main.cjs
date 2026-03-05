@@ -1064,6 +1064,45 @@ const interactions = {
       })()`
     },
     {
+      name: 'settings-ledger-derivation',
+      js: `(() => {
+        // Find the Ledger derivation select dropdown
+        const selects = Array.from(document.querySelectorAll('select'));
+        const ledgerSelect = selects.find(s => {
+          const options = Array.from(s.options).map(o => o.textContent);
+          return options.some(t => t.includes('Live') || t.includes('Legacy'));
+        });
+        if (ledgerSelect) {
+          ledgerSelect.focus();
+          // Change to Legacy derivation
+          const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value').set;
+          nativeSetter.call(ledgerSelect, 'legacy');
+          ledgerSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          return 'changed Ledger derivation to Legacy';
+        }
+        return 'no Ledger derivation select found, selects: ' + selects.length;
+      })()`
+    },
+    {
+      name: 'settings-api-keys-filled',
+      js: `(() => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        const inputs = Array.from(document.querySelectorAll('input[type="text"]'));
+        const apiInputs = inputs.filter(i => i.placeholder?.includes('API') || i.placeholder?.includes('key') || i.placeholder?.toLowerCase().includes('api'));
+        if (apiInputs.length > 0) {
+          apiInputs.forEach((input, idx) => {
+            nativeSetter.call(input, 'DEMO_API_KEY_' + (idx + 1));
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          });
+          return 'filled ' + apiInputs.length + ' API key inputs';
+        }
+        // Scroll to make API keys visible
+        const main = document.querySelector('main');
+        if (main) main.scrollTop = main.scrollHeight / 2;
+        return 'no API key inputs found, scrolled to mid-page';
+      })()`
+    },
+    {
       name: 'settings-danger-zone',
       js: `(() => {
         const main = document.querySelector('main');
