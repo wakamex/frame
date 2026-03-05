@@ -25,6 +25,9 @@ function App() {
   const colorway = snap.main?.colorway
   const accounts = useAccounts()
   const onboardingComplete = snap.main?.mute?.onboardingWindow
+  const pendingRequests = usePendingRequests()
+  const compact = useCompact()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (colorway) {
@@ -51,10 +54,7 @@ function App() {
     )
   }
 
-  const pendingRequests = usePendingRequests()
   const updateBadge = snap.main?.updater?.badge
-  const compact = useCompact()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   // Close sidebar when switching views on compact layout
   const handleViewChange = (view: string) => {
