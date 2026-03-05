@@ -326,10 +326,10 @@ const mockState = {
         },
         created: '2024-06-01'
       },
-      '0xwa7c00000000000000000000000000000000ba7c': {
-        id: '0xwa7c00000000000000000000000000000000ba7c',
+      '0xda7c00000000000000000000000000000000ba7c': {
+        id: '0xda7c00000000000000000000000000000000ba7c',
         name: 'Watch Account',
-        address: '0xwa7c00000000000000000000000000000000ba7c',
+        address: '0xda7c00000000000000000000000000000000ba7c',
         status: 'ok',
         signer: '',
         requests: {},
@@ -371,7 +371,7 @@ const mockState = {
         { address: '0x0000000000000000000000000000000000000000', chainId: 1, symbol: 'ETH', name: 'Ether', decimals: 18, balance: '500000000000000000', displayBalance: '0.5' },
         { address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', chainId: 1, symbol: 'USDC', name: 'USD Coin', decimals: 6, balance: '10000000000', displayBalance: '10000' }
       ],
-      '0xwa7c00000000000000000000000000000000ba7c': [
+      '0xda7c00000000000000000000000000000000ba7c': [
         { address: '0x0000000000000000000000000000000000000000', chainId: 1, symbol: 'ETH', name: 'Ether', decimals: 18, balance: '1000000000000000000', displayBalance: '1.0' },
         { address: '0xd9fcd98c322942075a5c3860693e9f4f03aae07b', chainId: 1, symbol: 'EUL', name: 'Euler', decimals: 18, balance: '480000000000000000', displayBalance: '0.48' }
       ]
