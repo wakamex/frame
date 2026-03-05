@@ -212,35 +212,29 @@ const rpc: Record<string, (...args: any[]) => void> = {
 
       // Detect if first line is a header
       const firstFields = lines[0].split(',').map((f) => f.trim().toLowerCase())
-      const hasHeader =
-        firstFields.includes('name') || firstFields.includes('address') || firstFields.includes('chainid')
+      const hasHeader = firstFields.includes('name') || firstFields.includes('address')
       const dataLines = hasHeader ? lines.slice(1) : lines
 
-      const results: Array<{ name: string; chainId: number; address: string; error?: string }> = []
+      const results: Array<{ name: string; address: string; error?: string }> = []
       const added = new Set<string>()
 
       for (const line of dataLines) {
         const parts = line.split(',').map((p) => p.trim())
-        if (parts.length < 3) {
-          results.push({ name: parts[0] || '', chainId: 0, address: '', error: 'Invalid row format' })
+        if (parts.length < 2) {
+          results.push({ name: parts[0] || '', address: '', error: 'Invalid row format' })
           continue
         }
 
-        const [name, chainIdStr, address] = parts
-        const chainId = parseInt(chainIdStr, 10)
-        if (isNaN(chainId)) {
-          results.push({ name, chainId: 0, address, error: `Invalid chain ID: ${chainIdStr}` })
-          continue
-        }
+        const [name, address] = parts
 
         if (!isAddress(address)) {
-          results.push({ name, chainId, address, error: `Invalid address: ${address}` })
+          results.push({ name, address, error: `Invalid address: ${address}` })
           continue
         }
 
         const normalized = address.toLowerCase()
         if (added.has(normalized)) {
-          results.push({ name, chainId, address })
+          results.push({ name, address })
           continue
         }
         added.add(normalized)
@@ -249,7 +243,7 @@ const rpc: Record<string, (...args: any[]) => void> = {
         await new Promise<void>((resolve) => {
           accounts.add(address, name, { type: 'Address' }, () => resolve())
         })
-        results.push({ name, chainId, address })
+        results.push({ name, address })
       }
 
       cb(null, results)

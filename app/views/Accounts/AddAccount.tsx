@@ -357,7 +357,7 @@ function WatchAddressForm({ onBack, onDone }: { onBack: () => void; onDone: (add
   )
 }
 
-type WatchListResult = { name: string; chainId: number; address: string; error?: string }
+type WatchListResult = { name: string; address: string; error?: string }
 
 function WatchListForm({ onBack, onDone }: { onBack: () => void; onDone: (address?: string) => void }) {
   const [mode, setMode] = useState<'file' | 'url'>('file')
@@ -401,7 +401,6 @@ function WatchListForm({ onBack, onDone }: { onBack: () => void; onDone: (addres
               <span className="text-gray-500">{r.name || '—'}</span>
               {' '}
               <span className="truncate">{r.address ? `${r.address.slice(0, 8)}...${r.address.slice(-6)}` : '—'}</span>
-              {r.chainId > 0 && <span className="text-gray-600 ml-1">({r.chainId})</span>}
               {r.error && <span className="ml-1 text-red-500">{r.error}</span>}
             </div>
           ))}
@@ -420,7 +419,7 @@ function WatchListForm({ onBack, onDone }: { onBack: () => void; onDone: (addres
     <form onSubmit={handleLoad} className="space-y-3">
       <FormHeader title="Import Watch List" onBack={onBack} />
       <p className="text-xs text-gray-500">
-        CSV format: <span className="font-mono text-gray-400">name,chainId,address</span>
+        CSV format: <span className="font-mono text-gray-400">name,address</span>
       </p>
       <div className="flex gap-2">
         <button

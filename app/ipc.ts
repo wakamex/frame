@@ -105,9 +105,7 @@ export const actions = {
   ) => rpc('createFromKeystore', keystore, password, keystorePassword),
   createFromAddress: (address: string, name: string) => rpc('createFromAddress', address, name),
   loadWatchList: (source: string) =>
-    rpc('loadWatchList', source) as Promise<
-      Array<{ name: string; chainId: number; address: string; error?: string }>
-    >,
+    rpc('loadWatchList', source) as Promise<Array<{ name: string; address: string; error?: string }>>,
   createAccount: (address: string, name: string, options: Record<string, unknown>) =>
     rpc('createAccount', address, name, options),
   locateKeystore: () => rpc('locateKeystore') as Promise<Record<string, unknown>>,
