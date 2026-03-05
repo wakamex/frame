@@ -221,7 +221,34 @@ const mockState = {
         address: '0x9999888877776666555544443333222211110000',
         status: 'ok',
         signer: 'trezor-1',
-        requests: {},
+        requests: {
+          'req-permit-expired': {
+            handlerId: 'req-permit-expired',
+            type: 'signTypedData',
+            status: 'pending',
+            origin: 'app.uniswap.org',
+            account: '0x9999888877776666555544443333222211110000',
+            created: Date.now(),
+            payload: {
+              jsonrpc: '2.0', id: 20, method: 'eth_signTypedData_v4',
+              params: ['0x9999888877776666555544443333222211110000', JSON.stringify({
+                types: {
+                  EIP712Domain: [{ name: 'name', type: 'string' }, { name: 'version', type: 'string' }, { name: 'chainId', type: 'uint256' }],
+                  Permit: [{ name: 'owner', type: 'address' }, { name: 'spender', type: 'address' }, { name: 'value', type: 'uint256' }, { name: 'nonce', type: 'uint256' }, { name: 'deadline', type: 'uint256' }]
+                },
+                primaryType: 'Permit',
+                domain: { name: 'USD Coin', version: '2', chainId: '1' },
+                message: {
+                  owner: '0x9999888877776666555544443333222211110000',
+                  spender: '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
+                  value: '115792089237316195423570985008687907853269984665640564039457584007913129639935',
+                  nonce: '0',
+                  deadline: String(Math.floor(Date.now()/1000) - 3600)
+                }
+              })]
+            }
+          }
+        },
         created: '2024-09-01'
       },
       '0x5555555555555555555555555555555555555555': {
@@ -606,6 +633,15 @@ const interactions = {
             }, 400);
           }, 300);
         }, 300));
+      })()`
+    },
+    {
+      name: 'permit-expired-deadline',
+      js: `(() => {
+        const btns = Array.from(document.querySelectorAll('main button'));
+        const trezorBtn = btns.find(b => b.textContent.includes('Trezor'));
+        if (trezorBtn) { trezorBtn.click(); return 'clicked Trezor Account'; }
+        return 'no Trezor Account button found';
       })()`
     }
   ],
