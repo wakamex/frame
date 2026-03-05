@@ -92,10 +92,10 @@ describe('#createBalance price availability', () => {
     // 0x3635C9ADC5DEA00000 = 1000 * 10^18 → 1000 tokens
     const shib = { balance: '0x3635C9ADC5DEA00000', decimals: 18, address: '0xshib', chainId: 1, symbol: 'SHIB', name: 'SHIB' }
     const b = createBalance(shib, { price: 0.00001, change24hr: 5.0 })
-    // 1000 * 0.00001 = 0.01 → very small total value, shows "<1"
+    // 1000 * 0.00001 = 0.01 → shows $0.01
     expect(b.totalValue.toNumber()).toBeGreaterThan(0)
     expect(b.totalValue.toNumber()).toBeCloseTo(0.01)
-    expect(b.displayValue).toBe('<1')
+    expect(b.displayValue).toBe('0.01')
   })
 
   it('handles very large price (e.g. BTC)', () => {
@@ -243,19 +243,39 @@ describe('#createBalance sub-dollar display', () => {
     // totalValue should be small but non-zero
     expect(b.totalValue.toNumber()).toBeGreaterThan(0)
     expect(b.totalValue.toNumber()).toBeLessThan(1)
-    // MUST show "<1", NOT "0" — the old bug would show "0" and hide the price entirely
-    expect(b.displayValue).toBe('<1')
+    // MUST show the actual cents, NOT "0" — the old bug would show "0" and hide the price entirely
+    expect(b.displayValue).not.toBe('0')
+    expect(b.displayValue).toMatch(/^0\.\d{2}$/)
   })
 
-  it('shows "<1" for 0.01 USDC at $1', () => {
+  it('shows "0.01" for 0.01 USDC at $1', () => {
     const usdc = { balance: '0x2710', decimals: 6, address: '0xusdc', chainId: 1, symbol: 'USDC', name: 'USD Coin' }
     // 0x2710 = 10000 → 0.01 USDC → $0.01
     const b = createBalance(usdc, { price: 1.0, change24hr: 0 })
     expect(b.totalValue.toNumber()).toBeCloseTo(0.01)
-    expect(b.displayValue).toBe('<1')
+    expect(b.displayValue).toBe('0.01')
   })
 
-  it('does NOT show "<1" for values >= $1', () => {
+  it('shows "0.52" for 0.48 EUL at $1.10', () => {
+    // 0.48 * 1.10 = 0.528, floor to 2 decimals = 0.52
+    const eul = { balance: '0x6A94D74F4300000', decimals: 18, address: '0xeul', chainId: 1, symbol: 'EUL', name: 'Euler' }
+    const b = createBalance(eul, { price: 1.10, change24hr: 0 })
+    expect(b.totalValue.toNumber()).toBeGreaterThan(0)
+    expect(b.totalValue.toNumber()).toBeLessThan(1)
+    expect(b.displayValue).toMatch(/^0\.\d{2}$/)
+    expect(b.displayValue).not.toBe('0')
+  })
+
+  it('shows "<0.01" for sub-penny values', () => {
+    // 0.001 tokens * $1 = $0.001
+    const token = { balance: '0x38D7EA4C68000', decimals: 18, address: '0xtiny', chainId: 1, symbol: 'T', name: 'Tiny' }
+    const b = createBalance(token, { price: 1.0, change24hr: 0 })
+    expect(b.totalValue.toNumber()).toBeGreaterThan(0)
+    expect(b.totalValue.toNumber()).toBeLessThan(0.01)
+    expect(b.displayValue).toBe('<0.01')
+  })
+
+  it('does NOT show "<0.01" for values >= $1', () => {
     const token = { balance: '0xDE0B6B3A7640000', decimals: 18, address: '0x0', chainId: 1, symbol: 'ETH', name: 'Ether' }
     const b = createBalance(token, { price: 2000, change24hr: 0 })
     expect(b.displayValue).toBe('2,000')

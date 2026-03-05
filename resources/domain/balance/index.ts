@@ -83,9 +83,9 @@ export function createBalance(rawBalance: Balance, quote?: Rate): DisplayedBalan
     totalValue: safeTotalValue,
     displayValue: safeTotalValue.isZero()
       ? '0'
-      : safeTotalValue.lt(1) && safeTotalValue.gt(0)
-        ? '<1'
-        : formatUsdRate(safeTotalValue, 0)
+      : safeTotalValue.lt(0.01) && safeTotalValue.gt(0)
+        ? '<0.01'
+        : formatUsdRate(safeTotalValue, safeTotalValue.lt(1) ? 2 : 0)
   }
 }
 
