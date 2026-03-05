@@ -426,6 +426,35 @@ const interactions = {
       })()`
     },
     {
+      name: 'add-account-watch-form',
+      js: `(() => {
+        // First ensure we're on the add-account panel
+        const btns = Array.from(document.querySelectorAll('button'));
+        // If type selector is visible, click Watch Address
+        const watchBtn = btns.find(b => b.textContent.includes('Watch Address'));
+        if (watchBtn) { watchBtn.click(); return 'clicked Watch Address'; }
+        // Otherwise click + Add first, then Watch Address
+        const addBtn = btns.find(b => b.textContent.includes('+ Add') || b.textContent.includes('Add'));
+        if (addBtn) { addBtn.click(); return 'clicked Add first'; }
+        return 'no Watch Address or Add button found';
+      })()`
+    },
+    {
+      name: 'add-account-watch-ens',
+      js: `(() => {
+        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        const inputs = Array.from(document.querySelectorAll('input'));
+        const addrInput = inputs.find(i => i.placeholder?.includes('0x') || i.placeholder?.includes('address') || i.placeholder?.includes('ENS'));
+        if (addrInput) {
+          nativeSetter.call(addrInput, 'vitalik.eth');
+          addrInput.dispatchEvent(new Event('input', { bubbles: true }));
+          addrInput.dispatchEvent(new Event('change', { bubbles: true }));
+          return 'filled ENS name: vitalik.eth';
+        }
+        return 'no address input found, inputs: ' + inputs.map(i => i.placeholder?.substring(0, 20)).join(', ');
+      })()`
+    },
+    {
       name: 'signature-request',
       js: `(() => {
         // Close the add-account panel (Cancel) then click Hardware Wallet to show its signature request overlay
