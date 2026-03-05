@@ -212,7 +212,7 @@ function TxCostTable({ chains }: { chains: ChainGasData[] }) {
         {/* Header */}
         <div
           className="grid gap-2 px-4 py-2.5 border-b border-gray-700/50 text-xs font-medium text-gray-500 uppercase tracking-wide"
-          style={{ gridTemplateColumns: `1fr repeat(${sampleLabels.length}, minmax(80px, 1fr))` }}
+          style={{ gridTemplateColumns: `1fr repeat(${sampleLabels.length}, minmax(100px, 1fr))` }}
         >
           <div>Chain</div>
           {sampleLabels.map((label) => (
@@ -225,7 +225,7 @@ function TxCostTable({ chains }: { chains: ChainGasData[] }) {
           <div
             key={chain.id}
             className="grid gap-2 px-4 py-3 border-b border-gray-800/50 last:border-0 hover:bg-gray-800/30 transition-colors"
-            style={{ gridTemplateColumns: `1fr repeat(${sampleLabels.length}, minmax(80px, 1fr))` }}
+            style={{ gridTemplateColumns: `1fr repeat(${sampleLabels.length}, minmax(100px, 1fr))` }}
           >
             <div className="flex items-center gap-2 min-w-0">
               {chain.color ? (
@@ -239,11 +239,18 @@ function TxCostTable({ chains }: { chains: ChainGasData[] }) {
               const sample = chain.samples.find((s) => s.label === label)
               const lowCost = sample?.estimates?.low?.cost?.usd
               const highCost = sample?.estimates?.high?.cost?.usd
+              const gasEstimateHex = sample?.estimates?.low?.gasEstimate || sample?.estimates?.high?.gasEstimate
+              const gasGwei = gasEstimateHex ? gweiFromHex(gasEstimateHex) : null
 
               return (
                 <div key={label} className="text-right">
                   {sample ? (
-                    <CostRange low={lowCost} high={highCost} />
+                    <>
+                      <CostRange low={lowCost} high={highCost} />
+                      {gasGwei !== null && (
+                        <div className="text-xs text-gray-600 tabular-nums">{formatGwei(gasGwei)}g</div>
+                      )}
+                    </>
                   ) : (
                     <span className="text-sm text-gray-600">—</span>
                   )}
