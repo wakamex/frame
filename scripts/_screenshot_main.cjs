@@ -245,6 +245,21 @@ const mockState = {
               maxPriorityFeePerGas: '0x3b9aca00',
               data: '0xa9059cbb000000000000000000000000deadbeefdeadbeefdeadbeefdeadbeefdeadbeef0000000000000000000000000000000000000000000000000000000077359400'
             }
+          },
+          'req-personalsign': {
+            handlerId: 'req-personalsign',
+            type: 'sign',
+            status: 'pending',
+            origin: 'app.uniswap.org',
+            account: '0x5555555555555555555555555555555555555555',
+            created: Date.now(),
+            payload: {
+              jsonrpc: '2.0', id: 10, method: 'personal_sign',
+              params: ['0x' + Buffer.from('Sign this message to verify your identity on Uniswap. Nonce: 42').toString('hex'), '0x5555555555555555555555555555555555555555']
+            },
+            data: {
+              decodedMessage: 'Sign this message to verify your identity on Uniswap. Nonce: 42'
+            }
           }
         },
         created: '2024-06-01'
@@ -476,6 +491,41 @@ const interactions = {
             );
             if (candidates[0]) { candidates[0].click(); resolve('clicked Main Account to show permissions list'); }
             else resolve('no Main Account button found, buttons: ' + document.querySelectorAll('main button').length);
+          }, 300);
+        }, 300));
+      })()`
+    },
+    {
+      name: 'personal-sign-overlay',
+      js: `(() => {
+        // Navigate to DeFi Wallet account and find the personal_sign overlay
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        return new Promise(resolve => setTimeout(() => {
+          const navBtns = document.querySelectorAll('nav button');
+          if (navBtns[0]) navBtns[0].click();
+          setTimeout(() => {
+            const btns = Array.from(document.querySelectorAll('main button'));
+            const defiBtn = btns.find(b => b.textContent.includes('DeFi Wallet'));
+            if (defiBtn) { defiBtn.click(); }
+            setTimeout(() => {
+              // Navigate request queue to find the personal_sign request (type 'sign')
+              let attempts = 0;
+              const findPersonalSign = () => {
+                if (attempts++ > 8) { resolve('personal_sign request not found after 8 attempts'); return; }
+                const text = document.body.innerText;
+                if (text.includes('Uniswap') && text.includes('Nonce') && text.includes('verify your identity')) {
+                  resolve('personal_sign overlay visible with plain message text');
+                  return;
+                }
+                const btns2 = Array.from(document.querySelectorAll('button'));
+                const nextBtn = btns2.find(b => b.textContent.trim().includes('Next') && !b.disabled);
+                if (nextBtn) { nextBtn.click(); setTimeout(findPersonalSign, 300); return; }
+                const prevBtn = btns2.find(b => b.textContent.trim().includes('Prev') && !b.disabled);
+                if (prevBtn) { prevBtn.click(); setTimeout(findPersonalSign, 300); return; }
+                resolve('no navigation available, text: ' + text.substring(0, 100));
+              };
+              setTimeout(findPersonalSign, 300);
+            }, 400);
           }, 300);
         }, 300));
       })()`
