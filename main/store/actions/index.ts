@@ -264,7 +264,6 @@ export function pushGasHistory(netType: string, netId: string, gweiPrice: number
   const prev = gas.history || []
   const next = [...prev, { t: Date.now(), gwei: gweiPrice }]
   gas.history = next.length > MAX_GAS_HISTORY ? next.slice(-MAX_GAS_HISTORY) : next
-  log.info(`Gas history [${netId}]: ${gweiPrice.toFixed(2)} gwei (${gas.history.length} points)`)
 }
 
 export function setNativeCurrencyData(netType: string, netId: string | number, currency: any) {
