@@ -155,7 +155,7 @@
     "electron": "40",
     "node": ">= 24.0.0"
   },
-  "repository": "github:floating/frame",
+  "repository": "github:wakamex/framed",
   "overrides": {
     "@framelabs/logger": "1.1.1"
   },
