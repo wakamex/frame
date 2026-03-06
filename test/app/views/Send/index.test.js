@@ -79,15 +79,18 @@ describe('SendView', () => {
   // Test 3: Valid 0x address enables submit (combined with amount)
   it('enables submit when valid 0x address and positive amount are provided', async () => {
     const { user } = render(<SendView />)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), RECIPIENT)
-    await user.type(screen.getByPlaceholderText('0.0'), '1.0')
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste(RECIPIENT)
+    await user.click(screen.getByPlaceholderText('0.0'))
+    await user.paste('1.0')
     expect(screen.getByText('Review Transaction').closest('button').disabled).toBe(false)
   })
 
   // Test 4: Contact autocomplete suggestions
   it('shows contact suggestions filtered by name prefix', async () => {
     const { user } = render(<SendView />)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), 'Ali')
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste('Ali')
     expect(screen.getByText('Alice')).toBeDefined()
     expect(screen.queryByText('Bob')).toBeNull()
   })
@@ -95,7 +98,8 @@ describe('SendView', () => {
   // Test 4b: Contact suggestions filtered by address prefix
   it('shows up to 5 contact suggestions filtered by address', async () => {
     const { user } = render(<SendView />)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), '0xdd')
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste('0xdd')
     expect(screen.getByText('Alice')).toBeDefined()
   })
 
@@ -103,7 +107,8 @@ describe('SendView', () => {
   it('fills in address when a contact suggestion is selected', async () => {
     const { user } = render(<SendView />)
     const input = screen.getByPlaceholderText('0x..., ENS name, or contact name')
-    await user.type(input, 'Ali')
+    await user.click(input)
+    await user.paste('Ali')
     await user.click(screen.getByText('Alice').closest('button'))
     expect(input.value).toBe(defaultAddressBook['contact-1'].address)
   })
@@ -111,7 +116,8 @@ describe('SendView', () => {
   // Test 6: ENS name shows resolve button
   it('shows resolve button when input contains a dot and does not start with 0x', async () => {
     const { user } = render(<SendView />)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), 'vitalik.eth')
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste('vitalik.eth')
     expect(screen.getByText('Resolve')).toBeDefined()
   })
 
@@ -119,7 +125,8 @@ describe('SendView', () => {
   it('resolves ENS name via rpc and displays resolved address', async () => {
     mockRpc.mockResolvedValue(RECIPIENT)
     const { user } = render(<SendView />)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), 'vitalik.eth')
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste('vitalik.eth')
 
     await act(async () => {
       await user.click(screen.getByText('Resolve'))
@@ -133,16 +140,20 @@ describe('SendView', () => {
   // Test 8: Amount input with valid number enables submit
   it('enables submit when valid fractional amount is typed with recipient set', async () => {
     const { user } = render(<SendView />)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), RECIPIENT)
-    await user.type(screen.getByPlaceholderText('0.0'), '0.5')
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste(RECIPIENT)
+    await user.click(screen.getByPlaceholderText('0.0'))
+    await user.paste('0.5')
     expect(screen.getByText('Review Transaction').closest('button').disabled).toBe(false)
   })
 
   // Test 9: Non-numeric amount triggers error
   it('shows Invalid amount error when non-numeric amount is submitted', async () => {
     const { user } = render(<SendView />)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), RECIPIENT)
-    await user.type(screen.getByPlaceholderText('0.0'), 'abc')
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste(RECIPIENT)
+    await user.click(screen.getByPlaceholderText('0.0'))
+    await user.paste('abc')
 
     await act(async () => {
       await user.click(screen.getByText('Review Transaction'))
@@ -178,8 +189,10 @@ describe('SendView', () => {
   it('sends native ETH transfer with correct value and chainId', async () => {
     mockRpc.mockResolvedValue(undefined)
     const { user } = render(<SendView />)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), RECIPIENT)
-    await user.type(screen.getByPlaceholderText('0.0'), '1.0')
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste(RECIPIENT)
+    await user.click(screen.getByPlaceholderText('0.0'))
+    await user.paste('1.0')
 
     await act(async () => {
       await user.click(screen.getByText('Review Transaction'))
@@ -211,8 +224,10 @@ describe('SendView', () => {
 
     const [, tokenSelect] = screen.getAllByRole('combobox')
     await user.selectOptions(tokenSelect, TOKEN_ADDRESS)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), RECIPIENT)
-    await user.type(screen.getByPlaceholderText('0.0'), '1.0')
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste(RECIPIENT)
+    await user.click(screen.getByPlaceholderText('0.0'))
+    await user.paste('1.0')
 
     await act(async () => {
       await user.click(screen.getByText('Review Transaction'))
@@ -244,8 +259,10 @@ describe('SendView', () => {
   // Test 15: Submit with zero/negative amount shows error
   it('shows Invalid amount error when amount is zero', async () => {
     const { user } = render(<SendView />)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), RECIPIENT)
-    await user.type(screen.getByPlaceholderText('0.0'), '0')
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste(RECIPIENT)
+    await user.click(screen.getByPlaceholderText('0.0'))
+    await user.paste('0')
 
     await act(async () => {
       await user.click(screen.getByText('Review Transaction'))
@@ -259,8 +276,10 @@ describe('SendView', () => {
   it('pressing Enter in address input submits the form', async () => {
     mockRpc.mockResolvedValue(undefined)
     const { user } = render(<SendView />)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), RECIPIENT)
-    await user.type(screen.getByPlaceholderText('0.0'), '1.0')
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste(RECIPIENT)
+    await user.click(screen.getByPlaceholderText('0.0'))
+    await user.paste('1.0')
 
     const addressInput = screen.getByPlaceholderText('0x..., ENS name, or contact name')
     await user.click(addressInput)
@@ -278,8 +297,10 @@ describe('SendView', () => {
   // Bug-catching: Enter in form with ENS+resolve button triggers submit, not resolve
   it('pressing Enter with ENS name triggers form submit error, not resolve', async () => {
     const { user } = render(<SendView />)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), 'vitalik.eth')
-    await user.type(screen.getByPlaceholderText('0.0'), '1.0')
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste('vitalik.eth')
+    await user.click(screen.getByPlaceholderText('0.0'))
+    await user.paste('1.0')
 
     // Resolve button is visible but Enter should submit the form
     expect(screen.getByText('Resolve')).toBeDefined()
@@ -307,8 +328,10 @@ describe('toSmallestUnit conversion (via submit)', () => {
 
   const submitAndGetTx = async (amount) => {
     const { user } = render(<SendView />)
-    await user.type(screen.getByPlaceholderText('0x..., ENS name, or contact name'), RECIPIENT)
-    await user.type(screen.getByPlaceholderText('0.0'), amount)
+    await user.click(screen.getByPlaceholderText('0x..., ENS name, or contact name'))
+    await user.paste(RECIPIENT)
+    await user.click(screen.getByPlaceholderText('0.0'))
+    await user.paste(amount)
     await act(async () => {
       await user.click(screen.getByText('Review Transaction'))
       jest.runAllTimers()

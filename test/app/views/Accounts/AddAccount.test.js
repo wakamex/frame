@@ -77,10 +77,8 @@ describe('WatchAddressForm', () => {
     mockCreateFromAddress.mockResolvedValue(undefined)
     const { user, onClose } = await navigateToWatchForm()
 
-    await user.type(
-      screen.getByPlaceholderText('0x... or ENS name'),
-      '0xd1074e0ae85610ddba0147e29ebe0d8e5873a000'
-    )
+    await user.click(screen.getByPlaceholderText('0x... or ENS name'))
+    await user.paste('0xd1074e0ae85610ddba0147e29ebe0d8e5873a000')
     await user.click(screen.getByRole('button', { name: 'Add' }))
 
     // Flush the resolved promise
@@ -97,10 +95,12 @@ describe('WatchAddressForm', () => {
     mockCreateFromAddress.mockRejectedValue(new Error('Network error'))
     const { user, onClose } = await navigateToWatchForm()
 
-    await user.type(screen.getByPlaceholderText('0x... or ENS name'), '0xabc')
+    await user.click(screen.getByPlaceholderText('0x... or ENS name'))
+    await user.paste('0xabc')
 
     await act(async () => {
       await user.click(screen.getByRole('button', { name: 'Add' }))
+      jest.runAllTimers()
     })
 
     expect(screen.getByText('Network error')).toBeDefined()
@@ -112,7 +112,8 @@ describe('WatchAddressForm', () => {
     const { user, onClose } = await navigateToWatchForm()
 
     const input = screen.getByPlaceholderText('0x... or ENS name')
-    await user.type(input, '0xd1074e0ae85610ddba0147e29ebe0d8e5873a000')
+    await user.click(input)
+    await user.paste('0xd1074e0ae85610ddba0147e29ebe0d8e5873a000')
     // Pressing Enter should submit, not trigger Back
     await user.keyboard('{Enter}')
 

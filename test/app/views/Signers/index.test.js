@@ -201,7 +201,8 @@ describe('SignerDetail', () => {
     const { user } = render(<SignerDetail signerId="hot-1" />)
 
     const input = screen.getByPlaceholderText('Enter password')
-    await user.type(input, 'mypassword')
+    await user.click(input)
+    await user.paste('mypassword')
     // Submit via Enter key — tests that form onSubmit (not a stray button) handles submission
     await user.keyboard('{Enter}')
 
@@ -219,12 +220,10 @@ describe('SignerDetail', () => {
     mockUseSigners.mockReturnValue({ 'hot-1': hotSigner })
     const { user } = render(<SignerDetail signerId="hot-1" />)
 
-    await user.type(screen.getByPlaceholderText('Enter password'), 'wrongpassword')
+    await user.click(screen.getByPlaceholderText('Enter password'))
+    await user.paste('wrongpassword')
     await act(async () => {
       await user.click(screen.getByRole('button', { name: 'Unlock' }))
-    })
-
-    await act(async () => {
       jest.runAllTimers()
     })
 

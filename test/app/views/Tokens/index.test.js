@@ -103,7 +103,8 @@ describe('TokensView', () => {
     useTokens.mockReturnValue({ custom: manyTokens })
     const { user } = render(<TokensView />)
     const filterInput = screen.getByPlaceholderText('Filter tokens...')
-    await user.type(filterInput, 'Token0')
+    await user.click(filterInput)
+    await user.paste('Token0')
     expect(screen.getByText('Token0')).toBeDefined()
     expect(screen.queryByText('Token1')).toBeNull()
   })
@@ -119,7 +120,8 @@ describe('TokensView', () => {
     useTokens.mockReturnValue({ custom: manyTokens })
     const { user } = render(<TokensView />)
     const filterInput = screen.getByPlaceholderText('Filter tokens...')
-    await user.type(filterInput, 'TK3')
+    await user.click(filterInput)
+    await user.paste('TK3')
     expect(screen.getByText('Token3')).toBeDefined()
     expect(screen.queryByText('Token0')).toBeNull()
   })
@@ -135,7 +137,8 @@ describe('TokensView', () => {
     useTokens.mockReturnValue({ custom: manyTokens })
     const { user } = render(<TokensView />)
     const filterInput = screen.getByPlaceholderText('Filter tokens...')
-    await user.type(filterInput, 'ZZZNOMATCH')
+    await user.click(filterInput)
+    await user.paste('ZZZNOMATCH')
     expect(screen.getByText('No tokens match filter')).toBeDefined()
   })
 
@@ -216,7 +219,8 @@ describe('AddTokenForm', () => {
     const { user } = await openAddForm()
 
     const addressInput = screen.getByPlaceholderText('0x...')
-    await user.type(addressInput, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
+    await user.click(addressInput)
+    await user.paste('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
 
     // Should not have fetched yet (debounced)
     expect(actions.getTokenDetails).not.toHaveBeenCalled()
@@ -241,12 +245,13 @@ describe('AddTokenForm', () => {
     const addressInput = screen.getByPlaceholderText('0x...')
 
     // Type a partial address first
-    await user.type(addressInput, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB4')
+    await user.click(addressInput)
+    await user.paste('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB4')
     // Advance less than debounce time
     act(() => { jest.advanceTimersByTime(200) })
 
-    // Now type more to complete the address
-    await user.type(addressInput, '8')
+    // Now add more to complete the address
+    await user.paste('8')
 
     // Advance full debounce
     await act(async () => {
@@ -263,7 +268,8 @@ describe('AddTokenForm', () => {
     const { user } = await openAddForm()
 
     const addressInput = screen.getByPlaceholderText('0x...')
-    await user.type(addressInput, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
+    await user.click(addressInput)
+    await user.paste('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
 
     await act(async () => {
       jest.advanceTimersByTime(500)
@@ -281,7 +287,8 @@ describe('AddTokenForm', () => {
     const { user } = await openAddForm()
 
     const addressInput = screen.getByPlaceholderText('0x...')
-    await user.type(addressInput, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
+    await user.click(addressInput)
+    await user.paste('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
 
     await act(async () => {
       jest.advanceTimersByTime(500)
@@ -297,7 +304,8 @@ describe('AddTokenForm', () => {
     const { user } = await openAddForm()
 
     const addressInput = screen.getByPlaceholderText('0x...')
-    await user.type(addressInput, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
+    await user.click(addressInput)
+    await user.paste('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
 
     await act(async () => {
       jest.advanceTimersByTime(500)
@@ -313,7 +321,8 @@ describe('AddTokenForm', () => {
     const { user } = await openAddForm()
 
     const addressInput = screen.getByPlaceholderText('0x...')
-    await user.type(addressInput, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
+    await user.click(addressInput)
+    await user.paste('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
 
     await act(async () => {
       jest.advanceTimersByTime(500)
@@ -336,7 +345,8 @@ describe('AddTokenForm', () => {
     const { user } = await openAddForm()
 
     const addressInput = screen.getByPlaceholderText('0x...')
-    await user.type(addressInput, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
+    await user.click(addressInput)
+    await user.paste('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
 
     await act(async () => {
       jest.advanceTimersByTime(500)
@@ -353,7 +363,8 @@ describe('AddTokenForm', () => {
     const { user } = await openAddForm()
 
     const addressInput = screen.getByPlaceholderText('0x...')
-    await user.type(addressInput, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
+    await user.click(addressInput)
+    await user.paste('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
 
     await act(async () => {
       jest.advanceTimersByTime(500)
@@ -380,7 +391,8 @@ describe('AddTokenForm', () => {
     const { user } = await openAddForm()
 
     const addressInput = screen.getByPlaceholderText('0x...')
-    await user.type(addressInput, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
+    await user.click(addressInput)
+    await user.paste('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
 
     await act(async () => {
       jest.advanceTimersByTime(500)
@@ -403,7 +415,8 @@ describe('AddTokenForm', () => {
     const { user } = await openAddForm()
 
     const addressInput = screen.getByPlaceholderText('0x...')
-    await user.type(addressInput, '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
+    await user.click(addressInput)
+    await user.paste('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
 
     await act(async () => {
       jest.advanceTimersByTime(500)
@@ -427,7 +440,8 @@ describe('AddTokenForm', () => {
     const { user } = await openAddForm()
 
     const addressInput = screen.getByPlaceholderText('0x...')
-    await user.type(addressInput, '0xA0b86991') // too short
+    await user.click(addressInput)
+    await user.paste('0xA0b86991') // too short
 
     await act(async () => {
       jest.advanceTimersByTime(500)
@@ -442,7 +456,8 @@ describe('AddTokenForm', () => {
 
     const addressInput = screen.getByPlaceholderText('0x...')
     // 40 chars but with invalid hex chars (G)
-    await user.type(addressInput, '0xGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG')
+    await user.click(addressInput)
+    await user.paste('0xGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG')
 
     await act(async () => {
       jest.advanceTimersByTime(500)
